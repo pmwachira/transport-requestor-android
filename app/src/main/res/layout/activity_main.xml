@@ -10,7 +10,7 @@
 
     <view
         android:layout_centerInParent="true"
-        class="mushirih.pickup.pdf.MainActivity$DrawingView"
+        class="mushirih.pickup.pdf.DrawingView"
         android:layout_width="100dp"
         android:id="@+id/draw"
         android:layout_height="100dp"
