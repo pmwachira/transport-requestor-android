@@ -29,7 +29,7 @@ public  class DrawingView extends View {
 
 
 
-    public DrawingView(Context context, AttributeSet attrs,int instance) {
+    public DrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
         context = context;
         mPath = new Path();
@@ -62,6 +62,8 @@ public  class DrawingView extends View {
         mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         mBitmap.eraseColor(Color.WHITE);
         mcanvas = new Canvas(mBitmap);
+        mcanvas.drawText("Draw Here",0,0,circlePaint);
+     
 
     }
 

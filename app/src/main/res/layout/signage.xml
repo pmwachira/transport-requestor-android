@@ -200,29 +200,26 @@
                     android:text="Driver's Sign"/>
                 <view
                     android:layout_centerInParent="true"
-                    class="mushirih.pickup.pdf.DrawingView"
+                    class="mushirih.pickup.pdf.DrawingView2"
                     android:layout_width="match_parent"
                     android:id="@+id/draw_driver"
                     android:layout_height="100dp"
                     />
                 <LinearLayout
+                    android:weightSum="2"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
-                    <Button
-                        android:layout_marginRight="2dp"
-                        android:background="@drawable/button_green_background"
-                        android:textColor="#fff"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Submit"/>
-                    <Button
-                        android:layout_marginLeft="2dp"
-                        android:background="@drawable/button_red_background"
-                        android:textColor="#fff"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Clear"/>
+                   <ImageView
+                       android:layout_weight="1"
+                       android:layout_width="40dp"
+                       android:layout_height="40dp"
+                       android:src="@drawable/ok"/>
+                    <ImageView
+                        android:layout_weight="1"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/cancel"/>
                 </LinearLayout>
             </LinearLayout>
             <LinearLayout
@@ -246,23 +243,20 @@
                     android:layout_height="100dp"
                     />
                 <LinearLayout
+                    android:weightSum="2"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
-                    <Button
-                        android:layout_marginRight="2dp"
-                        android:background="@drawable/button_green_background"
-                        android:textColor="#fff"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Submit"/>
-                    <Button
-                        android:layout_marginLeft="2dp"
-                        android:background="@drawable/button_red_background"
-                        android:textColor="#fff"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Clear"/>
+                    <ImageView
+                        android:layout_weight="1"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ok"/>
+                    <ImageView
+                        android:layout_weight="1"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/cancel"/>
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

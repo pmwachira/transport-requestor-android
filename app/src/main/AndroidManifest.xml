@@ -39,6 +39,7 @@
             android:name=".mapping.MapsActivity"
             android:label="@string/title_activity_maps">
 
+
         </activity>
         <activity
             android:name=".ui.Move"
@@ -48,11 +49,13 @@
         <activity
             android:name=".ui.Register"
             android:label="@string/title_activity_maps">
+            <!--INSERT LAUNCHER FILTER HERE TO TEST UI-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
     </application>
 

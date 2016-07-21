@@ -15,7 +15,8 @@ import mushirih.pickup.R;
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.register);
 //        setContentView(R.layout.cost_est);
-        setContentView(R.layout.signage);
+       setContentView(R.layout.signage);
+       // setContentView(R.layout.activity_maps);
 
     }
 
