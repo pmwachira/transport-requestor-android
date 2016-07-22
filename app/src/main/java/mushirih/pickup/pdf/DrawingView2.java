@@ -13,7 +13,7 @@ import android.view.View;
 /**
  * Created by p-tah on 20/07/2016.
  */
-public  class DrawingView extends View {
+public  class DrawingView2 extends View {
     public static Paint mpaint;
     public int height;
     public int width;
@@ -29,7 +29,7 @@ public  class DrawingView extends View {
 
 
 
-    public DrawingView(Context context, AttributeSet attrs) {
+    public DrawingView2(Context context, AttributeSet attrs) {
         super(context, attrs);
         context = context;
         mPath = new Path();
@@ -48,7 +48,7 @@ public  class DrawingView extends View {
 
         mpaint.setAntiAlias(true);
         mpaint.setDither(true);
-        mpaint.setColor(Color.BLUE);
+        mpaint.setColor(Color.GREEN);
         mpaint.setStyle(Paint.Style.STROKE);
         mpaint.setStrokeJoin(Paint.Join.ROUND);
         mpaint.setStrokeCap(Paint.Cap.ROUND);
@@ -62,8 +62,6 @@ public  class DrawingView extends View {
         mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         mBitmap.eraseColor(Color.WHITE);
         mcanvas = new Canvas(mBitmap);
-        mcanvas.drawText("Draw Here",0,0,circlePaint);
-
 
     }
 
