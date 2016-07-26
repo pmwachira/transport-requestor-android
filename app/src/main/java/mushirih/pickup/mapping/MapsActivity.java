@@ -1,6 +1,7 @@
 package mushirih.pickup.mapping;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -32,11 +33,13 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -44,7 +47,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import mushirih.pickup.R;
 import mushirih.pickup.pdf.PDF;
 
-
+/*
+* Disable top search,redirect to pick up intent
+* restore myLocation Button
+*
+*
+* */
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener  {
    Context mContext;
     private GoogleMap mMap;
@@ -58,11 +66,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String TAG="MAPSACTIVITY LOG";
     private LatLng mCenterLatLong;
     private static final int REQUEST_CODE_AUTOCOMPLETE = 1;
-
+    int PLACE_PICKER_REQUEST=2;
     protected String mAddressOutput;
     protected String mAreaOutput;
     protected String mCityOutput;
     protected String mStateOutput;
+    Activity activity;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +81,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         //pdf=new PDF(context, mBitmap);
      mContext=this;
-
+activity=this;
         setContentView(R.layout.activity_maps);
 
         mLocationText= (TextView) findViewById(R.id.locationtext);
@@ -120,7 +130,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 
-        mResultReceiver = new AddressResultReceiver(new Handler());
+       mResultReceiver = new AddressResultReceiver(new Handler());
+
 // If this check succeeds, proceed with normal processing.
         // Otherwise, prompt user to get valid Play Services APK.
         if (checkPlayServices()) {
@@ -167,7 +178,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 public void onMapReady(GoogleMap googleMap) {
 
         mMap = googleMap;
-        // Add a marker in Sydney and move the camera
+
+
+    // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-1.22001084,36.89884089);//SET THIS TO CURRENT LOCATION
         CameraUpdate update= CameraUpdateFactory.newLatLngZoom(sydney, 16);
 
@@ -213,21 +226,42 @@ public void onMapReady(GoogleMap googleMap) {
     //ADDS LOCATION Finder option on map
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
+    //SET Marker at my location
     mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
         @Override
         public boolean onMyLocationButtonClick() {
+            //Set Place Picker as a override
+
+            PlacePicker.IntentBuilder builder=new PlacePicker.IntentBuilder();
+            try {
+                startActivityForResult(builder.build(activity),PLACE_PICKER_REQUEST);
+
+            } catch (GooglePlayServicesRepairableException e) {
+                e.printStackTrace();
+            } catch (GooglePlayServicesNotAvailableException e) {
+                e.printStackTrace();
+            }
+//or do this on myLocationButton
+/*
             if(mMap.getMyLocation()!=null) {
                 LatLng here = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
                 mMap.clear();//Clear existing markers
-                mMap.addMarker(new MarkerOptions().position(here).title("Here I am").snippet("Somewhere in Nairobi"));
+                mMap.addMarker(new MarkerOptions()
+                        .position(here)
+                        .title("Here I am")
+                        .snippet("Somewhere in Nairobi")
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.add_marker))
+                        .anchor(0.0f, 1.0f));
                 CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(here, 16);
                 mMap.animateCamera(cameraUpdate);
             }
+            */
             return true;
         }
     });
 
-
+//SEE THE MOVEMENTS
+   // flatMarker(mMap);
 
 
 }
@@ -342,8 +376,7 @@ public void onMapReady(GoogleMap googleMap) {
 
     private void changeMap(Location location) {
 
-        Log.d(TAG, "Reaching map" + mMap);
-
+//        Log.d(TAG, "Reaching map" + mMap);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -424,6 +457,7 @@ class AddressResultReceiver extends ResultReceiver {
         }
 
 
+
     }
 
 }
@@ -439,7 +473,8 @@ class AddressResultReceiver extends ResultReceiver {
                 Log.d("MAP LOG",mAddressOutput);
 //                mLocationAddress.setText(mAddressOutput);
             //mLocationText.setText(mAreaOutput);
-            Toast.makeText(getApplicationContext(),"This location is"+mAddressOutput,Toast.LENGTH_SHORT).show();
+            //SEND THIS LOCATION TO DRIVER REQUEST
+            Toast.makeText(getApplicationContext(),"This location is "+mAddressOutput,Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -496,6 +531,16 @@ class AddressResultReceiver extends ResultReceiver {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+
+        //Place Picker Request
+        if(requestCode==PLACE_PICKER_REQUEST){
+            if(resultCode==RESULT_OK){
+                Place place=PlacePicker.getPlace(this,data);
+                String toastMsg = String.format("Place: %s", place.getName());
+                Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
+
+            }
+        }
         // Check that the result was from the autocomplete widget.
         if (requestCode == REQUEST_CODE_AUTOCOMPLETE) {
             if (resultCode == RESULT_OK) {
@@ -551,4 +596,25 @@ class AddressResultReceiver extends ResultReceiver {
 //    private void stopLocationUpdates() {
 //        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,this);
 //    }
+
+    //CUSTOM LOCATION METHODS
+    public void flatMarker(GoogleMap mMap){
+        LatLng mapCenter = new LatLng(41.889, -87.622);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mapCenter,13));
+        mMap.addMarker(new MarkerOptions()
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.snail))
+                .position(mapCenter)
+                .flat(true)
+                .rotation(245));
+
+        CameraPosition cameraPosition=CameraPosition.builder()
+                                                .target(mapCenter)
+                                                .zoom(13)
+                                                .bearing(90)
+                                                .build();
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition),2000,null);
+
+
+
+    }
 }

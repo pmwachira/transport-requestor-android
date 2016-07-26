@@ -5,6 +5,7 @@ android {
     buildToolsVersion "23.0.1"
 
     defaultConfig {
+        multiDexEnabled true
         applicationId "mushirih.pickup"
         minSdkVersion 13
         targetSdkVersion 23
