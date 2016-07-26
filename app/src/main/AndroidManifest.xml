@@ -31,25 +31,13 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-
-            <!--
+        <service
+            android:name=".mapping.FetchAddressIntentService"
+            android:exported="false" />
+        <activity
+            android:parentActivityName=".ui.TestScreen"
             android:name=".mapping.MapsActivity"
-            -->
-        <activity
-            android:name=".mapping.MapsActivity"
             android:label="@string/title_activity_maps">
-
-
-        </activity>
-        <activity
-            android:name=".ui.Move"
-            android:label="@string/title_activity_maps">
-
-        </activity>
-        <activity
-            android:name=".ui.Register"
-            android:label="@string/title_activity_maps">
-            <!--INSERT LAUNCHER FILTER HERE TO TEST UI-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -57,6 +45,30 @@
             </intent-filter>
 
         </activity>
+        <activity
+            android:parentActivityName=".ui.TestScreen"
+            android:name=".ui.Move"
+            android:label="@string/title_activity_maps">
+
+        </activity>
+        <activity
+            android:parentActivityName=".ui.TestScreen"
+        android:name=".ui.Register"
+        android:label="@string/title_activity_maps">
+
+
+
+    </activity>
+        <activity
+            android:name=".ui.TestScreen"
+            android:label="@string/title_activity_maps">
+            <!--LETS TEST SCREENS-->
+            <!--INSERT LAUNCHER HERE FOR DEMO-->
+
+
+
+        </activity>
+
     </application>
 
 </manifest>

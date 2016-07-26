@@ -26,5 +26,6 @@ dependencies {
     compile 'com.itextpdf:itextg:5.5.9'
     compile 'com.android.support:cardview-v7:24.0.0'
     compile 'com.android.support:design:23.1.0'
+    compile 'com.mcxiaoke.volley:library-aar:1.0.0'
 
 }

@@ -1,16 +1,9 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 xmlns:tools="http://schemas.android.com/tools"
     tools:context=".mapping.MapsActivity"
 android:layout_width="match_parent"
+    android:orientation="vertical"
 android:layout_height="match_parent">
-
-<fragment
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-
-    android:id="@+id/map"
-    tools:context=".mapping.MapsActivity"
-    android:name="com.google.android.gms.maps.SupportMapFragment"/>
     <android.support.v7.widget.CardView
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
@@ -22,79 +15,89 @@ android:layout_height="match_parent">
         android:clickable="true"
         card_view:cardCornerRadius="4dp"
         xmlns:card_view="http://schemas.android.com/apk/res-auto">
-    <LinearLayout
-        android:background="#fff"
-        android:layout_margin="0dp"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
         <LinearLayout
-            android:orientation="horizontal"
+            android:background="#fff"
+            android:layout_margin="0dp"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-            <ImageView
-
-                android:layout_marginLeft="8dp"
-                android:layout_gravity="center_vertical"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@android:drawable/ic_search_category_default"/>
             <LinearLayout
-
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
-                <TextView
-                    android:layout_gravity="center_horizontal"
-                    style="@style/PlaceView"
+                <ImageView
+
+                    android:layout_marginLeft="8dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@android:drawable/ic_search_category_default"/>
+                <LinearLayout
+
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_gravity="center_horizontal"
+                        style="@style/PlaceView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PICKUP POINT"
+                        android:textColor="#069614"/>
+                    <AutoCompleteTextView
+                        android:id="@+id/pickUpEdit"
+                        style="@style/PlaceView"
+                        android:layout_gravity="center_horizontal"
+                        android:hint="Pick Up at Pin"
+                        android:gravity="top|center_horizontal"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+<LinearLayout
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+
+        android:id="@+id/map"
+        tools:context=".mapping.MapsActivity"
+        android:name="com.google.android.gms.maps.SupportMapFragment"/>
+                <LinearLayout
+                    android:id="@+id/locationMarker"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="PICKUP POINT"
-                    android:textColor="#069614"/>
-                <AutoCompleteTextView
-                    android:id="@+id/pickUpEdit"
-                    style="@style/PlaceView"
-                    android:layout_gravity="center_horizontal"
-                    android:hint="Pick Up at Pin"
-                    android:gravity="top|center_horizontal"/>
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="30dp"
+                    android:gravity="center"
+                    android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/locationtext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/rounded_corner_map"
+                    android:gravity="center"
+
+                    android:paddingLeft="2dp"
+                    android:paddingRight="2dp"
+                    android:text=" Set pick up Location "
+                    android:textColor="@android:color/white" />
+                    <!--android:minWidth="250dp"-->
+
+                <ImageView
+                    android:id="@+id/imageMarker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/add_marker" />
                 </LinearLayout>
-        </LinearLayout>
-    <!--<LinearLayout-->
-        <!--android:orientation="horizontal"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content">-->
-        <!--<ImageView-->
-
-            <!--android:layout_gravity="center_vertical"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:src="@drawable/marker"/>-->
-    <!--<AutoCompleteTextView-->
-        <!--android:id="@+id/pickUpEdit"-->
-        <!--style="@style/PlaceView"-->
-        <!--android:hint="Pick Up"-->
-        <!--android:gravity="top"/>-->
-    <!--</LinearLayout>-->
-    <!--<LinearLayout-->
-
-       <!--android:orientation="horizontal"-->
-       <!--android:layout_width="match_parent"-->
-       <!--android:layout_height="wrap_content">-->
-       <!--<ImageView-->
-           <!--android:layout_gravity="center_vertical"-->
-
-           <!--android:layout_width="wrap_content"-->
-           <!--android:layout_height="wrap_content"-->
-           <!--android:src="@drawable/marker"/>-->
-        <!--<AutoCompleteTextView-->
-            <!--android:id="@+id/dropEdit"-->
-            <!--style="@style/PlaceView"-->
-            <!--android:hint="Drop off"-->
-            <!--/>-->
-   <!--</LinearLayout>-->
-
-</LinearLayout>
-    </android.support.v7.widget.CardView>
+   </LinearLayout>
     <LinearLayout
 
         android:background="#fff"
@@ -197,5 +200,7 @@ android:layout_height="match_parent">
         </LinearLayout>
 
     </LinearLayout>
+
     </LinearLayout>
-   </FrameLayout>
+    </FrameLayout>
+   </LinearLayout>

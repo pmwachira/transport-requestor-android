@@ -62,7 +62,7 @@ public  class DrawingView extends View {
         mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         mBitmap.eraseColor(Color.WHITE);
         mcanvas = new Canvas(mBitmap);
-        mcanvas.drawText("Draw Here",0,0,circlePaint);
+//        mcanvas.drawText("Draw Here",0,0,circlePaint);
 
 
     }
