@@ -55,6 +55,7 @@ import mushirih.pickup.pdf.PDF;
 * */
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener  {
    Context mContext;
+    LinearLayout searchloc;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     PDF pdf;
@@ -67,6 +68,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLng mCenterLatLong;
     private static final int REQUEST_CODE_AUTOCOMPLETE = 1;
     int PLACE_PICKER_REQUEST=2;
+    int PLACE_AUTOCOMPLETE_REQUEST_CODE = 20;
     protected String mAddressOutput;
     protected String mAreaOutput;
     protected String mCityOutput;
@@ -116,6 +118,21 @@ activity=this;
                 one.setChecked(false);
                 two.setChecked(false);
                 three.setChecked(true);
+            }
+        });
+
+        searchloc= (LinearLayout) findViewById(R.id.search_loc);
+        searchloc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Intent intent=new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY).build(activity);
+                    startActivityForResult(intent,REQUEST_CODE_AUTOCOMPLETE);
+                } catch (GooglePlayServicesRepairableException e) {
+                    e.printStackTrace();
+                } catch (GooglePlayServicesNotAvailableException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -530,7 +547,22 @@ class AddressResultReceiver extends ResultReceiver {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        //location autocomplete
+        if(requestCode==REQUEST_CODE_AUTOCOMPLETE){
+            if (resultCode == RESULT_OK) {
+                Place place = PlaceAutocomplete.getPlace(this, data);
+                Toast.makeText(this,"Place: " + place.getName(),Toast.LENGTH_SHORT).show();
+                Log.i(TAG, "Place: " + place.getName());
+            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
+                Status status = PlaceAutocomplete.getStatus(this, data);
+                // TODO: Handle the error.
+                Log.i(TAG, status.getStatusMessage());
 
+            } else if (resultCode == RESULT_CANCELED) {
+                // The user canceled the operation.
+            }
+
+        }
 
         //Place Picker Request
         if(requestCode==PLACE_PICKER_REQUEST){
