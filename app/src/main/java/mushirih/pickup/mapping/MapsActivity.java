@@ -42,6 +42,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import mushirih.pickup.R;
@@ -241,15 +242,17 @@ public void onMapReady(GoogleMap googleMap) {
         return;
     }
     //ADDS LOCATION Finder option on map
-        mMap.setMyLocationEnabled(true);
-        mMap.getUiSettings().setMyLocationButtonEnabled(true);
-    //SET Marker at my location
-    mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+         //SET Marker at my location
+            mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
         @Override
         public boolean onMyLocationButtonClick() {
-            //Set Place Picker as a override
+            //Deactivate SearchLoc of Parent Activity
+           // searchloc.setOnClickListener(null);
 
-            PlacePicker.IntentBuilder builder=new PlacePicker.IntentBuilder();
+            //Set Place Picker as a override
+            PlacePicker.IntentBuilder builder=new PlacePicker.IntentBuilder()/*.setLatLngBounds(LatLngBounds.builder().include(mCenterLatLong).build()*/;
             try {
                 startActivityForResult(builder.build(activity),PLACE_PICKER_REQUEST);
 
@@ -547,22 +550,6 @@ class AddressResultReceiver extends ResultReceiver {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        //location autocomplete
-        if(requestCode==REQUEST_CODE_AUTOCOMPLETE){
-            if (resultCode == RESULT_OK) {
-                Place place = PlaceAutocomplete.getPlace(this, data);
-                Toast.makeText(this,"Place: " + place.getName(),Toast.LENGTH_SHORT).show();
-                Log.i(TAG, "Place: " + place.getName());
-            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
-                Status status = PlaceAutocomplete.getStatus(this, data);
-                // TODO: Handle the error.
-                Log.i(TAG, status.getStatusMessage());
-
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
-            }
-
-        }
 
         //Place Picker Request
         if(requestCode==PLACE_PICKER_REQUEST){
@@ -573,6 +560,8 @@ class AddressResultReceiver extends ResultReceiver {
 
             }
         }
+
+        //location autocomplete check
         // Check that the result was from the autocomplete widget.
         if (requestCode == REQUEST_CODE_AUTOCOMPLETE) {
             if (resultCode == RESULT_OK) {
@@ -580,7 +569,7 @@ class AddressResultReceiver extends ResultReceiver {
                 Place place = PlaceAutocomplete.getPlace(mContext, data);
 
                 // TODO call location based filter
-
+                Toast.makeText(this,"Place: " + place.getName(),Toast.LENGTH_SHORT).show();
 
                 LatLng latLong;
 
