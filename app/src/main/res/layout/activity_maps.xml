@@ -71,6 +71,9 @@ android:layout_height="match_parent">
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
     <fragment
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -91,14 +94,12 @@ android:layout_height="match_parent">
                     android:id="@+id/locationtext"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/rounded_corner_map"
+                    android:background="@drawable/marker_background"
                     android:gravity="center"
 
-                    android:paddingLeft="2dp"
-                    android:paddingRight="2dp"
                     android:text=" Set pick up Location "
-                    android:textColor="@android:color/white" />
-                    <!--android:minWidth="250dp"-->
+                    android:textColor="@android:color/white"
+                    android:minWidth="200dp"/>
 
                 <ImageView
                     android:id="@+id/imageMarker"
@@ -106,9 +107,11 @@ android:layout_height="match_parent">
                     android:layout_height="wrap_content"
                     android:src="@drawable/add_marker" />
                 </LinearLayout>
+    </FrameLayout>
    </LinearLayout>
     <LinearLayout
-
+        android:id="@+id/request_pane"
+        android:visibility="gone"
         android:background="#fff"
         android:layout_gravity="bottom"
         android:orientation="vertical"

@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,7 +42,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import mushirih.pickup.R;
@@ -55,7 +53,7 @@ import mushirih.pickup.pdf.PDF;
 *
 *
 * */
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener  {
+public class MapsActivity02 extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener  {
    Context mContext;
     LinearLayout searchloc;
     private GoogleMap mMap;
@@ -64,7 +62,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     TextView mLocationText;
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     ToggleButton one, two, three;
-    LinearLayout l1, l2, l3,request_pane;
+    LinearLayout l1, l2, l3;
     private AddressResultReceiver mResultReceiver;
     String TAG="MAPSACTIVITY LOG";
     private LatLng mCenterLatLong;
@@ -137,7 +135,7 @@ activity=this;
                 }
             }
         });
-        request_pane= (LinearLayout) findViewById(R.id.request_pane);
+
         // Toast.makeText(context,"Call PDF ? ",Toast.LENGTH_LONG).show();
 
 
@@ -195,24 +193,22 @@ activity=this;
      */
 @Override
 public void onMapReady(GoogleMap googleMap) {
-    //TODO: ON map load,show drivers in the area
 
-             mMap = googleMap;
-
-
-            // Add a marker in Sydney and move the camera
-             LatLng sydney = new LatLng(-1.22001084,36.89884089);//SET THIS TO CURRENT LOCATION
-             CameraUpdate update= CameraUpdateFactory.newLatLngZoom(sydney, 16);
-
-             //mMap.addMarker(new MarkerOptions().position(sydney).title("Somewhere in Nairobi").snippet("Watch this"));
-             mMap.moveCamera(update);
+        mMap = googleMap;
 
 
+    // Add a marker in Sydney and move the camera
+        LatLng sydney = new LatLng(-1.22001084,36.89884089);//SET THIS TO CURRENT LOCATION
+        CameraUpdate update= CameraUpdateFactory.newLatLngZoom(sydney, 16);
 
-            mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+        mMap.addMarker(new MarkerOptions().position(sydney).title("Somewhere in Nairobi").snippet("Watch this"));
+        mMap.moveCamera(update);
+
+
+
+    mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
         @Override
         public void onCameraChange(CameraPosition cameraPosition) {
-            request_pane.setVisibility(View.GONE);
             Log.d("Camera position changed", cameraPosition+"");
             mCenterLatLong = cameraPosition.target;
 
@@ -227,22 +223,8 @@ public void onMapReady(GoogleMap googleMap) {
 
                 startIntentService(mLocation);
 
-              // mLocationText.setText("Lat : " + mCenterLatLong.latitude + "," + "Long : " + mCenterLatLong.longitude);
-                mLocationText.setText("Click to request Pick Up here");
-                mLocationText.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-//                        Toast.makeText(MapsActivity.this, "Opening", Toast.LENGTH_SHORT).show();
+               mLocationText.setText("Lat : " + mCenterLatLong.latitude + "," + "Long : " + mCenterLatLong.longitude);
 
-                            //TODO :Next step
-                        //open drop off place picker
-                        request_pane.setVisibility(View.VISIBLE);
-                        /*set nature of load
-                        * take picture
-                        * estimated pick+drop*/
-                        /*send (mCenterLatLong.latitude,mCenterLatLong.longitude) & drop off place coords to the requestor tab*/
-                    }
-                });
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -261,7 +243,6 @@ public void onMapReady(GoogleMap googleMap) {
     //ADDS LOCATION Finder option on map
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
-         //TODO: SET DESTINATION USING THIS
          //SET Marker at my location
             mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
         @Override
@@ -270,7 +251,6 @@ public void onMapReady(GoogleMap googleMap) {
            // searchloc.setOnClickListener(null);
 
             //Set Place Picker as a override
-            //Use this to place destination marker
             PlacePicker.IntentBuilder builder=new PlacePicker.IntentBuilder()/*.setLatLngBounds(LatLngBounds.builder().include(mCenterLatLong).build()*/;
             try {
                 startActivityForResult(builder.build(activity),PLACE_PICKER_REQUEST);
@@ -415,7 +395,7 @@ public void onMapReady(GoogleMap googleMap) {
 
     private void changeMap(Location location) {
 
-
+//        Log.d(TAG, "Reaching map" + mMap);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -435,13 +415,14 @@ public void onMapReady(GoogleMap googleMap) {
 
 
             latLong = new LatLng(location.getLatitude(), location.getLongitude());
-            //TODO: CAMERA TILT TOPOGRAPHY
-            //CameraPosition cameraPosition = new CameraPosition.Builder().target(latLong).zoom(19f).tilt(70).build();
+
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(latLong).zoom(19f).tilt(70).build();
 
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
-            //TODO: CAMERA TILT TOPOGRAPHY
-           // mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+            mMap.animateCamera(CameraUpdateFactory
+                    .newCameraPosition(cameraPosition));
 
             //mLocationMarkerText.setText("Lat : " + location.getLatitude() + "," + "Long : " + location.getLongitude());
             startIntentService(location);
@@ -596,8 +577,8 @@ class AddressResultReceiver extends ResultReceiver {
 
                 //mLocationText.setText(place.getName() + "");
 
-                //TODO: CAMERA TILT TOPOGRAPHY
-               //CameraPosition cameraPosition = new CameraPosition.Builder().target(latLong).zoom(19f).tilt(70).build();
+                CameraPosition cameraPosition = new CameraPosition.Builder()
+                        .target(latLong).zoom(19f).tilt(70).build();
 
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     // TODO: Consider calling
@@ -610,8 +591,8 @@ class AddressResultReceiver extends ResultReceiver {
                     return;
                 }
                 mMap.setMyLocationEnabled(true);
-                //TODO: CAMERA TILT TOPOGRAPHY
-               // mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                mMap.animateCamera(CameraUpdateFactory
+                        .newCameraPosition(cameraPosition));
 
 
             }
