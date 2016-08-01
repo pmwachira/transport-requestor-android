@@ -105,21 +105,23 @@ android:layout_height="match_parent">
                     android:id="@+id/imageMarker"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/add_marker" />
+                    android:src="@drawable/marker" />
                 </LinearLayout>
     </FrameLayout>
    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/request_pane"
+            android:layout_gravity="bottom"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:layout_height="wrap_content">
+            <!--android:visibility="gone"-->
     <LinearLayout
-        android:id="@+id/request_pane"
-        android:visibility="gone"
         android:background="#fff"
-        android:layout_gravity="bottom"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
-
-            <TextView
+        <TextView
 
                 style="@style/PlaceView"
                 android:layout_width="wrap_content"
@@ -210,8 +212,72 @@ android:layout_height="match_parent">
                 android:background="@drawable/ic_toggle_bg"
                 />
         </LinearLayout>
-
     </LinearLayout>
+    </LinearLayout>
+            <LinearLayout
+                android:layout_marginBottom="2dp"
+                android:layout_marginRight="2dp"
+                android:layout_marginTop="2dp"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:weightSum="3"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:background="#fff"
+                    android:gravity="center_horizontal"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <ImageView
+                        android:layout_width="50dp"
+                        android:layout_height="44dp"
+                        android:src="@drawable/luggage2"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Describe load"/>
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:background="#fff"
+                    android:layout_marginLeft="2dp"
+                    android:gravity="center_horizontal"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <ImageView
+                        android:layout_marginTop="2dp"
+                        android:layout_width="50dp"
+                        android:layout_height="44dp"
+                        android:src="@drawable/ic_action_time"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pick up Time/Date?"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:background="#fff"
+                    android:layout_marginLeft="2dp"
+                    android:gravity="center_horizontal"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <ImageView
+                        android:layout_marginTop="2dp"
+                        android:layout_width="50dp"
+                        android:layout_height="44dp"
+                        android:src="@drawable/ok"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Confirm Request"/>
+                </LinearLayout>
+
+            </LinearLayout>
 
     </LinearLayout>
     </FrameLayout>
