@@ -201,10 +201,10 @@ public void onMapReady(GoogleMap googleMap) {
 
 
             // Add a marker in Sydney and move the camera
-             LatLng sydney = new LatLng(-1.22001084,36.89884089);//SET THIS TO CURRENT LOCATION
+             LatLng sydney = new LatLng(0,0);//SET THIS TO CURRENT LOCATION
              CameraUpdate update= CameraUpdateFactory.newLatLngZoom(sydney, 16);
 
-             //mMap.addMarker(new MarkerOptions().position(sydney).title("Somewhere in Nairobi").snippet("Watch this"));
+             mMap.addMarker(new MarkerOptions().position(sydney).title("Ground Zero").snippet("Watch this"));
              mMap.moveCamera(update);
 
 
@@ -227,8 +227,8 @@ public void onMapReady(GoogleMap googleMap) {
 
                 startIntentService(mLocation);
 
-              // mLocationText.setText("Lat : " + mCenterLatLong.latitude + "," + "Long : " + mCenterLatLong.longitude);
-                mLocationText.setText("Click to request Pick Up here");
+               mLocationText.setText("LatLong is: " + mCenterLatLong.latitude + ", " + mCenterLatLong.longitude);
+              //  mLocationText.setText("Click to request Pick Up here");
                 mLocationText.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {

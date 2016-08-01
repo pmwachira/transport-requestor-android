@@ -85,7 +85,7 @@ android:layout_height="match_parent">
                     android:id="@+id/locationMarker"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
+                    android:layout_gravity="center_vertical|center_horizontal"
                     android:layout_marginBottom="30dp"
                     android:gravity="center"
                     android:orientation="vertical" >
@@ -103,9 +103,9 @@ android:layout_height="match_parent">
 
                 <ImageView
                     android:id="@+id/imageMarker"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/marker" />
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/location_picker_marker" />
                 </LinearLayout>
     </FrameLayout>
    </LinearLayout>
