@@ -64,7 +64,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     PDF pdf;
-    TextView mLocationText;
+    TextView mLocationText,pich_loc;
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     ToggleButton one, two, three;
     LinearLayout l1, l2, l3,request_pane,request_time,describe_load;
@@ -163,6 +163,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 describe_load();
             }
         });
+
+        pich_loc=(TextView) findViewById(R.id.top_bar_location);
         // Toast.makeText(context,"Call PDF ? ",Toast.LENGTH_LONG).show();
 
 
@@ -286,11 +288,12 @@ public void onMapReady(GoogleMap googleMap) {
                     public void onClick(View v) {
 //                        Toast.makeText(MapsActivity.this, "Opening", Toast.LENGTH_SHORT).show();
 
-                            //TODO :Next step
                         //open drop off place picker
                         //TODO Try find clicked location
+                        pich_loc.setText(mAddressOutput);
                         startIntentService(mLocation);
                         request_pane.setVisibility(View.VISIBLE);
+                        //TODO :Next step
                         /*set nature of load
                         * take picture
                         * estimated pick+drop*/
