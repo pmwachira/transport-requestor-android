@@ -64,6 +64,69 @@ android:layout_height="match_parent">
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+    <android.support.v7.widget.CardView
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_margin="4dp"
+        android:elevation="2dp"
+        android:id="@+id/second_hide"
+        android:layout_gravity="center_horizontal"
+        android:clickable="true"
+        card_view:cardCornerRadius="4dp"
+        xmlns:card_view="http://schemas.android.com/apk/res-auto">
+
+        <LinearLayout
+            android:background="#fff"
+            android:layout_margin="0dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <ImageView
+
+                    android:layout_marginLeft="8dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@android:drawable/ic_search_category_default"/>
+                <LinearLayout
+
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:id="@+id/top_bar_label_rep"
+                        android:layout_gravity="center_horizontal"
+                        style="@style/PlaceView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                            android:text="Drop Off Point"
+                        android:textColor="#069614"/>
+                    <TextView
+                        android:id="@+id/top_bar_location_rep"
+                        android:layout_gravity="center_horizontal"
+                        style="@style/PlaceView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Drop Location"
+                        android:gravity="top|center_horizontal"/>
+                    <!--<AutoCompleteTextView-->
+                    <!--android:id="@+id/pickUpEdit"-->
+                    <!--style="@style/PlaceView"-->
+                    <!--android:layout_gravity="center_horizontal"-->
+                    <!--android:hint="Pick Up at Pin"-->
+                    <!--android:gravity="top|center_horizontal"/>-->
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
     </android.support.v7.widget.CardView>
     <FrameLayout
         android:layout_width="match_parent"
@@ -111,7 +174,66 @@ android:layout_height="match_parent">
                     android:src="@drawable/location_picker_marker" />
                 </LinearLayout>
     </FrameLayout>
+</LinearLayout>
+        <android.support.v7.widget.CardView
+
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_margin="4dp"
+            android:elevation="2dp"
+            android:id="@+id/go"
+            android:layout_gravity="center_horizontal|bottom"
+            android:clickable="true"
+            card_view:cardCornerRadius="4dp"
+            xmlns:card_view="http://schemas.android.com/apk/res-auto">
+    <LinearLayout
+
+        android:background="#fff"
+        android:layout_margin="2dp"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:id="@+id/dest_loc"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+
+                android:layout_marginLeft="8dp"
+                android:layout_gravity="center_vertical"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@android:drawable/ic_search_category_default"/>
+            <LinearLayout
+
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/bottom_bar_label"
+                    android:layout_gravity="center_horizontal"
+                    style="@style/PlaceView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Drop-off POINT"
+                    android:textColor="#069614"/>
+                <TextView
+                    android:id="@+id/bottom_bar_location"
+                    android:layout_gravity="center_horizontal"
+                    style="@style/PlaceView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Select Drop Off Location"
+                    android:gravity="top|center_horizontal"/>
+
+            </LinearLayout>
+
+    </LinearLayout>
+
    </LinearLayout>
+        </android.support.v7.widget.CardView>
         <LinearLayout
             android:id="@+id/request_pane"
             android:layout_gravity="bottom"

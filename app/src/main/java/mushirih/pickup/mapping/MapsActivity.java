@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,6 +18,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -64,22 +66,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     PDF pdf;
-    TextView mLocationText,pich_loc;
+    TextView mLocationText,pich_loc,drop_loc,loc_rep;
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     ToggleButton one, two, three;
-    LinearLayout l1, l2, l3,request_pane,request_time,describe_load;
+    LinearLayout l1, l2, l3,request_pane,request_time,describe_load,destination_pane;
     private AddressResultReceiver mResultReceiver;
     String TAG="MAPSACTIVITY LOG";
     private LatLng mCenterLatLong;
     private static final int REQUEST_CODE_AUTOCOMPLETE = 1;
     int PLACE_PICKER_REQUEST=2;
+    int PLACE_PICKER_DEST_REQUEST=02022;
     int PLACE_AUTOCOMPLETE_REQUEST_CODE = 20;
     protected String mAddressOutput;
     protected String mAreaOutput;
     protected String mCityOutput;
     protected String mStateOutput;
     Activity activity;
-    Location mLastLocation;
+   Location mLastLocation;
+    CardView hide,go;
+  TextView VIEW_TO_CHANGE;
 
 
     @Override
@@ -165,9 +170,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
         pich_loc=(TextView) findViewById(R.id.top_bar_location);
+
+        destination_pane= (LinearLayout) findViewById(R.id.dest_loc);
+        destination_pane.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(pich_loc.getText().equals("Select Pick Up Location")) {
+                    pich_loc.setTextColor(Color.RED);
+                    pich_loc.setTextSize(20);
+                }else{
+                    PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder()/*.setLatLngBounds(LatLngBounds.builder().include(mCenterLatLong).build()*/;
+                    try {
+                        startActivityForResult(builder.build(activity), PLACE_PICKER_DEST_REQUEST);
+
+                    } catch (GooglePlayServicesRepairableException e) {
+                        e.printStackTrace();
+                    } catch (GooglePlayServicesNotAvailableException e) {
+                        e.printStackTrace();
+                    }
+                    //
+
+                }
+            }
+        });
         // Toast.makeText(context,"Call PDF ? ",Toast.LENGTH_LONG).show();
-
-
+        drop_loc= (TextView) findViewById(R.id.bottom_bar_location);
+        hide= (CardView) findViewById(R.id.second_hide);
+        hide.setVisibility(View.GONE);
+        go= (CardView) findViewById(R.id.go);
+        loc_rep= (TextView) findViewById(R.id.top_bar_location_rep);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -236,7 +267,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
-        return builder.create();
+        return builder.show();
     }
 
 
@@ -290,14 +321,13 @@ public void onMapReady(GoogleMap googleMap) {
 
                         //open drop off place picker
                         //TODO Try find clicked location
-                        pich_loc.setText(mAddressOutput);
+                        VIEW_TO_CHANGE= loc_rep;
                         startIntentService(mLocation);
-                        request_pane.setVisibility(View.VISIBLE);
-                        //TODO :Next step
-                        /*set nature of load
-                        * take picture
-                        * estimated pick+drop*/
-                        /*send (mCenterLatLong.latitude,mCenterLatLong.longitude) & drop off place coords to the requestor tab*/
+                        pich_loc.setTextColor(Color.BLACK);
+                        pich_loc.setTextSize(18);
+                        pich_loc.setText(mAddressOutput);
+
+
                     }
                 });
             } catch (Exception e) {
@@ -318,6 +348,7 @@ public void onMapReady(GoogleMap googleMap) {
     //ADDS LOCATION Finder option on map
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
+
          //TODO: SET DESTINATION USING THIS
          //SET Marker at my location
             mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
@@ -376,6 +407,8 @@ public void onMapReady(GoogleMap googleMap) {
                 mGoogleApiClient);
         if (mLastLocation != null) {
             changeMap(mLastLocation);
+            VIEW_TO_CHANGE= loc_rep;
+            startIntentService(mLastLocation);
             Log.d(TAG, "ON connected");
 
         } else
@@ -546,16 +579,9 @@ class AddressResultReceiver extends ResultReceiver {
         // Show a toast message if an address was found.
         if (resultCode == AppUtils.LocationConstants.SUCCESS_RESULT) {
             //  showToast(getString(R.string.address_found));
-
-
         }
-
-
-
     }
-
 }
-
     /**
      * Updates the address in the UI.
      */
@@ -568,7 +594,8 @@ class AddressResultReceiver extends ResultReceiver {
 //                mLocationAddress.setText(mAddressOutput);
             //mLocationText.setText(mAreaOutput);
             //SEND THIS LOCATION TO DRIVER REQUEST
-            Toast.makeText(getApplicationContext(),"This location is "+mAddressOutput,Toast.LENGTH_SHORT).show();
+           //Toast.makeText(getApplicationContext(),"This location is "+mAddressOutput,Toast.LENGTH_SHORT).show();
+            VIEW_TO_CHANGE.setText(mAddressOutput);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -624,7 +651,28 @@ class AddressResultReceiver extends ResultReceiver {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==PLACE_PICKER_DEST_REQUEST){
+            if(resultCode==RESULT_OK){
+                String Latlong="";
+                Place place=PlacePicker.getPlace(this,data);
+                //TODO THISSSSSSSSSSSSSSSSSSSS
+//
+                Location x=new Location("");
+                x.setLatitude(place.getLatLng().latitude);
+                x.setLongitude(place.getLatLng().longitude);
+                mAddressOutput=null;
+                VIEW_TO_CHANGE=loc_rep;
+                startIntentService(x);
 
+                go.setVisibility(View.GONE);
+                hide.setVisibility(View.VISIBLE);
+
+//                drop_loc.setText(mAddressOutput);
+                request_pane.setVisibility(View.VISIBLE);
+
+//                Toast.makeText(this, Latlong, Toast.LENGTH_LONG).show();
+            }
+        }
         //Place Picker Request
         if(requestCode==PLACE_PICKER_REQUEST){
             if(resultCode==RESULT_OK){
