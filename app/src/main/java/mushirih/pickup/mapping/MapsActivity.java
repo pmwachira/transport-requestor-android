@@ -2,11 +2,11 @@ package mushirih.pickup.mapping;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +14,7 @@ import android.os.ResultReceiver;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -35,7 +36,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.location.places.ui.PlacePicker;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -43,11 +43,14 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.ArrayList;
 
 import mushirih.pickup.R;
 import mushirih.pickup.pdf.PDF;
+import mushirih.pickup.ui.DatePickerFragment;
+import mushirih.pickup.ui.TimePickerFragment;
 
 /*
 * Disable top search,redirect to pick up intent
@@ -64,7 +67,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     TextView mLocationText;
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     ToggleButton one, two, three;
-    LinearLayout l1, l2, l3,request_pane;
+    LinearLayout l1, l2, l3,request_pane,request_time,describe_load;
     private AddressResultReceiver mResultReceiver;
     String TAG="MAPSACTIVITY LOG";
     private LatLng mCenterLatLong;
@@ -76,6 +79,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected String mCityOutput;
     protected String mStateOutput;
     Activity activity;
+    Location mLastLocation;
 
 
     @Override
@@ -84,8 +88,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Context context = this;
 
         //pdf=new PDF(context, mBitmap);
-     mContext=this;
-activity=this;
+        mContext=this;
+        activity=this;
+        buildGoogleApiClient();
         setContentView(R.layout.activity_maps);
 
         mLocationText= (TextView) findViewById(R.id.locationtext);
@@ -138,6 +143,26 @@ activity=this;
             }
         });
         request_pane= (LinearLayout) findViewById(R.id.request_pane);
+        request_time= (LinearLayout) findViewById(R.id.set_time);
+        request_time.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //time pick
+                DialogFragment newFragment = new TimePickerFragment();
+                newFragment.show(getSupportFragmentManager(), "timePicker");
+                //datePicker
+                DialogFragment newfragment = new DatePickerFragment();
+                newfragment.show(getSupportFragmentManager(), "datePicker");
+            }
+        });
+        
+        describe_load= (LinearLayout) findViewById(R.id.describe_load);
+        describe_load.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                describe_load();
+            }
+        });
         // Toast.makeText(context,"Call PDF ? ",Toast.LENGTH_LONG).show();
 
 
@@ -176,11 +201,40 @@ activity=this;
                 });
                 dialog.show();
             }
-          buildGoogleApiClient();
+
         } else {
             Toast.makeText(mContext, "Location not supported in this device", Toast.LENGTH_SHORT).show();
         }
 
+    }
+
+    private Dialog describe_load() {
+        final ArrayList load_char=new ArrayList();
+        String[] options={"opt 1","opt 2","opt 3"};
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        builder.setTitle("Set Load Char").setMultiChoiceItems(options, null, new DialogInterface.OnMultiChoiceClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                if(isChecked){
+                    load_char.add(which);
+                }else if(load_char.contains(which)){
+                    load_char.remove(Integer.valueOf(which));
+                }
+            }
+        }).setPositiveButton("Okay",new DialogInterface.OnClickListener(){
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        }).setNegativeButton("Cancel",new DialogInterface.OnClickListener(){
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        return builder.create();
     }
 
 
@@ -196,18 +250,22 @@ activity=this;
 @Override
 public void onMapReady(GoogleMap googleMap) {
     //TODO: ON map load,show drivers in the area
+    mMap = googleMap;
+    mMap.setMyLocationEnabled(true);
 
-             mMap = googleMap;
-
-
-            // Add a marker in Sydney and move the camera
-             LatLng sydney = new LatLng(0,0);//SET THIS TO CURRENT LOCATION
-             CameraUpdate update= CameraUpdateFactory.newLatLngZoom(sydney, 16);
-
-             mMap.addMarker(new MarkerOptions().position(sydney).title("Ground Zero").snippet("Watch this"));
-             mMap.moveCamera(update);
-
-
+//    if(mLastLocation!=null) {
+//        LatLng here = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+//        mMap.addMarker(new MarkerOptions()
+//                .position(here)
+//                .title("Here I am")
+//                .snippet("Somewhere in Nairobi")
+//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.add_marker))
+//                .anchor(0.0f, 1.0f));
+//        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(here, 16);
+//        mMap.animateCamera(cameraUpdate);
+//    }else{
+//        Toast.makeText(MapsActivity.this, "NULL LOCS", Toast.LENGTH_SHORT).show();
+//    }
 
             mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
         @Override
@@ -215,20 +273,14 @@ public void onMapReady(GoogleMap googleMap) {
             request_pane.setVisibility(View.GONE);
             Log.d("Camera position changed", cameraPosition+"");
             mCenterLatLong = cameraPosition.target;
-
                 //Clear markers and map
             //mMap.clear();
-
             try {
-
-                Location mLocation = new Location("");
+                final Location mLocation = new Location("");
                 mLocation.setLatitude(mCenterLatLong.latitude);
                 mLocation.setLongitude(mCenterLatLong.longitude);
-
-                startIntentService(mLocation);
-
-               mLocationText.setText("LatLong is: " + mCenterLatLong.latitude + ", " + mCenterLatLong.longitude);
-              //  mLocationText.setText("Click to request Pick Up here");
+               //  mLocationText.setText("LatLong is: " + mCenterLatLong.latitude + ", " + mCenterLatLong.longitude);
+              mLocationText.setText("Click to request Pick Up here");
                 mLocationText.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -236,6 +288,8 @@ public void onMapReady(GoogleMap googleMap) {
 
                             //TODO :Next step
                         //open drop off place picker
+                        //TODO Try find clicked location
+                        startIntentService(mLocation);
                         request_pane.setVisibility(View.VISIBLE);
                         /*set nature of load
                         * take picture
@@ -271,6 +325,7 @@ public void onMapReady(GoogleMap googleMap) {
 
             //Set Place Picker as a override
             //Use this to place destination marker
+            
             PlacePicker.IntentBuilder builder=new PlacePicker.IntentBuilder()/*.setLatLngBounds(LatLngBounds.builder().include(mCenterLatLong).build()*/;
             try {
                 startActivityForResult(builder.build(activity),PLACE_PICKER_REQUEST);
@@ -298,15 +353,12 @@ public void onMapReady(GoogleMap googleMap) {
             return true;
         }
     });
-
 //SEE THE MOVEMENTS
    // flatMarker(mMap);
-
-
 }
-
     @Override
     public void onConnected(Bundle bundle) {
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -317,7 +369,7 @@ public void onMapReady(GoogleMap googleMap) {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
         if (mLastLocation != null) {
             changeMap(mLastLocation);
@@ -436,15 +488,16 @@ public void onMapReady(GoogleMap googleMap) {
 
             latLong = new LatLng(location.getLatitude(), location.getLongitude());
             //TODO: CAMERA TILT TOPOGRAPHY
-            //CameraPosition cameraPosition = new CameraPosition.Builder().target(latLong).zoom(19f).tilt(70).build();
+//            CameraPosition cameraPosition = new CameraPosition.Builder().target(latLong).zoom(19f).tilt(70).build();
+            CameraPosition cameraPosition = new CameraPosition.Builder().target(latLong).zoom(19f).build();
 
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
             //TODO: CAMERA TILT TOPOGRAPHY
-           // mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
             //mLocationMarkerText.setText("Lat : " + location.getLatitude() + "," + "Long : " + location.getLongitude());
-            startIntentService(location);
+//TODO Location getter
+//            startIntentService(location);
 
 
         } else {
@@ -572,10 +625,13 @@ class AddressResultReceiver extends ResultReceiver {
         //Place Picker Request
         if(requestCode==PLACE_PICKER_REQUEST){
             if(resultCode==RESULT_OK){
+                String Latlong="";
                 Place place=PlacePicker.getPlace(this,data);
-                String toastMsg = String.format("Place: %s", place.getName());
-                Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
-
+//                String toastMsg = String.format("Place: %s", place.getLatLng());
+                if(place.getLatLng().toString().contains("lat/lng")){
+                    Latlong = place.getLatLng().toString().replace("lat/lng:","").replace(" ","").replace("(","").replace(")","");
+                }
+                Toast.makeText(this, Latlong, Toast.LENGTH_LONG).show();
             }
         }
 

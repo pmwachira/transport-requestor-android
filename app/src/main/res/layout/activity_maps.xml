@@ -86,7 +86,8 @@ android:layout_height="match_parent">
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|center_horizontal"
-                    android:layout_marginBottom="30dp"
+
+                    android:paddingBottom="87dp"
                     android:gravity="center"
                     android:orientation="vertical" >
 
@@ -223,6 +224,7 @@ android:layout_height="match_parent">
                 android:weightSum="3"
                 android:layout_height="wrap_content">
                 <LinearLayout
+                    android:id="@+id/describe_load"
                     android:background="#fff"
                     android:gravity="center_horizontal"
                     android:layout_weight="1"
@@ -241,6 +243,7 @@ android:layout_height="match_parent">
 
 
                 <LinearLayout
+                    android:id="@+id/set_time"
                     android:background="#fff"
                     android:layout_marginLeft="2dp"
                     android:gravity="center_horizontal"

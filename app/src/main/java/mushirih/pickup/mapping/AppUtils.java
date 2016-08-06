@@ -3,9 +3,13 @@ package mushirih.pickup.mapping;
 /**
  * Created by p-tah on 22/07/2016.
  */
+
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 
@@ -53,6 +57,18 @@ public class AppUtils {
         } else {
             locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
             return !TextUtils.isEmpty(locationProviders);
+        }
+    }
+    public static boolean isDataEnabled(Context context){
+        ConnectivityManager check = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = check.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        NetworkInfo info1 = check.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        if (info == null || !info.isConnected() || tm.getDataState() != tm.DATA_CONNECTED||!info1.isConnected()) {
+            return false;
+        }
+        else{
+            return true;
         }
     }
 
