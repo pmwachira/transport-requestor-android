@@ -10,6 +10,8 @@ import android.widget.Toast;
 
 import java.util.Calendar;
 
+import mushirih.pickup.mapping.MapsActivity;
+
 /**
  * Created by p-tah on 06/08/2016.
  */
@@ -30,6 +32,6 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-        Toast.makeText(getActivity().getApplicationContext(),hourOfDay+","+minute+"",Toast.LENGTH_SHORT).show();
+        MapsActivity.setPickTime(hourOfDay,minute);
     }
 }

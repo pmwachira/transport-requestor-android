@@ -5,16 +5,16 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.widget.DatePicker;
-import android.widget.Toast;
 
 import java.util.Calendar;
+
+import mushirih.pickup.mapping.MapsActivity;
 
 
 /**
  * Created by p-tah on 06/08/2016.
  */
 public class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener{
-
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final Calendar c=Calendar.getInstance();
@@ -30,6 +30,6 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
 
     @Override
     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-        Toast.makeText(getActivity().getApplicationContext(),year+","+monthOfYear+","+dayOfMonth,Toast.LENGTH_SHORT).show();
+        MapsActivity.setPickDate(year,monthOfYear,dayOfMonth);
     }
 }

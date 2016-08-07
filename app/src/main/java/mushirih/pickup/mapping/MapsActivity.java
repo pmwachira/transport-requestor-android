@@ -7,11 +7,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -21,6 +24,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,7 +65,7 @@ import mushirih.pickup.ui.TimePickerFragment;
 *
 * */
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener  {
-   Context mContext;
+   static Context mContext;
     LinearLayout searchloc;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
@@ -69,7 +73,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     TextView mLocationText,pich_loc,drop_loc,loc_rep;
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     ToggleButton one, two, three;
-    LinearLayout l1, l2, l3,request_pane,request_time,describe_load,destination_pane;
+    LinearLayout l1, l2, l3,request_pane,request_time,describe_load,destination_pane,location_pick_graphic,top_dest,confirm;
     private AddressResultReceiver mResultReceiver;
     String TAG="MAPSACTIVITY LOG";
     private LatLng mCenterLatLong;
@@ -85,7 +89,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
    Location mLastLocation;
     CardView hide,go;
   TextView VIEW_TO_CHANGE;
-
+    EditText EDIT_TEXT_TO_EDIT;
+    int CONTACT_PICKER_RESULT=999;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,19 +137,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 three.setChecked(true);
             }
         });
+        pich_loc=(TextView) findViewById(R.id.top_bar_location);
 
         searchloc= (LinearLayout) findViewById(R.id.search_loc);
+        loc_rep= (TextView) findViewById(R.id.top_bar_location_rep);
         searchloc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder()/*.setLatLngBounds(LatLngBounds.builder().include(mCenterLatLong).build()*/;
                 try {
-                    Intent intent=new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY).build(activity);
-                    startActivityForResult(intent,REQUEST_CODE_AUTOCOMPLETE);
+                    VIEW_TO_CHANGE=pich_loc;
+                    startActivityForResult(builder.build(activity), PLACE_PICKER_DEST_REQUEST);
+
                 } catch (GooglePlayServicesRepairableException e) {
                     e.printStackTrace();
                 } catch (GooglePlayServicesNotAvailableException e) {
                     e.printStackTrace();
                 }
+//                try {
+//                    Intent intent=new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY).build(activity);
+//                    startActivityForResult(intent,REQUEST_CODE_AUTOCOMPLETE);
+//                } catch (GooglePlayServicesRepairableException e) {
+//                    e.printStackTrace();
+//                } catch (GooglePlayServicesNotAvailableException e) {
+//                    e.printStackTrace();
+//                }
             }
         });
         request_pane= (LinearLayout) findViewById(R.id.request_pane);
@@ -158,6 +175,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //datePicker
                 DialogFragment newfragment = new DatePickerFragment();
                 newfragment.show(getSupportFragmentManager(), "datePicker");
+
             }
         });
         
@@ -169,18 +187,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        pich_loc=(TextView) findViewById(R.id.top_bar_location);
+
 
         destination_pane= (LinearLayout) findViewById(R.id.dest_loc);
         destination_pane.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(pich_loc.getText().equals("Select Pick Up Location")) {
+                if(pich_loc.getText().equals("Select pick up location")) {
                     pich_loc.setTextColor(Color.RED);
                     pich_loc.setTextSize(20);
                 }else{
                     PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder()/*.setLatLngBounds(LatLngBounds.builder().include(mCenterLatLong).build()*/;
                     try {
+                        VIEW_TO_CHANGE=loc_rep;
                         startActivityForResult(builder.build(activity), PLACE_PICKER_DEST_REQUEST);
 
                     } catch (GooglePlayServicesRepairableException e) {
@@ -188,8 +207,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     } catch (GooglePlayServicesNotAvailableException e) {
                         e.printStackTrace();
                     }
-                    //
-
                 }
             }
         });
@@ -198,7 +215,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         hide= (CardView) findViewById(R.id.second_hide);
         hide.setVisibility(View.GONE);
         go= (CardView) findViewById(R.id.go);
-        loc_rep= (TextView) findViewById(R.id.top_bar_location_rep);
+
+
+        location_pick_graphic= (LinearLayout) findViewById(R.id.locationMarker);
+        top_dest= (LinearLayout) findViewById(R.id.top_dest_holder);
+        top_dest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder()/*.setLatLngBounds(LatLngBounds.builder().include(mCenterLatLong).build()*/;
+                try {
+                    VIEW_TO_CHANGE=loc_rep;
+                    startActivityForResult(builder.build(activity), PLACE_PICKER_DEST_REQUEST);
+
+                } catch (GooglePlayServicesRepairableException e) {
+                    e.printStackTrace();
+                } catch (GooglePlayServicesNotAvailableException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        confirm= (LinearLayout) findViewById(R.id.confirm);
+        confirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder=new AlertDialog.Builder(mContext);
+                builder.setTitle("Prompt");
+                builder.setMessage("By clicking okay,you accept our T&c's");
+                builder.setNegativeButton("Cancel",null);
+                builder.setPositiveButton("Okay",null);
+                builder.show();
+            }
+        });
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -208,6 +255,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
        mResultReceiver = new AddressResultReceiver(new Handler());
+
 
 // If this check succeeds, proceed with normal processing.
         // Otherwise, prompt user to get valid Play Services APK.
@@ -242,10 +290,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private Dialog describe_load() {
+        //TODO Add take picture action here
         final ArrayList load_char=new ArrayList();
-        String[] options={"opt 1","opt 2","opt 3"};
+        final String[] options={"Urgent","Fragile ","Perishable","Bring packing boxes","I need help loading"};
+        String[] weight={"Load under 5 Kgs","Load between 5-30 Kgs","Load over 30Kgs"};
         AlertDialog.Builder builder=new AlertDialog.Builder(this);
-        builder.setTitle("Set Load Char").setMultiChoiceItems(options, null, new DialogInterface.OnMultiChoiceClickListener() {
+        builder.setTitle("Please describe your load").setSingleChoiceItems(weight,2,null)
+            .setPositiveButton("Okay",new DialogInterface.OnClickListener(){
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                AlertDialog.Builder builder=new AlertDialog.Builder(mContext);
+                builder.setTitle("Please describe your load");
+                    builder.setMultiChoiceItems(options, null, new DialogInterface.OnMultiChoiceClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which, boolean isChecked) {
                 if(isChecked){
@@ -254,10 +311,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     load_char.remove(Integer.valueOf(which));
                 }
             }
-        }).setPositiveButton("Okay",new DialogInterface.OnClickListener(){
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+        });
+                builder.setNegativeButton("Cancel",null);
+                builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                    View layoutInflater=View.inflate(mContext, R.layout.contact_details, null);
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        AlertDialog.Builder builder=new AlertDialog.Builder(mContext);
+                        builder.setTitle("Provide details of person to pick goods.");
+                        builder.setView(layoutInflater);
+                        final View nambayake=layoutInflater.findViewById(R.id.numbertoget);
+                               layoutInflater.findViewById(R.id.bContact).setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                EDIT_TEXT_TO_EDIT= (EditText) nambayake;
+                                Intent pickContactIntent = new Intent( Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI );
+                                pickContactIntent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
+                                startActivityForResult(pickContactIntent, CONTACT_PICKER_RESULT);
+                            }
+                        });
+                        builder.setPositiveButton("Okay",null);
+                        builder.setNegativeButton("Cancel",null);
+                        builder.show();
+                    }
+                });
+                builder.setView(View.inflate(mContext,R.layout.hello,null));
+                builder.show();
 
             }
         }).setNegativeButton("Cancel",new DialogInterface.OnClickListener(){
@@ -269,7 +348,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
         return builder.show();
     }
-
 
     /**
      * Manipulates the map once available.
@@ -285,7 +363,8 @@ public void onMapReady(GoogleMap googleMap) {
     //TODO: ON map load,show drivers in the area
     mMap = googleMap;
     mMap.setMyLocationEnabled(true);
-
+  //  mMap.setMaxZoomPreference(16);
+  //  mMap.setMinZoomPreference(8);
 //    if(mLastLocation!=null) {
 //        LatLng here = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
 //        mMap.addMarker(new MarkerOptions()
@@ -303,36 +382,57 @@ public void onMapReady(GoogleMap googleMap) {
             mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
         @Override
         public void onCameraChange(CameraPosition cameraPosition) {
-            request_pane.setVisibility(View.GONE);
-            Log.d("Camera position changed", cameraPosition+"");
             mCenterLatLong = cameraPosition.target;
-                //Clear markers and map
-            //mMap.clear();
-            try {
-                final Location mLocation = new Location("");
-                mLocation.setLatitude(mCenterLatLong.latitude);
-                mLocation.setLongitude(mCenterLatLong.longitude);
-               //  mLocationText.setText("LatLong is: " + mCenterLatLong.latitude + ", " + mCenterLatLong.longitude);
-              mLocationText.setText("Click to request Pick Up here");
+            final Location mLocation = new Location("");
+            mLocation.setLatitude(mCenterLatLong.latitude);
+            mLocation.setLongitude(mCenterLatLong.longitude);
+
+            //Check for drop of marker move
+            if (pich_loc.getText().length()!=0&&(mLocationText.getText().equals("Goods pick up point")|mLocationText.getText().equals("Drag to drop point"))) {
+                mLocationText.setText("Drag to drop point");
                 mLocationText.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-//                        Toast.makeText(MapsActivity.this, "Opening", Toast.LENGTH_SHORT).show();
-
-                        //open drop off place picker
-                        //TODO Try find clicked location
-                        VIEW_TO_CHANGE= loc_rep;
+                        VIEW_TO_CHANGE = loc_rep;
                         startIntentService(mLocation);
-                        pich_loc.setTextColor(Color.BLACK);
-                        pich_loc.setTextSize(18);
-                        pich_loc.setText(mAddressOutput);
-
+                        go.setVisibility(View.GONE);
+                        hide.setVisibility(View.VISIBLE);
+                        request_pane.setVisibility(View.VISIBLE);
+                        location_pick_graphic.setVisibility(View.INVISIBLE);
+                        mMap.setMinZoomPreference(10);
 
                     }
+
                 });
-            } catch (Exception e) {
-                e.printStackTrace();
+            } else {
+                request_pane.setVisibility(View.GONE);
+                try {
+                    mLocationText.setText("Click to request pick up here");
+                    mLocationText.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            //TODO Try find clicked location
+                           // VIEW_TO_CHANGE = loc_rep;
+                            VIEW_TO_CHANGE=pich_loc;
+                            startIntentService(mLocation);
+                            if(pich_loc.getText().equals("Select pick up location")) {
+                                pich_loc.setTextColor(Color.DKGRAY);
+                                pich_loc.setTextSize(16);
+                            }
+                           // pich_loc.setText(mAddressOutput);
+                            mLocationText.setText("Drag to drop point");
+                            Toast.makeText(getApplicationContext(),"Goods pick up point set at pin",Toast.LENGTH_LONG).show();
+                            mMap.setMinZoomPreference(10);
+                        }
+
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
+//            if(!pich_loc.getText().equals("Select pick up location")&&!loc_rep.getText().equals("Drop Location")){
+//                location_pick_graphic.setVisibility(View.INVISIBLE);
+//            }
         }
     });
     if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -348,27 +448,6 @@ public void onMapReady(GoogleMap googleMap) {
     //ADDS LOCATION Finder option on map
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
-
-         //TODO: SET DESTINATION USING THIS
-         //SET Marker at my location
-            mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
-        @Override
-        public boolean onMyLocationButtonClick() {
-            //Deactivate SearchLoc of Parent Activity
-           // searchloc.setOnClickListener(null);
-
-            //Set Place Picker as a override
-            //Use this to place destination marker
-            
-            PlacePicker.IntentBuilder builder=new PlacePicker.IntentBuilder()/*.setLatLngBounds(LatLngBounds.builder().include(mCenterLatLong).build()*/;
-            try {
-                startActivityForResult(builder.build(activity),PLACE_PICKER_REQUEST);
-
-            } catch (GooglePlayServicesRepairableException e) {
-                e.printStackTrace();
-            } catch (GooglePlayServicesNotAvailableException e) {
-                e.printStackTrace();
-            }
 //or do this on myLocationButton
 /*
             if(mMap.getMyLocation()!=null) {
@@ -384,9 +463,6 @@ public void onMapReady(GoogleMap googleMap) {
                 mMap.animateCamera(cameraUpdate);
             }
             */
-            return true;
-        }
-    });
 //SEE THE MOVEMENTS
    // flatMarker(mMap);
 }
@@ -451,9 +527,6 @@ public void onMapReady(GoogleMap googleMap) {
             e.printStackTrace();
         }
     }
-
-
-
 
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -541,12 +614,19 @@ public void onMapReady(GoogleMap googleMap) {
                     "Sorry! unable to create maps", Toast.LENGTH_SHORT)
                     .show();
         }
-
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
+    }
+
+    public static void setPickDate(int year, int monthOfYear, int dayOfMonth) {
+        Toast.makeText(mContext,"Load to be picked on : "+dayOfMonth+","+monthOfYear+","+year,Toast.LENGTH_SHORT).show();
+    }
+
+    public static void setPickTime(int hourOfDay, int minute) {
+        Toast.makeText(mContext,"Load to be picked at - "+hourOfDay+":"+minute,Toast.LENGTH_SHORT).show();
     }
 
 
@@ -621,7 +701,6 @@ class AddressResultReceiver extends ResultReceiver {
         startService(intent);
     }
 
-
     private void openAutocompleteActivity() {
         try {
             // The autocomplete activity requires Google Play Services to be available. The intent
@@ -651,6 +730,27 @@ class AddressResultReceiver extends ResultReceiver {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        //CONTACTPICKER
+        if(requestCode==CONTACT_PICKER_RESULT){
+        if (resultCode == RESULT_OK) {
+            String phoneNo = null;
+            Uri uri = data.getData();
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            cursor.moveToFirst();
+
+            int phoneIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+            phoneNo = cursor.getString(phoneIndex);
+
+            phoneNo = phoneNo.replace("+254", "0");
+            phoneNo = phoneNo.replace(" ", "");
+            phoneNo = phoneNo.replace("-", "");
+            //TODO GET CALLING NUMBER
+           EDIT_TEXT_TO_EDIT.setText(phoneNo);
+           // phonenumber2.setText(phoneNo);
+
+        }
+    }
         if(requestCode==PLACE_PICKER_DEST_REQUEST){
             if(resultCode==RESULT_OK){
                 String Latlong="";
@@ -661,7 +761,7 @@ class AddressResultReceiver extends ResultReceiver {
                 x.setLatitude(place.getLatLng().latitude);
                 x.setLongitude(place.getLatLng().longitude);
                 mAddressOutput=null;
-                VIEW_TO_CHANGE=loc_rep;
+
                 startIntentService(x);
 
                 go.setVisibility(View.GONE);

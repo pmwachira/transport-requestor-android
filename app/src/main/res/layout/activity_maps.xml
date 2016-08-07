@@ -33,7 +33,8 @@ android:layout_height="match_parent">
                     android:layout_gravity="center_vertical"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:src="@android:drawable/ic_search_category_default"/>
+                    android:src="@android:drawable/presence_online"/>
+                <!--android:src="@android:drawable/ic_search_category_default"-->
                 <LinearLayout
 
                     android:orientation="vertical"
@@ -45,7 +46,7 @@ android:layout_height="match_parent">
                         style="@style/PlaceView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="PICKUP POINT"
+                        android:text="Pick up point"
                         android:textColor="#069614"/>
                     <TextView
                         android:id="@+id/top_bar_location"
@@ -53,7 +54,7 @@ android:layout_height="match_parent">
                         style="@style/PlaceView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Select Pick Up Location"
+                        android:text="Select pick up location"
                         android:gravity="top|center_horizontal"/>
                     <!--<AutoCompleteTextView-->
                         <!--android:id="@+id/pickUpEdit"-->
@@ -71,6 +72,7 @@ android:layout_height="match_parent">
         android:layout_width="match_parent"
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_margin="4dp"
+        android:layout_marginTop="2dp"
         android:elevation="2dp"
         android:id="@+id/second_hide"
         android:layout_gravity="center_horizontal"
@@ -79,6 +81,7 @@ android:layout_height="match_parent">
         xmlns:card_view="http://schemas.android.com/apk/res-auto">
 
         <LinearLayout
+            android:id="@+id/top_dest_holder"
             android:background="#fff"
             android:layout_margin="0dp"
             android:orientation="vertical"
@@ -95,7 +98,7 @@ android:layout_height="match_parent">
                     android:layout_gravity="center_vertical"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:src="@android:drawable/ic_search_category_default"/>
+                    android:src="@android:drawable/radiobutton_off_background"/>
                 <LinearLayout
 
                     android:orientation="vertical"
@@ -107,7 +110,7 @@ android:layout_height="match_parent">
                         style="@style/PlaceView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                            android:text="Drop Off Point"
+                            android:text="Drop Off point"
                         android:textColor="#069614"/>
                     <TextView
                         android:id="@+id/top_bar_location_rep"
@@ -162,8 +165,7 @@ android:layout_height="match_parent">
                     android:layout_height="wrap_content"
                     android:background="@drawable/marker_background"
                     android:gravity="center"
-
-                    android:text=" Set pick up Location "
+                    android:text="Request pick up here"
                     android:textColor="@android:color/white"
                     android:minWidth="200dp"/>
 
@@ -205,7 +207,7 @@ android:layout_height="match_parent">
                 android:layout_gravity="center_vertical"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:src="@android:drawable/ic_search_category_default"/>
+                android:src="@android:drawable/presence_away"/>
             <LinearLayout
 
                 android:orientation="vertical"
@@ -217,7 +219,7 @@ android:layout_height="match_parent">
                     style="@style/PlaceView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Drop-off POINT"
+                    android:text="Drop-off point"
                     android:textColor="#069614"/>
                 <TextView
                     android:id="@+id/bottom_bar_location"
@@ -225,7 +227,7 @@ android:layout_height="match_parent">
                     style="@style/PlaceView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Select Drop Off Location"
+                    android:text="Click to select drop off location"
                     android:gravity="top|center_horizontal"/>
 
             </LinearLayout>
@@ -239,8 +241,8 @@ android:layout_height="match_parent">
             android:layout_gravity="bottom"
             android:layout_width="match_parent"
             android:orientation="vertical"
-            android:layout_height="wrap_content">
-            <!--android:visibility="gone"-->
+            android:layout_height="wrap_content"
+            android:visibility="gone">
     <LinearLayout
         android:background="#fff"
         android:orientation="vertical"
@@ -251,7 +253,7 @@ android:layout_height="match_parent">
                 style="@style/PlaceView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Choose Vehicle "
+                android:text="Choose vehicle "
                 android:textColor="#069614"
                 android:layout_gravity="center_horizontal" />
         <LinearLayout
@@ -386,6 +388,7 @@ android:layout_height="match_parent">
                         android:text="Pick up Time/Date?"/>
                 </LinearLayout>
                 <LinearLayout
+                    android:id="@+id/confirm"
                     android:background="#fff"
                     android:layout_marginLeft="2dp"
                     android:gravity="center_horizontal"
