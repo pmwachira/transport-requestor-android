@@ -73,12 +73,12 @@
             android:label="@string/title_activity_maps">
             <!--LETS TEST SCREENS-->
             <!--INSERT LAUNCHER HERE FOR DEMO-->
-
-
-
+        </activity>
+        <activity android:name=".ui.MainActivity">
 
         </activity>
-
+        <activity android:name=".ui.LoginSuccessActivity" />
+        <activity android:name=".ui.RegisterActivity"/>
     </application>
 
 </manifest>

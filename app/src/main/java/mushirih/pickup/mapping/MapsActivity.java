@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
@@ -50,20 +51,22 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import mushirih.pickup.R;
+import mushirih.pickup.http.HttpConnection;
 import mushirih.pickup.pdf.PDF;
 import mushirih.pickup.ui.DatePickerFragment;
 import mushirih.pickup.ui.TimePickerFragment;
 
-/*
-* Disable top search,redirect to pick up intent
-* restore myLocation Button
-*
-*
-* */
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener  {
    static Context mContext;
     LinearLayout searchloc;
@@ -91,6 +94,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   TextView VIEW_TO_CHANGE;
     EditText EDIT_TEXT_TO_EDIT;
     int CONTACT_PICKER_RESULT=999;
+    LatLng LOCATION_FROM;
+    LatLng LOCATION_TO;
+    int PICK_FLAG=44;
+    int DROP_FLAG=55;
+    int MARKER_TYPE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,6 +155,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder()/*.setLatLngBounds(LatLngBounds.builder().include(mCenterLatLong).build()*/;
                 try {
                     VIEW_TO_CHANGE=pich_loc;
+                    MARKER_TYPE=PICK_FLAG;
                     startActivityForResult(builder.build(activity), PLACE_PICKER_DEST_REQUEST);
 
                 } catch (GooglePlayServicesRepairableException e) {
@@ -200,6 +209,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder()/*.setLatLngBounds(LatLngBounds.builder().include(mCenterLatLong).build()*/;
                     try {
                         VIEW_TO_CHANGE=loc_rep;
+                        MARKER_TYPE=DROP_FLAG;
                         startActivityForResult(builder.build(activity), PLACE_PICKER_DEST_REQUEST);
 
                     } catch (GooglePlayServicesRepairableException e) {
@@ -225,6 +235,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder()/*.setLatLngBounds(LatLngBounds.builder().include(mCenterLatLong).build()*/;
                 try {
                     VIEW_TO_CHANGE=loc_rep;
+                    MARKER_TYPE=DROP_FLAG;
                     startActivityForResult(builder.build(activity), PLACE_PICKER_DEST_REQUEST);
 
                 } catch (GooglePlayServicesRepairableException e) {
@@ -246,6 +257,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 builder.show();
             }
         });
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -394,16 +406,23 @@ public void onMapReady(GoogleMap googleMap) {
                     @Override
                     public void onClick(View v) {
                         VIEW_TO_CHANGE = loc_rep;
+                        MARKER_TYPE=DROP_FLAG;
                         startIntentService(mLocation);
                         go.setVisibility(View.GONE);
                         hide.setVisibility(View.VISIBLE);
                         request_pane.setVisibility(View.VISIBLE);
                         location_pick_graphic.setVisibility(View.INVISIBLE);
                         mMap.setMinZoomPreference(10);
-
+                        LOCATION_TO=new LatLng(mLocation.getLatitude(),mLocation.getLongitude());
+                        if(!LOCATION_FROM.equals(null)&&!LOCATION_TO.equals(null)){
+                            String url = getMapsApiDirectionsUrl();
+                            ReadTask readTask = new ReadTask();
+                            readTask.execute(url);
+                        }
                     }
 
                 });
+
             } else {
                 request_pane.setVisibility(View.GONE);
                 try {
@@ -412,7 +431,7 @@ public void onMapReady(GoogleMap googleMap) {
                         @Override
                         public void onClick(View v) {
                             //TODO Try find clicked location
-                           // VIEW_TO_CHANGE = loc_rep;
+                           MARKER_TYPE=PICK_FLAG;
                             VIEW_TO_CHANGE=pich_loc;
                             startIntentService(mLocation);
                             if(pich_loc.getText().equals("Select pick up location")) {
@@ -422,6 +441,7 @@ public void onMapReady(GoogleMap googleMap) {
                            // pich_loc.setText(mAddressOutput);
                             mLocationText.setText("Drag to drop point");
                             Toast.makeText(getApplicationContext(),"Goods pick up point set at pin",Toast.LENGTH_LONG).show();
+                            LOCATION_FROM=new LatLng(mLocation.getLatitude(),mLocation.getLongitude());
                             mMap.setMinZoomPreference(10);
                         }
 
@@ -430,6 +450,7 @@ public void onMapReady(GoogleMap googleMap) {
                     e.printStackTrace();
                 }
             }
+
 //            if(!pich_loc.getText().equals("Select pick up location")&&!loc_rep.getText().equals("Drop Location")){
 //                location_pick_graphic.setVisibility(View.INVISIBLE);
 //            }
@@ -466,6 +487,97 @@ public void onMapReady(GoogleMap googleMap) {
 //SEE THE MOVEMENTS
    // flatMarker(mMap);
 }
+    private String getMapsApiDirectionsUrl() {
+        String waypoints="&waypoints=optimize:true|"+
+                LOCATION_FROM.latitude+","+LOCATION_FROM.longitude+
+                "|"+LOCATION_TO.latitude+","+LOCATION_TO.longitude;
+        String sensor="sensor=false";
+        String params=waypoints+"&"+sensor;
+        String output="json";
+        String url="https://maps.googleapis.com/maps/api/directions/" + output + "?"+"origin="
+                +LOCATION_FROM.latitude+","+LOCATION_FROM.longitude+"&destination="
+                +LOCATION_TO.latitude+","+LOCATION_TO.longitude +  params;
+/*Chnage route
+
+&waypoints=via:"+LOCATION_OCHA2.latitude+*/
+
+        return url;
+    }
+
+    private class ReadTask extends AsyncTask<String,Void,String> {
+
+
+        @Override
+        protected String doInBackground(String... url) {
+            String data="";
+
+            HttpConnection httpConnection= new HttpConnection();
+            try {
+                data=httpConnection.readUrl(url[0]);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return data;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            new ParserTask().execute(s);
+        }
+    }
+
+    private class ParserTask extends AsyncTask<String,Integer,List<List<HashMap<String,String>>>>{
+        JSONObject jsonObject;
+        List<List<HashMap<String,String>>> routes=null;
+
+        @Override
+        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
+
+
+
+            try {
+                jsonObject=new JSONObject(jsonData[0]);
+                PathJsonParser pathJsonParser=new PathJsonParser();
+                routes=pathJsonParser.parse(jsonObject);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return routes;
+
+        }
+
+        @Override
+        protected void onPostExecute(List<List<HashMap<String, String>>> lists) {
+            ArrayList<LatLng> points = null;
+            PolylineOptions polyLineOptions = null;
+
+            // traversing through routes
+            for (int i = 0; i < routes.size(); i++) {
+                points = new ArrayList<LatLng>();
+                polyLineOptions = new PolylineOptions();
+                List<HashMap<String, String>> path = routes.get(i);
+
+                for (int j = 0; j < path.size(); j++) {
+
+                    HashMap<String, String> point = path.get(j);
+
+                    double lat = Double.parseDouble(point.get("lat"));
+                    double lng = Double.parseDouble(point.get("lng"));
+                    LatLng position = new LatLng(lat, lng);
+
+                    points.add(position);
+                }
+
+                polyLineOptions.addAll(points);
+                polyLineOptions.width(10);
+                polyLineOptions.color(Color.BLUE);
+            }
+            mMap.addPolyline(polyLineOptions);
+        }
+
+
+    }
     @Override
     public void onConnected(Bundle bundle) {
 
@@ -730,7 +842,6 @@ class AddressResultReceiver extends ResultReceiver {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         //CONTACTPICKER
         if(requestCode==CONTACT_PICKER_RESULT){
         if (resultCode == RESULT_OK) {
@@ -747,8 +858,6 @@ class AddressResultReceiver extends ResultReceiver {
             phoneNo = phoneNo.replace("-", "");
             //TODO GET CALLING NUMBER
            EDIT_TEXT_TO_EDIT.setText(phoneNo);
-           // phonenumber2.setText(phoneNo);
-
         }
     }
         if(requestCode==PLACE_PICKER_DEST_REQUEST){
@@ -760,6 +869,22 @@ class AddressResultReceiver extends ResultReceiver {
                 Location x=new Location("");
                 x.setLatitude(place.getLatLng().latitude);
                 x.setLongitude(place.getLatLng().longitude);
+                if(MARKER_TYPE==PICK_FLAG){
+                    LOCATION_FROM=new LatLng(x.getLatitude(),x.getLongitude());
+                    if(!LOCATION_FROM.equals(null)&&!LOCATION_TO.equals(null)){
+                        String url = getMapsApiDirectionsUrl();
+                        ReadTask readTask = new ReadTask();
+                        readTask.execute(url);
+                    }
+                }else{
+                    LOCATION_TO=new LatLng(x.getLatitude(),x.getLongitude());
+                    if(!LOCATION_FROM.equals(null)&&!LOCATION_TO.equals(null)){
+                        String url = getMapsApiDirectionsUrl();
+                        ReadTask readTask = new ReadTask();
+                        readTask.execute(url);
+                    }
+                }
+
                 mAddressOutput=null;
 
                 startIntentService(x);
