@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
@@ -16,6 +17,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -25,6 +27,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -43,6 +46,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -63,6 +67,7 @@ import java.util.List;
 
 import mushirih.pickup.R;
 import mushirih.pickup.http.HttpConnection;
+import mushirih.pickup.http.Load;
 import mushirih.pickup.pdf.PDF;
 import mushirih.pickup.ui.DatePickerFragment;
 import mushirih.pickup.ui.TimePickerFragment;
@@ -75,8 +80,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     PDF pdf;
     TextView mLocationText,pich_loc,drop_loc,loc_rep;
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    ToggleButton one, two, three;
-    LinearLayout l1, l2, l3,request_pane,request_time,describe_load,destination_pane,location_pick_graphic,top_dest,confirm;
+    ToggleButton zero,one, two, three;
+    LinearLayout l0,l1, l2, l3,request_pane,request_time,describe_load,destination_pane,location_pick_graphic,top_dest;
+    Button confirm;
     private AddressResultReceiver mResultReceiver;
     String TAG="MAPSACTIVITY LOG";
     private LatLng mCenterLatLong;
@@ -99,6 +105,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     int PICK_FLAG=44;
     int DROP_FLAG=55;
     int MARKER_TYPE;
+    static final int REQUEST_IMAGE_CAPTURE=802;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,10 +120,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mLocationText= (TextView) findViewById(R.id.locationtext);
 
+        zero=(ToggleButton) findViewById(R.id.toggleButton0);
         one = (ToggleButton) findViewById(R.id.toggleButton1);
         two = (ToggleButton) findViewById(R.id.toggleButton2);
         three = (ToggleButton) findViewById(R.id.toggleButton3);
 
+        l0 = (LinearLayout) findViewById(R.id.select_individual);
         l1 = (LinearLayout) findViewById(R.id.select_bike);
         l2 = (LinearLayout) findViewById(R.id.select_pick_up);
         l3 = (LinearLayout) findViewById(R.id.select_lorry);
@@ -245,19 +254,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         });
-        confirm= (LinearLayout) findViewById(R.id.confirm);
+        confirm= (Button) findViewById(R.id.confirm);
+        confirm.setText("Describe load");
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder=new AlertDialog.Builder(mContext);
-                builder.setTitle("Prompt");
-                builder.setMessage("By clicking okay,you accept our T&c's");
-                builder.setNegativeButton("Cancel",null);
-                builder.setPositiveButton("Okay",null);
-                builder.show();
+                describe_load();
             }
         });
 
+        if(confirm.getText().equals("Request Delivery")) {
+            confirm.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            builder.setTitle("Prompt");
+            builder.setMessage("By clicking okay,you accept our T&c's");
+            builder.setNegativeButton("Cancel", null);
+            builder.setPositiveButton("Okay", null);
+            builder.show();
+                }
+            });
+        }
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -304,7 +322,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Dialog describe_load() {
         //TODO Add take picture action here
         final ArrayList load_char=new ArrayList();
-        final String[] options={"Urgent","Fragile ","Perishable","Bring packing boxes","I need help loading"};
+        final String[] options={"Urgent","Fragile ","Perishable","In need of packing boxes","I need help loading"};
         String[] weight={"Load under 5 Kgs","Load between 5-30 Kgs","Load over 30Kgs"};
         AlertDialog.Builder builder=new AlertDialog.Builder(this);
         builder.setTitle("Please describe your load").setSingleChoiceItems(weight,2,null)
@@ -342,7 +360,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 startActivityForResult(pickContactIntent, CONTACT_PICKER_RESULT);
                             }
                         });
-                        builder.setPositiveButton("Okay",null);
+                        builder.setPositiveButton("Take picture of load", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //TODO CAPTURE PICTURE OF THE LOAD
+                                Intent takePicture=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                if (takePicture.resolveActivity(getPackageManager())!=null){
+                                    startActivityForResult(takePicture,REQUEST_IMAGE_CAPTURE);
+                                }
+                            }
+                        });
                         builder.setNegativeButton("Cancel",null);
                         builder.show();
                     }
@@ -358,7 +385,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
+        confirm.setText("Request Delivery");
         return builder.show();
+
     }
 
     /**
@@ -394,14 +423,15 @@ public void onMapReady(GoogleMap googleMap) {
             mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
         @Override
         public void onCameraChange(CameraPosition cameraPosition) {
+           //TODO SHOW REQUEST PICK UP HERE FROM CENTER MAP COORDS
             mCenterLatLong = cameraPosition.target;
             final Location mLocation = new Location("");
             mLocation.setLatitude(mCenterLatLong.latitude);
             mLocation.setLongitude(mCenterLatLong.longitude);
 
             //Check for drop of marker move
-            if (pich_loc.getText().length()!=0&&(mLocationText.getText().equals("Goods pick up point")|mLocationText.getText().equals("Drag to drop point"))) {
-                mLocationText.setText("Drag to drop point");
+            if (pich_loc.getText().length()!=0&&(mLocationText.getText().equals("Goods pick up point")|mLocationText.getText().equals("Set drop point here"))) {
+                mLocationText.setText("Set drop point here");
                 mLocationText.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -414,10 +444,21 @@ public void onMapReady(GoogleMap googleMap) {
                         location_pick_graphic.setVisibility(View.INVISIBLE);
                         mMap.setMinZoomPreference(10);
                         LOCATION_TO=new LatLng(mLocation.getLatitude(),mLocation.getLongitude());
+//                        mMap.addMarker(new MarkerOptions()
+//                        .position(LOCATION_TO)
+//                           .title("Drop point")
+//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.add_marker))
+//                .anchor(0.0f, 1.0f));
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_TO, 16);
+                        mMap.animateCamera(cameraUpdate);
+                        //TODO
+                        showRoute();
                         if(!LOCATION_FROM.equals(null)&&!LOCATION_TO.equals(null)){
-                            String url = getMapsApiDirectionsUrl();
-                            ReadTask readTask = new ReadTask();
-                            readTask.execute(url);
+                            if(AppUtils.isDataEnabled(mContext)) {
+                                showRoute();
+                            }else{
+                                Toast.makeText(getApplicationContext(),"Please check your internet connection",Toast.LENGTH_SHORT).show();
+                            }
                         }
                     }
 
@@ -439,7 +480,7 @@ public void onMapReady(GoogleMap googleMap) {
                                 pich_loc.setTextSize(16);
                             }
                            // pich_loc.setText(mAddressOutput);
-                            mLocationText.setText("Drag to drop point");
+                            mLocationText.setText("Set drop point here");
                             Toast.makeText(getApplicationContext(),"Goods pick up point set at pin",Toast.LENGTH_LONG).show();
                             LOCATION_FROM=new LatLng(mLocation.getLatitude(),mLocation.getLongitude());
                             mMap.setMinZoomPreference(10);
@@ -487,6 +528,16 @@ public void onMapReady(GoogleMap googleMap) {
 //SEE THE MOVEMENTS
    // flatMarker(mMap);
 }
+
+    private void showRoute() {
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(LOCATION_TO).title("Pick Up Location"));
+        mMap.addMarker(new MarkerOptions().position(LOCATION_FROM).title("Drop Location"));
+        String url = getMapsApiDirectionsUrl();
+        ReadTask readTask = new ReadTask();
+        readTask.execute(url);
+    }
+
     private String getMapsApiDirectionsUrl() {
         String waypoints="&waypoints=optimize:true|"+
                 LOCATION_FROM.latitude+","+LOCATION_FROM.longitude+
@@ -632,6 +683,7 @@ public void onMapReady(GoogleMap googleMap) {
         try {
             if (location != null)
                 changeMap(location);
+
             LocationServices.FusedLocationApi.removeLocationUpdates(
                     mGoogleApiClient, this);
 
@@ -687,9 +739,6 @@ public void onMapReady(GoogleMap googleMap) {
     }
 
     private void changeMap(Location location) {
-
-
-
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -734,11 +783,11 @@ public void onMapReady(GoogleMap googleMap) {
     }
 
     public static void setPickDate(int year, int monthOfYear, int dayOfMonth) {
-        Toast.makeText(mContext,"Load to be picked on : "+dayOfMonth+","+monthOfYear+","+year,Toast.LENGTH_SHORT).show();
+        Load.setDate(dayOfMonth,monthOfYear,year);
     }
 
     public static void setPickTime(int hourOfDay, int minute) {
-        Toast.makeText(mContext,"Load to be picked at - "+hourOfDay+":"+minute,Toast.LENGTH_SHORT).show();
+       Load.setTime(hourOfDay,minute);
     }
 
 
@@ -842,6 +891,16 @@ class AddressResultReceiver extends ResultReceiver {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        //IMAGE_CAPTURE
+        if(requestCode==REQUEST_IMAGE_CAPTURE){
+            if (resultCode==RESULT_OK){
+                Bundle extras=data.getExtras();
+                Bitmap image= (Bitmap) extras.get("data");
+                Load.setImage(image);
+                //LinearLayout linearLayout= (LinearLayout) findViewById(R.id.test);
+                //linearLayout.setBackground((Drawable)new BitmapDrawable(image));
+            }
+        }
         //CONTACTPICKER
         if(requestCode==CONTACT_PICKER_RESULT){
         if (resultCode == RESULT_OK) {
@@ -871,20 +930,28 @@ class AddressResultReceiver extends ResultReceiver {
                 x.setLongitude(place.getLatLng().longitude);
                 if(MARKER_TYPE==PICK_FLAG){
                     LOCATION_FROM=new LatLng(x.getLatitude(),x.getLongitude());
-                    if(!LOCATION_FROM.equals(null)&&!LOCATION_TO.equals(null)){
-                        String url = getMapsApiDirectionsUrl();
-                        ReadTask readTask = new ReadTask();
-                        readTask.execute(url);
-                    }
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_FROM, 16);
+                    mMap.animateCamera(cameraUpdate);
+//                    if(!LOCATION_FROM.equals(null)&&!LOCATION_TO.equals(null)){
+//                        String url = getMapsApiDirectionsUrl();
+//                        ReadTask readTask = new ReadTask();
+//                        readTask.execute(url);
+//                    }
                 }else{
                     LOCATION_TO=new LatLng(x.getLatitude(),x.getLongitude());
                     if(!LOCATION_FROM.equals(null)&&!LOCATION_TO.equals(null)){
-                        String url = getMapsApiDirectionsUrl();
-                        ReadTask readTask = new ReadTask();
-                        readTask.execute(url);
+                        showRoute();
                     }
                 }
-
+                if(MARKER_TYPE==DROP_FLAG){
+//                    mMap.addMarker(new MarkerOptions()
+//                            .position(LOCATION_TO)
+//                            .title("Drop point")
+//                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.add_marker))
+//                            .anchor(0.0f, 1.0f));
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_TO, 16);
+                    mMap.animateCamera(cameraUpdate);
+                }
                 mAddressOutput=null;
 
                 startIntentService(x);

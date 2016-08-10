@@ -3,6 +3,7 @@ xmlns:tools="http://schemas.android.com/tools"
     tools:context=".mapping.MapsActivity"
 android:layout_width="match_parent"
     android:orientation="vertical"
+    android:id="@+id/test"
 android:layout_height="match_parent">
     <android.support.v7.widget.CardView
         android:layout_height="wrap_content"
@@ -110,7 +111,7 @@ android:layout_height="match_parent">
                         style="@style/PlaceView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                            android:text="Drop Off point"
+                            android:text="Drop off point"
                         android:textColor="#069614"/>
                     <TextView
                         android:id="@+id/top_bar_location_rep"
@@ -118,7 +119,7 @@ android:layout_height="match_parent">
                         style="@style/PlaceView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Drop Location"
+                        android:text="Drop off location"
                         android:gravity="top|center_horizontal"/>
                     <!--<AutoCompleteTextView-->
                     <!--android:id="@+id/pickUpEdit"-->
@@ -154,7 +155,6 @@ android:layout_height="match_parent">
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|center_horizontal"
-
                     android:paddingBottom="87dp"
                     android:gravity="center"
                     android:orientation="vertical" >
@@ -165,7 +165,7 @@ android:layout_height="match_parent">
                     android:layout_height="wrap_content"
                     android:background="@drawable/marker_background"
                     android:gravity="center"
-                    android:text="Request pick up here"
+                    android:text="Click to request pick up here"
                     android:textColor="@android:color/white"
                     android:minWidth="200dp"/>
 
@@ -175,6 +175,131 @@ android:layout_height="match_parent">
                     android:layout_height="40dp"
                     android:src="@drawable/location_picker_marker" />
                 </LinearLayout>
+        <LinearLayout
+            android:visibility="invisible"
+            android:layout_margin="4dp"
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:background="#fff"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+
+                style="@style/PlaceView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Choose vehicle "
+                android:textColor="#069614"
+                android:layout_gravity="center_horizontal" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:weightSum="4"
+                >
+                <LinearLayout
+
+                    android:layout_marginRight="4dp"
+                    android:id="@+id/select_individual"
+
+                    android:layout_marginBottom="8dp"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom">
+                    <ImageView
+
+                        android:layout_width="50dp"
+                        android:layout_height="44dp"
+                        android:src="@drawable/luggage1"/>
+                    <ToggleButton
+                        android:id="@+id/toggleButton0"
+                        android:layout_width="50dp"
+
+                        android:layout_height="8dp"
+                        android:layout_gravity="center_horizontal"
+                        style="@style/toggleButton"
+                        android:background="@drawable/ic_toggle_bg"
+                        />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_marginRight="4dp"
+                    android:id="@+id/select_bike"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom">
+                    <ImageView
+
+                        android:layout_width="50dp"
+                        android:layout_height="44dp"
+                        android:src="@drawable/bike"/>
+                    <ToggleButton
+                        android:id="@+id/toggleButton1"
+                        android:layout_width="50dp"
+
+                        android:layout_height="8dp"
+                        android:layout_gravity="center_horizontal"
+                        style="@style/toggleButton"
+                        android:background="@drawable/ic_toggle_bg"
+                        />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_marginRight="4dp"
+                    android:id="@+id/select_pick_up"
+
+                    android:layout_marginBottom="8dp"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom">
+                    <ImageView
+
+                        android:layout_width="50dp"
+                        android:layout_height="44dp"
+                        android:src="@drawable/pick_up"/>
+                    <ToggleButton
+                        android:id="@+id/toggleButton2"
+                        android:layout_width="50dp"
+
+                        android:layout_height="8dp"
+                        android:layout_gravity="center_horizontal"
+                        style="@style/toggleButton"
+                        android:background="@drawable/ic_toggle_bg"
+                        />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/select_lorry"
+
+                    android:layout_marginBottom="8dp"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom">
+                    <ImageView
+                        android:layout_width="50dp"
+                        android:layout_height="44dp"
+                        android:src="@drawable/lorry"/>
+                    <ToggleButton
+                        android:id="@+id/toggleButton3"
+                        android:layout_width="50dp"
+
+                        android:layout_height="8dp"
+                        android:layout_gravity="center_horizontal"
+                        style="@style/toggleButton"
+                        android:background="@drawable/ic_toggle_bg"
+                        />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
     </FrameLayout>
 </LinearLayout>
         <android.support.v7.widget.CardView
@@ -243,104 +368,11 @@ android:layout_height="match_parent">
             android:orientation="vertical"
             android:layout_height="wrap_content"
             android:visibility="gone">
-    <LinearLayout
-        android:background="#fff"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <TextView
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-                style="@style/PlaceView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Choose vehicle "
-                android:textColor="#069614"
-                android:layout_gravity="center_horizontal" />
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:weightSum="3"
-            >
-
-    <LinearLayout
-
-        android:layout_marginRight="4dp"
-        android:id="@+id/select_bike"
-
-        android:layout_marginBottom="8dp"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:layout_weight="1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom">
-        <ImageView
-
-            android:layout_width="50dp"
-            android:layout_height="44dp"
-            android:src="@drawable/bike"/>
-        <ToggleButton
-            android:id="@+id/toggleButton1"
-            android:layout_width="50dp"
-
-            android:layout_height="8dp"
-            android:layout_gravity="center_horizontal"
-            style="@style/toggleButton"
-            android:background="@drawable/ic_toggle_bg"
-             />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_marginRight="4dp"
-            android:id="@+id/select_pick_up"
-
-            android:layout_marginBottom="8dp"
-            android:orientation="vertical"
-            android:gravity="center_horizontal"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom">
-            <ImageView
-
-                android:layout_width="50dp"
-                android:layout_height="44dp"
-                android:src="@drawable/pick_up"/>
-            <ToggleButton
-                android:id="@+id/toggleButton2"
-                android:layout_width="50dp"
-
-                android:layout_height="8dp"
-                android:layout_gravity="center_horizontal"
-                style="@style/toggleButton"
-                android:background="@drawable/ic_toggle_bg"
-                />
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/select_lorry"
-
-            android:layout_marginBottom="8dp"
-            android:orientation="vertical"
-            android:gravity="center_horizontal"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom">
-            <ImageView
-                android:layout_width="50dp"
-                android:layout_height="44dp"
-                android:src="@drawable/lorry"/>
-            <ToggleButton
-                android:id="@+id/toggleButton3"
-                android:layout_width="50dp"
-
-                android:layout_height="8dp"
-                android:layout_gravity="center_horizontal"
-                style="@style/toggleButton"
-                android:background="@drawable/ic_toggle_bg"
-                />
-        </LinearLayout>
-    </LinearLayout>
-    </LinearLayout>
             <LinearLayout
                 android:layout_marginBottom="2dp"
                 android:layout_marginRight="2dp"
@@ -388,7 +420,6 @@ android:layout_height="match_parent">
                         android:text="Pick up Time/Date?"/>
                 </LinearLayout>
                 <LinearLayout
-                    android:id="@+id/confirm"
                     android:background="#fff"
                     android:layout_marginLeft="2dp"
                     android:gravity="center_horizontal"
@@ -404,11 +435,20 @@ android:layout_height="match_parent">
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Confirm Request"/>
+                        android:text="Add Button"/>
                 </LinearLayout>
-
             </LinearLayout>
+                <android.support.v7.widget.AppCompatButton
+                    android:layout_margin="6dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/confirm"
+                    android:text="Confirm Request"
+                    android:textColor="@color/white"
+                    android:background="@color/colorPrimary"
+                    />
 
+                </LinearLayout>
     </LinearLayout>
     </FrameLayout>
    </LinearLayout>
