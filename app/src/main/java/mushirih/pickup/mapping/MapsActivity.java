@@ -196,7 +196,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
-        
+
         describe_load= (LinearLayout) findViewById(R.id.describe_load);
         describe_load.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -451,7 +451,6 @@ public void onMapReady(GoogleMap googleMap) {
 //                .anchor(0.0f, 1.0f));
                 CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_TO, 16);
                         mMap.animateCamera(cameraUpdate);
-
                         if(!LOCATION_FROM.equals(null)&&!LOCATION_TO.equals(null)){
                             if(AppUtils.isDataEnabled(mContext)) {
                                 showRoute();
