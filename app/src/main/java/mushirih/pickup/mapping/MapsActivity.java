@@ -451,8 +451,7 @@ public void onMapReady(GoogleMap googleMap) {
 //                .anchor(0.0f, 1.0f));
                 CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_TO, 16);
                         mMap.animateCamera(cameraUpdate);
-                        //TODO
-                        showRoute();
+
                         if(!LOCATION_FROM.equals(null)&&!LOCATION_TO.equals(null)){
                             if(AppUtils.isDataEnabled(mContext)) {
                                 showRoute();

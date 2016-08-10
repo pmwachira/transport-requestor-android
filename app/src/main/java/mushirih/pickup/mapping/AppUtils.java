@@ -65,12 +65,15 @@ public class AppUtils {
         NetworkInfo info = check.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
         NetworkInfo info1 = check.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        if (info == null || !info.isConnected() || tm.getDataState() != tm.DATA_CONNECTED||!info1.isConnected()) {
-            return false;
-        }
+       if(info.isConnected()){
+           return true;
+       }
+        else if(info1.isConnected()){
+           return true;
+       }
         else{
-            return true;
-        }
+           return false;
+       }
     }
 
 }
