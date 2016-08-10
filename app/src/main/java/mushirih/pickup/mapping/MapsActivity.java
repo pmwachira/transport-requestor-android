@@ -54,6 +54,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -529,8 +530,10 @@ public void onMapReady(GoogleMap googleMap) {
 
     private void showRoute() {
         mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(LOCATION_TO).title("Pick Up Location"));
-        mMap.addMarker(new MarkerOptions().position(LOCATION_FROM).title("Drop Location"));
+        mMap.addMarker(new MarkerOptions().position(LOCATION_FROM).title("Pick Up Location"));
+        MarkerOptions dest=new MarkerOptions().position(LOCATION_TO).title("Drop Location");
+        Marker DEST= mMap.addMarker(dest);
+        //TODO HERE
         String url = getMapsApiDirectionsUrl();
         ReadTask readTask = new ReadTask();
         readTask.execute(url);
