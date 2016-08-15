@@ -35,6 +35,15 @@ public class AppUtils {
         public static final String LOCATION_DATA_CITY = PACKAGE_NAME + ".LOCATION_DATA_CITY";
         public static final String LOCATION_DATA_STREET = PACKAGE_NAME + ".LOCATION_DATA_STREET";
 
+        /*
+        * Track state of the application wrt request*/
+        public   int REQUEST_STAGE_TRACKER;
+        public static final int REQUEST_STAGE_REGISTER=0;
+        public static final int REQUEST_STAGE_REQUEST=1;
+        public static final int REQUEST_STAGE_OPTIMIZATION=2;
+        public static final int REQUEST_STAGE_ACCEPTOR=3;
+        public static final int REQUEST_STAGE_CLOSURE=4;
+
 
     }
 

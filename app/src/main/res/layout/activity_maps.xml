@@ -373,71 +373,71 @@ android:layout_height="match_parent">
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-            <LinearLayout
-                android:layout_marginBottom="2dp"
-                android:layout_marginRight="2dp"
-                android:layout_marginTop="2dp"
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:weightSum="3"
-                android:layout_height="wrap_content">
-                <LinearLayout
-                    android:id="@+id/describe_load"
-                    android:background="#fff"
-                    android:gravity="center_horizontal"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-                    <ImageView
-                        android:layout_width="50dp"
-                        android:layout_height="44dp"
-                        android:src="@drawable/luggage2"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Describe load"/>
-                </LinearLayout>
+            <!--<LinearLayout-->
+                <!--android:layout_marginBottom="2dp"-->
+                <!--android:layout_marginRight="2dp"-->
+                <!--android:layout_marginTop="2dp"-->
+                <!--android:orientation="horizontal"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:weightSum="3"-->
+                <!--android:layout_height="wrap_content">-->
+                <!--<LinearLayout-->
+                    <!--android:id="@+id/describe_load"-->
+                    <!--android:background="#fff"-->
+                    <!--android:gravity="center_horizontal"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:orientation="vertical"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content">-->
+                    <!--<ImageView-->
+                        <!--android:layout_width="50dp"-->
+                        <!--android:layout_height="44dp"-->
+                        <!--android:src="@drawable/luggage2"/>-->
+                    <!--<TextView-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:text="Describe load"/>-->
+                <!--</LinearLayout>-->
 
 
-                <LinearLayout
-                    android:id="@+id/set_time"
-                    android:background="#fff"
-                    android:layout_marginLeft="2dp"
-                    android:gravity="center_horizontal"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-                    <ImageView
-                        android:layout_marginTop="2dp"
-                        android:layout_width="50dp"
-                        android:layout_height="44dp"
-                        android:src="@drawable/ic_action_time"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Pick up Time/Date?"/>
-                </LinearLayout>
-                <LinearLayout
-                    android:background="#fff"
-                    android:layout_marginLeft="2dp"
-                    android:gravity="center_horizontal"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-                    <ImageView
-                        android:layout_marginTop="2dp"
-                        android:layout_width="50dp"
-                        android:layout_height="44dp"
-                        android:src="@drawable/ok"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Add Button"/>
-                </LinearLayout>
-            </LinearLayout>
+                <!--<LinearLayout-->
+                    <!--android:id="@+id/set_time"-->
+                    <!--android:background="#fff"-->
+                    <!--android:layout_marginLeft="2dp"-->
+                    <!--android:gravity="center_horizontal"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:orientation="vertical"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content">-->
+                    <!--<ImageView-->
+                        <!--android:layout_marginTop="2dp"-->
+                        <!--android:layout_width="50dp"-->
+                        <!--android:layout_height="44dp"-->
+                        <!--android:src="@drawable/ic_action_time"/>-->
+                    <!--<TextView-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:text="Pick up Time/Date?"/>-->
+                <!--</LinearLayout>-->
+                <!--<LinearLayout-->
+                    <!--android:background="#fff"-->
+                    <!--android:layout_marginLeft="2dp"-->
+                    <!--android:gravity="center_horizontal"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:orientation="vertical"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content">-->
+                    <!--<ImageView-->
+                        <!--android:layout_marginTop="2dp"-->
+                        <!--android:layout_width="50dp"-->
+                        <!--android:layout_height="44dp"-->
+                        <!--android:src="@drawable/ok"/>-->
+                    <!--<TextView-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:text="Add Button"/>-->
+                <!--</LinearLayout>-->
+            <!--</LinearLayout>-->
                 <android.support.v7.widget.AppCompatButton
                     android:layout_margin="6dp"
                     android:layout_width="match_parent"

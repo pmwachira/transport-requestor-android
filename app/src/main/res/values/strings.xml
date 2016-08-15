@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">PICKUP</string>
-    <string name="title_activity_maps">Mapping</string>
+    <string name="app_name">PickUp</string>
+    <string name="title_activity_maps">PickUp</string>
     <string name="no_geocoder_available">No geocoder available</string>
 
     <string name="fetch_address">Fetch address</string>

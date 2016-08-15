@@ -71,6 +71,7 @@ import mushirih.pickup.http.HttpConnection;
 import mushirih.pickup.http.Load;
 import mushirih.pickup.pdf.PDF;
 import mushirih.pickup.ui.DatePickerFragment;
+import mushirih.pickup.ui.PrefManager;
 import mushirih.pickup.ui.TimePickerFragment;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener  {
@@ -107,14 +108,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     int DROP_FLAG=55;
     int MARKER_TYPE;
     static final int REQUEST_IMAGE_CAPTURE=802;
+    PrefManager prefManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Context context = this;
+        mContext=this;
+        prefManager=new PrefManager(mContext);
+        if(!prefManager.isFirstLaunch()){
+            //TODO SHOW APP INTRO
+        }
 
         //pdf=new PDF(context, mBitmap);
-        mContext=this;
         activity=this;
         buildGoogleApiClient();
         setContentView(R.layout.activity_maps);
@@ -183,7 +188,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //                }
             }
         });
+
         request_pane= (LinearLayout) findViewById(R.id.request_pane);
+           /*
         request_time= (LinearLayout) findViewById(R.id.set_time);
         request_time.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -206,8 +213,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-
-
+*/
         destination_pane= (LinearLayout) findViewById(R.id.dest_loc);
         destination_pane.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -321,18 +327,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private Dialog describe_load() {
-        //TODO Add take picture action here
+        //TODO Button visibility
+        confirm.setVisibility(View.GONE);
         final ArrayList load_char=new ArrayList();
         final String[] options={"Urgent","Fragile ","Perishable","In need of packing boxes","I need help loading"};
         String[] weight={"Load under 5 Kgs","Load between 5-30 Kgs","Load over 30Kgs"};
         AlertDialog.Builder builder=new AlertDialog.Builder(this);
-        builder.setTitle("Please describe your load").setSingleChoiceItems(weight,2,null)
+        builder.setTitle("Please describe your load")
+                .setCancelable(false)
+                .setSingleChoiceItems(weight,2,null)
             .setPositiveButton("Okay",new DialogInterface.OnClickListener(){
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 AlertDialog.Builder builder=new AlertDialog.Builder(mContext);
-                builder.setTitle("Please describe your load");
+                builder
+                        .setCancelable(false)
+                        .setTitle("Please describe your load");
                     builder.setMultiChoiceItems(options, null, new DialogInterface.OnMultiChoiceClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which, boolean isChecked) {
@@ -348,8 +359,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     View layoutInflater=View.inflate(mContext, R.layout.contact_details, null);
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        AlertDialog.Builder builder=new AlertDialog.Builder(mContext);
-                        builder.setTitle("Provide details of person to pick goods.");
+                        final AlertDialog.Builder builder=new AlertDialog.Builder(mContext);
+                        builder.setCancelable(false).setTitle("Provide details of person to pick goods.");
                         builder.setView(layoutInflater);
                         final View nambayake=layoutInflater.findViewById(R.id.numbertoget);
                                layoutInflater.findViewById(R.id.bContact).setOnClickListener(new View.OnClickListener() {
@@ -361,13 +372,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 startActivityForResult(pickContactIntent, CONTACT_PICKER_RESULT);
                             }
                         });
-                        builder.setPositiveButton("Take picture of load", new DialogInterface.OnClickListener() {
+                        builder.setNeutralButton("Take picture of load", new DialogInterface.OnClickListener() {
+                            EditText name,id,num;
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                name= (EditText) layoutInflater.findViewById(R.id.name);
+                                if(name.getText().length()==0){
+                                    name.setError("Please fill in all details");
+                                }else{
                                 //TODO CAPTURE PICTURE OF THE LOAD
                                 Intent takePicture=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                if (takePicture.resolveActivity(getPackageManager())!=null){
-                                    startActivityForResult(takePicture,REQUEST_IMAGE_CAPTURE);
+                                if (takePicture.resolveActivity(getPackageManager())!=null) {
+                                    startActivityForResult(takePicture, REQUEST_IMAGE_CAPTURE);
+                                    //TODO change requestor button
+                                    confirm.setVisibility(View.VISIBLE);
+                                    confirm.setText("Request Delivery");
+                                    confirm.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            Load.requestService();
+                                        }
+                                    });
+                                }
                                 }
                             }
                         });
@@ -386,7 +412,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
-        confirm.setText("Request Delivery");
+
         return builder.show();
 
     }
@@ -440,6 +466,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         startIntentService(mLocation);
                         go.setVisibility(View.GONE);
                         hide.setVisibility(View.VISIBLE);
+                        //TODO change this to pop
                         request_pane.setVisibility(View.VISIBLE);
                         location_pick_graphic.setVisibility(View.INVISIBLE);
                         mMap.setMinZoomPreference(10);
@@ -837,6 +864,7 @@ class AddressResultReceiver extends ResultReceiver {
             //SEND THIS LOCATION TO DRIVER REQUEST
            //Toast.makeText(getApplicationContext(),"This location is "+mAddressOutput,Toast.LENGTH_SHORT).show();
             VIEW_TO_CHANGE.setText(mAddressOutput);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -940,7 +968,11 @@ class AddressResultReceiver extends ResultReceiver {
                 }else{
                     LOCATION_TO=new LatLng(x.getLatitude(),x.getLongitude());
                     if(!LOCATION_FROM.equals(null)&&!LOCATION_TO.equals(null)){
+                        if(AppUtils.isDataEnabled(mContext)) {
                         showRoute();
+                    }
+                    }else{
+                        Toast.makeText(getApplicationContext(),"Please check your internet connection",Toast.LENGTH_SHORT).show();
                     }
                 }
                 if(MARKER_TYPE==DROP_FLAG){

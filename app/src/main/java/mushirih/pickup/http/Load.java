@@ -31,4 +31,8 @@ public class Load {
         HOUR=hourOfDay;
         MINUTE=minute;
     }
+
+    public static void requestService() {
+        
+    }
 }
