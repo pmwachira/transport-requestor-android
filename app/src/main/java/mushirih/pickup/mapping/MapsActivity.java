@@ -336,85 +336,106 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         builder.setTitle("Please describe your load")
                 .setCancelable(false)
                 .setSingleChoiceItems(weight,2,null)
-            .setPositiveButton("Okay",new DialogInterface.OnClickListener(){
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                AlertDialog.Builder builder=new AlertDialog.Builder(mContext);
-                builder
-                        .setCancelable(false)
-                        .setTitle("Please describe your load");
+            .setPositiveButton("Okay",new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                    builder
+                            .setCancelable(false)
+                            .setTitle("Please describe your load");
                     builder.setMultiChoiceItems(options, null, new DialogInterface.OnMultiChoiceClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                if(isChecked){
-                    load_char.add(which);
-                }else if(load_char.contains(which)){
-                    load_char.remove(Integer.valueOf(which));
-                }
-            }
-        });
-                builder.setNegativeButton("Cancel",null);
-                builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-                    View layoutInflater=View.inflate(mContext, R.layout.contact_details, null);
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        final AlertDialog.Builder builder=new AlertDialog.Builder(mContext);
-                        builder.setCancelable(false).setTitle("Provide details of person to pick goods.");
-                        builder.setView(layoutInflater);
-                        final View nambayake=layoutInflater.findViewById(R.id.numbertoget);
-                               layoutInflater.findViewById(R.id.bContact).setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                EDIT_TEXT_TO_EDIT= (EditText) nambayake;
-                                Intent pickContactIntent = new Intent( Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI );
-                                pickContactIntent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
-                                startActivityForResult(pickContactIntent, CONTACT_PICKER_RESULT);
+                        @Override
+                        public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                            if (isChecked) {
+                                load_char.add(which);
+                            } else if (load_char.contains(which)) {
+                                load_char.remove(Integer.valueOf(which));
                             }
-                        });
-                        builder.setNeutralButton("Take picture of load", new DialogInterface.OnClickListener() {
-                            EditText name,id,num;
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                name= (EditText) layoutInflater.findViewById(R.id.name);
-                                if(name.getText().length()==0){
-                                    name.setError("Please fill in all details");
-                                }else{
-                                //TODO CAPTURE PICTURE OF THE LOAD
-                                Intent takePicture=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                if (takePicture.resolveActivity(getPackageManager())!=null) {
-                                    startActivityForResult(takePicture, REQUEST_IMAGE_CAPTURE);
-                                    //TODO change requestor button
-                                    confirm.setVisibility(View.VISIBLE);
-                                    confirm.setText("Request Delivery");
-                                    confirm.setOnClickListener(new View.OnClickListener() {
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", null);
+                    builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                        View layoutInflater = View.inflate(mContext, R.layout.contact_details, null);
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                            builder.setCancelable(false).setTitle("Provide details of person to pick goods.");
+                            builder.setView(layoutInflater);
+                            final View nambayake = layoutInflater.findViewById(R.id.numbertoget);
+                            layoutInflater.findViewById(R.id.bContact).setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    EDIT_TEXT_TO_EDIT = (EditText) nambayake;
+                                    Intent pickContactIntent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+                                    pickContactIntent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
+                                    startActivityForResult(pickContactIntent, CONTACT_PICKER_RESULT);
+                                }
+                            });
+                            builder.setPositiveButton("Take picture of load", null);
+                            builder.setNegativeButton("Cancel", null);
+                            final AlertDialog alertDialog = builder.create();
+                            alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                                @Override
+                                public void onShow(DialogInterface dialog) {
+                                    Button b = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                                    final EditText name, id, num;
+                                    name = (EditText) layoutInflater.findViewById(R.id.name);
+                                   id = (EditText) layoutInflater.findViewById(R.id.id);
+                                    num = (EditText) layoutInflater.findViewById(R.id.numbertoget);
+                                    b.setOnClickListener(new View.OnClickListener() {
+
                                         @Override
-                                        public void onClick(View v) {
-                                            Load.requestService();
+                                        public void onClick(View view) {
+
+                                            if (name.getText().length() == 0) {
+                                                name.setError("Please fill in all details");
+                                            }else  if (id.getText().length() == 0) {
+                                                id.setError("Please fill in all details");
+                                            }else  if (num.getText().length() == 0) {
+                                                num.setError("Please fill in all details");
+                                            }
+                                            else {
+                                                //TODO CAPTURE PICTURE OF THE LOAD
+                                                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                                if (takePicture.resolveActivity(getPackageManager()) != null) {
+                                                    startActivityForResult(takePicture, REQUEST_IMAGE_CAPTURE);
+                                                    //TODO change requestor button
+                                                    confirm.setVisibility(View.VISIBLE);
+                                                    confirm.setText("Request Delivery");
+                                                    confirm.setOnClickListener(new View.OnClickListener() {
+                                                        @Override
+                                                        public void onClick(View v) {
+                                                            Load.requestService();
+                                                        }
+                                                    });
+                                                }
+                                            }
                                         }
                                     });
+
+//                                    builder.show();
                                 }
-                                }
-                            }
-                        });
-                        builder.setNegativeButton("Cancel",null);
-                        builder.show();
-                    }
-                });
-                builder.setView(View.inflate(mContext,R.layout.hello,null));
-                builder.show();
+                            });
+                            alertDialog.show();
+                            //builder.setView(View.inflate(mContext, R.layout.hello, null));
+                            //builder.show();
 
-            }
-        }).setNegativeButton("Cancel",new DialogInterface.OnClickListener(){
+                        }
+                    }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
 
-            }
-        });
+                        }
+                    });
+                    //TODO SECOND BUILDER
+                     builder.show();
 
+
+                }
+            });
         return builder.show();
-
     }
 @Override
     public void onMapReady(GoogleMap googleMap) {
