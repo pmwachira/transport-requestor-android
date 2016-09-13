@@ -21,10 +21,10 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
+import android.transition.Explode;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -70,9 +70,7 @@ import mushirih.pickup.R;
 import mushirih.pickup.http.HttpConnection;
 import mushirih.pickup.http.Load;
 import mushirih.pickup.pdf.PDF;
-import mushirih.pickup.ui.DatePickerFragment;
 import mushirih.pickup.ui.PrefManager;
-import mushirih.pickup.ui.TimePickerFragment;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener  {
    static Context mContext;
@@ -85,13 +83,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     ToggleButton zero,one, two, three;
     LinearLayout l0,l1, l2, l3,request_pane,request_time,describe_load,destination_pane,location_pick_graphic,top_dest;
     Button confirm;
-    private AddressResultReceiver mResultReceiver;
     String TAG="MAPSACTIVITY LOG";
     private LatLng mCenterLatLong;
     private static final int REQUEST_CODE_AUTOCOMPLETE = 1;
     int PLACE_PICKER_REQUEST=2;
     int PLACE_PICKER_DEST_REQUEST=02022;
     int PLACE_AUTOCOMPLETE_REQUEST_CODE = 20;
+    private AddressResultReceiver mResultReceiver;
     protected String mAddressOutput;
     protected String mAreaOutput;
     protected String mCityOutput;
@@ -102,13 +100,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
   TextView VIEW_TO_CHANGE;
     EditText EDIT_TEXT_TO_EDIT;
     int CONTACT_PICKER_RESULT=999;
-    LatLng LOCATION_FROM;
-    LatLng LOCATION_TO;
     int PICK_FLAG=44;
     int DROP_FLAG=55;
     int MARKER_TYPE;
     static final int REQUEST_IMAGE_CAPTURE=802;
     PrefManager prefManager;
+    LatLng LOCATION_TO,LOCATION_FROM;
+    String weight;
+    ArrayList load_char;
+    Bitmap image;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -324,18 +324,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Toast.makeText(mContext, "Location not supported in this device", Toast.LENGTH_SHORT).show();
         }
 
+        Explode explode = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            explode = new Explode();
+            explode.setDuration(500);
+            getWindow().setExitTransition(explode);
+            getWindow().setEnterTransition(explode);
+        }
     }
 
-    private Dialog describe_load() {
+    private  void describe_load() {
         //TODO Button visibility
         confirm.setVisibility(View.GONE);
-        final ArrayList load_char=new ArrayList();
+        load_char=new ArrayList();
         final String[] options={"Urgent","Fragile ","Perishable","In need of packing boxes","I need help loading"};
-        String[] weight={"Load under 5 Kgs","Load between 5-30 Kgs","Load over 30Kgs"};
+        final String[] weight_options={"Load under 5 Kgs","Load between 5-30 Kgs","Load over 30Kgs"};
         AlertDialog.Builder builder=new AlertDialog.Builder(this);
         builder.setTitle("Please describe your load")
                 .setCancelable(false)
-                .setSingleChoiceItems(weight,2,null)
+                .setSingleChoiceItems(weight_options, 2, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        weight=weight_options[which].toString();
+                    }
+                })
             .setPositiveButton("Okay",new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -400,21 +412,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                                 if (takePicture.resolveActivity(getPackageManager()) != null) {
                                                     startActivityForResult(takePicture, REQUEST_IMAGE_CAPTURE);
+                                                    alertDialog.cancel();
                                                     //TODO change requestor button
                                                     confirm.setVisibility(View.VISIBLE);
                                                     confirm.setText("Request Delivery");
                                                     confirm.setOnClickListener(new View.OnClickListener() {
                                                         @Override
                                                         public void onClick(View v) {
-                                                            Load.requestService();
+                                                            Load load=new Load();
+                                                            load.requestService(mContext,LOCATION_FROM,LOCATION_TO,weight,load_char,name,id,num,image);
                                                         }
                                                     });
+
                                                 }
                                             }
                                         }
                                     });
 
-//                                    builder.show();
+                                 //  builder.show();
                                 }
                             });
                             alertDialog.show();
@@ -435,145 +450,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 }
             });
-        return builder.show();
+        builder.setNegativeButton("Cancel",null);
+         builder.show();
     }
-@Override
-    public void onMapReady(GoogleMap googleMap) {
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-    //TODO: ON map load,show drivers in the area
-    mMap = googleMap;
-    mMap.setMyLocationEnabled(true);
-  //  mMap.setMaxZoomPreference(16);
-  //  mMap.setMinZoomPreference(8);
-//    if(mLastLocation!=null) {
-//        LatLng here = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-//        mMap.addMarker(new MarkerOptions()
-//                .position(here)
-//                .title("Here I am")
-//                .snippet("Somewhere in Nairobi")
-//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.add_marker))
-//                .anchor(0.0f, 1.0f));
-//        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(here, 16);
-//        mMap.animateCamera(cameraUpdate);
-//    }else{
-//        Toast.makeText(MapsActivity.this, "NULL LOCS", Toast.LENGTH_SHORT).show();
-//    }
-
-            mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
-        @Override
-        public void onCameraChange(CameraPosition cameraPosition) {
-           //TODO SHOW REQUEST PICK UP HERE FROM CENTER MAP COORDS
-            mCenterLatLong = cameraPosition.target;
-            final Location mLocation = new Location("");
-            mLocation.setLatitude(mCenterLatLong.latitude);
-            mLocation.setLongitude(mCenterLatLong.longitude);
-
-            //Check for drop of marker move
-            if (pich_loc.getText().length()!=0&&(mLocationText.getText().equals("Goods pick up point")|mLocationText.getText().equals("Set drop point here"))) {
-                mLocationText.setText("Set drop point here");
-                mLocationText.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        VIEW_TO_CHANGE = loc_rep;
-                        MARKER_TYPE=DROP_FLAG;
-                        startIntentService(mLocation);
-                        go.setVisibility(View.GONE);
-                        hide.setVisibility(View.VISIBLE);
-                        //TODO change this to pop
-                        request_pane.setVisibility(View.VISIBLE);
-                        location_pick_graphic.setVisibility(View.INVISIBLE);
-                        mMap.setMinZoomPreference(10);
-                        LOCATION_TO=new LatLng(mLocation.getLatitude(),mLocation.getLongitude());
-//                        mMap.addMarker(new MarkerOptions()
-//                        .position(LOCATION_TO)
-//                           .title("Drop point")
-//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.add_marker))
-//                .anchor(0.0f, 1.0f));
-                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_TO, 16);
-                        mMap.animateCamera(cameraUpdate);
-                        if(!LOCATION_FROM.equals(null)&&!LOCATION_TO.equals(null)){
-                            if(AppUtils.isDataEnabled(mContext)) {
-                                showRoute();
-                            }else{
-                                Toast.makeText(getApplicationContext(),"Please check your internet connection",Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    }
-
-                });
-
-            } else {
-                request_pane.setVisibility(View.GONE);
-                try {
-                    mLocationText.setText("Click to request pick up here");
-                    mLocationText.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            //TODO Try find clicked location
-                           MARKER_TYPE=PICK_FLAG;
-                            VIEW_TO_CHANGE=pich_loc;
-                            startIntentService(mLocation);
-                            if(pich_loc.getText().equals("Select pick up location")) {
-                                pich_loc.setTextColor(Color.DKGRAY);
-                                pich_loc.setTextSize(16);
-                            }
-                           // pich_loc.setText(mAddressOutput);
-                            mLocationText.setText("Set drop point here");
-                            Toast.makeText(getApplicationContext(),"Goods pick up point set at pin",Toast.LENGTH_LONG).show();
-                            LOCATION_FROM=new LatLng(mLocation.getLatitude(),mLocation.getLongitude());
-                            mMap.setMinZoomPreference(10);
-                        }
-
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-//            if(!pich_loc.getText().equals("Select pick up location")&&!loc_rep.getText().equals("Drop Location")){
-//                location_pick_graphic.setVisibility(View.INVISIBLE);
-//            }
-        }
-    });
-    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-        // TODO: Consider calling
-        //    ActivityCompat#requestPermissions
-        // here to request the missing permissions, and then overriding
-        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-        //                                          int[] grantResults)
-        // to handle the case where the user grants the permission. See the documentation
-        // for ActivityCompat#requestPermissions for more details.
-        return;
-    }
-    //ADDS LOCATION Finder option on map
-            mMap.setMyLocationEnabled(true);
-            mMap.getUiSettings().setMyLocationButtonEnabled(true);
-//or do this on myLocationButton
-/*
-            if(mMap.getMyLocation()!=null) {
-                LatLng here = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
-                mMap.clear();//Clear existing markers
-                mMap.addMarker(new MarkerOptions()
-                        .position(here)
-                        .title("Here I am")
-                        .snippet("Somewhere in Nairobi")
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.add_marker))
-                        .anchor(0.0f, 1.0f));
-                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(here, 16);
-                mMap.animateCamera(cameraUpdate);
-            }
-            */
-//SEE THE MOVEMENTS
-   // flatMarker(mMap);
-}
 
     private void showRoute() {
         mMap.clear();
@@ -676,6 +555,143 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
 
+    }
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        /**
+         * Manipulates the map once available.
+         * This callback is triggered when the map is ready to be used.
+         * This is where we can add markers or lines, add listeners or move the camera. In this case,
+         * we just add a marker near Sydney, Australia.
+         * If Google Play services is not installed on the device, the user will be prompted to install
+         * it inside the SupportMapFragment. This method will only be triggered once the user has
+         * installed Google Play services and returned to the app.
+         */
+        //TODO: ON map load,show drivers in the area
+        mMap = googleMap;
+        mMap.setMyLocationEnabled(true);
+        //  mMap.setMaxZoomPreference(16);
+        //  mMap.setMinZoomPreference(8);
+//    if(mLastLocation!=null) {
+//        LatLng here = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+//        mMap.addMarker(new MarkerOptions()
+//                .position(here)
+//                .title("Here I am")
+//                .snippet("Somewhere in Nairobi")
+//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.add_marker))
+//                .anchor(0.0f, 1.0f));
+//        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(here, 16);
+//        mMap.animateCamera(cameraUpdate);
+//    }else{
+//        Toast.makeText(MapsActivity.this, "NULL LOCS", Toast.LENGTH_SHORT).show();
+//    }
+
+        mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+            @Override
+            public void onCameraChange(CameraPosition cameraPosition) {
+                //TODO SHOW REQUEST PICK UP HERE FROM CENTER MAP COORDS
+                mCenterLatLong = cameraPosition.target;
+                final Location mLocation = new Location("");
+                mLocation.setLatitude(mCenterLatLong.latitude);
+                mLocation.setLongitude(mCenterLatLong.longitude);
+
+                //Check for drop of marker move
+                if (pich_loc.getText().length()!=0&&(mLocationText.getText().equals("Goods pick up point")|mLocationText.getText().equals("Set drop point here"))) {
+                    mLocationText.setText("Set drop point here");
+                    mLocationText.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            VIEW_TO_CHANGE = loc_rep;
+                            MARKER_TYPE=DROP_FLAG;
+                            startIntentService(mLocation);
+                            go.setVisibility(View.GONE);
+                            hide.setVisibility(View.VISIBLE);
+                            //TODO change this to pop
+                            request_pane.setVisibility(View.VISIBLE);
+                            location_pick_graphic.setVisibility(View.INVISIBLE);
+                            mMap.setMinZoomPreference(10);
+                            LOCATION_TO=new LatLng(mLocation.getLatitude(),mLocation.getLongitude());
+//                        mMap.addMarker(new MarkerOptions()
+//                        .position(LOCATION_TO)
+//                           .title("Drop point")
+//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.add_marker))
+//                .anchor(0.0f, 1.0f));
+                            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_TO, 16);
+                            mMap.animateCamera(cameraUpdate);
+                            if(!LOCATION_FROM.equals(null)&&!LOCATION_TO.equals(null)){
+                                if(AppUtils.isDataEnabled(mContext)) {
+                                    showRoute();
+                                }else{
+                                    Toast.makeText(getApplicationContext(),"Please check your internet connection",Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+
+                    });
+
+                } else {
+                    request_pane.setVisibility(View.GONE);
+                    try {
+                        mLocationText.setText("Click to request pick up here");
+                        mLocationText.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                //TODO Try find clicked location
+                                MARKER_TYPE=PICK_FLAG;
+                                VIEW_TO_CHANGE=pich_loc;
+                                startIntentService(mLocation);
+                                if(pich_loc.getText().equals("Select pick up location")) {
+                                    pich_loc.setTextColor(Color.DKGRAY);
+                                    pich_loc.setTextSize(16);
+                                }
+                                // pich_loc.setText(mAddressOutput);
+                                mLocationText.setText("Set drop point here");
+                                Toast.makeText(getApplicationContext(),"Goods pick up point set at pin",Toast.LENGTH_LONG).show();
+                                LOCATION_FROM=new LatLng(mLocation.getLatitude(),mLocation.getLongitude());
+                                mMap.setMinZoomPreference(10);
+                            }
+
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+//            if(!pich_loc.getText().equals("Select pick up location")&&!loc_rep.getText().equals("Drop Location")){
+//                location_pick_graphic.setVisibility(View.INVISIBLE);
+//            }
+            }
+        });
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        //ADDS LOCATION Finder option on map
+        mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+//or do this on myLocationButton
+/*
+            if(mMap.getMyLocation()!=null) {
+                LatLng here = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
+                mMap.clear();//Clear existing markers
+                mMap.addMarker(new MarkerOptions()
+                        .position(here)
+                        .title("Here I am")
+                        .snippet("Somewhere in Nairobi")
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.add_marker))
+                        .anchor(0.0f, 1.0f));
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(here, 16);
+                mMap.animateCamera(cameraUpdate);
+            }
+            */
+//SEE THE MOVEMENTS
+        // flatMarker(mMap);
     }
     @Override
     public void onConnected(Bundle bundle) {
@@ -944,8 +960,8 @@ class AddressResultReceiver extends ResultReceiver {
         if(requestCode==REQUEST_IMAGE_CAPTURE){
             if (resultCode==RESULT_OK){
                 Bundle extras=data.getExtras();
-                Bitmap image= (Bitmap) extras.get("data");
-                Load.setImage(image);
+                image= (Bitmap) extras.get("data");
+
                 //LinearLayout linearLayout= (LinearLayout) findViewById(R.id.test);
                 //linearLayout.setBackground((Drawable)new BitmapDrawable(image));
             }

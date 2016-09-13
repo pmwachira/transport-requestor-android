@@ -35,7 +35,7 @@ public class TestScreen extends AppCompatActivity {
         activity=this;
         context=this;
         setContentView(R.layout.test_screen);
-        final Intent neww=new Intent(getBaseContext(),Register.class);
+        final Intent neww=new Intent(getBaseContext(),TestRegister.class);
         one= (Button) findViewById(R.id.one);
         one.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -1,12 +1,10 @@
 package mushirih.pickup.ui;
 
-import android.app.ActivityOptions;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -15,7 +13,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -31,94 +28,71 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import butterknife.ButterKnife;
-import butterknife.InjectView;
-import butterknife.OnClick;
 import mushirih.pickup.R;
 import mushirih.pickup.internal.MyApplication;
 import mushirih.pickup.internal.User;
-import mushirih.pickup.mapping.MapsActivity;
 
+/**
+ * Created by p-tah on 13/08/2016.
+ */
+public class LoginActivity extends AppCompatActivity {
 
-public class MainActivity extends AppCompatActivity {
-
-
-    @InjectView(R.id.et_username)
-    EditText etUsername;
-    @InjectView(R.id.et_password)
-    EditText etPassword;
-    @InjectView(R.id.bt_go)
-    Button btGo;
-    @InjectView(R.id.cv)
-    CardView cv;
-    @InjectView(R.id.register)
-    TextView register;
-    String name,password;
-    public String TAG="MainActivity.class";
-    private TextInputLayout inputLayoutName, inputLayoutPass;
+    private String TAG = LoginActivity.class.getSimpleName();
+    private EditText inputName, inputEmail;
+    private TextInputLayout inputLayoutName, inputLayoutEmail;
+    private Button btnEnter;
+    String name,email;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main0);
-        ButterKnife.inject(this);
-        inputLayoutName= (TextInputLayout) findViewById(R.id.input_layout_name);
 
-    }
-
-    @OnClick({R.id.bt_go, R.id.register})
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.register:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    getWindow().setExitTransition(null);
-                    getWindow().setEnterTransition(null);
-                }
-
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    ActivityOptions options =
-                            ActivityOptions.makeSceneTransitionAnimation(this, register, register.getTransitionName());
-                    startActivity(new Intent(this, RegisterActivity.class), options.toBundle());
-                } else {
-                    startActivity(new Intent(this, RegisterActivity.class));
-                }
-                break;
-            case R.id.bt_go:
-                /*TODO REMOVE FOR DEBUG*/
-                startActivity(new Intent(getApplicationContext(), MapsActivity.class));
-                finish();
-                //login();
-
-
-//                Explode explode = null;
-//                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-//                    explode = new Explode();
-//                    explode.setDuration(500);
-//
-//                    getWindow().setExitTransition(explode);
-//                    getWindow().setEnterTransition(explode);
-//                    ActivityOptionsCompat oc2 = ActivityOptionsCompat.makeSceneTransitionAnimation(this);
-//                    Intent i2 = new Intent(this,MapsActivity.class);
-//                    startActivity(i2, oc2.toBundle());
-//                    finish();
-//                }
-
-                break;
+        /**
+         * Check for login session. It user is already logged in
+         * redirect him to main activity
+         * */
+        if (MyApplication.getInstance().getPrefManager().getUser() != null) {
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
         }
+
+        setContentView(R.layout.activity_login);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
+        inputLayoutName = (TextInputLayout) findViewById(R.id.input_layout_name);
+        inputLayoutEmail = (TextInputLayout) findViewById(R.id.input_layout_email);
+        inputName = (EditText) findViewById(R.id.input_name);
+        inputEmail = (EditText) findViewById(R.id.input_email);
+        btnEnter = (Button) findViewById(R.id.btn_enter);
+
+        inputName.addTextChangedListener(new MyTextWatcher(inputName));
+        inputEmail.addTextChangedListener(new MyTextWatcher(inputEmail));
+
+        btnEnter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                login();
+            }
+        });
     }
 
+    /**
+     * logging in user. Will make http post request with name, email
+     * as parameters
+     */
     private void login() {
         if (!validateName()) {
             return;
         }
 
-//        if (!validateEmail()) {
-//            return;
-//        }
+        if (!validateEmail()) {
+            return;
+        }
 
-        name = etUsername.getText().toString();
-        password = etPassword.getText().toString();
+        name = inputName.getText().toString();
+        email = inputEmail.getText().toString();
 
         StringRequest strReq = new StringRequest(Request.Method.POST,
                 MyApplication.Online_Login, new Response.Listener<String>() {
@@ -143,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
                         MyApplication.getInstance().getPrefManager().storeUser(user);
 
                         // start main activity
-                        startActivity(new Intent(getApplicationContext(), MapsActivity.class));
+                        startActivity(new Intent(getApplicationContext(), MainActivity.class));
                         finish();
 
                     } else {
@@ -160,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onErrorResponse(VolleyError error) {
+
                 NetworkResponse networkResponse = error.networkResponse;
                 Log.e(TAG, "Volley error: " + error.getMessage() + ", code: " + networkResponse+" and "+error.getMessage());
                 Toast.makeText(getApplicationContext(), "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
@@ -171,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
             public Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
                 params.put("name", name);
-                params.put("password", password);
+                params.put("email", email);
 
 
                 Log.e(TAG, "params: " + params.toString());
@@ -198,9 +173,9 @@ public class MainActivity extends AppCompatActivity {
 
     // Validating name
     private boolean validateName() {
-        if (etUsername.getText().toString().trim().isEmpty()) {
-            etUsername.setError("Error message");
-            requestFocus(etUsername);
+        if (inputName.getText().toString().trim().isEmpty()) {
+            inputLayoutName.setError("Enter valid username");
+            requestFocus(inputName);
             return false;
         } else {
             inputLayoutName.setErrorEnabled(false);
@@ -209,20 +184,20 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-//    // Validating email
-//    private boolean validateEmail() {
-//        String email = inputEmail.getText().toString().trim();
-//
-//        if (email.isEmpty() || !isValidEmail(email)) {
-//            inputLayoutEmail.setError("Error message");
-//            requestFocus(inputEmail);
-//            return false;
-//        } else {
-//            inputLayoutEmail.setErrorEnabled(false);
-//        }
-//
-//        return true;
-//    }
+    // Validating email
+    private boolean validateEmail() {
+        String email = inputEmail.getText().toString().trim();
+
+        if (email.isEmpty() || !isValidEmail(email)) {
+            inputLayoutEmail.setError("Error message");
+            requestFocus(inputEmail);
+            return false;
+        } else {
+            inputLayoutEmail.setErrorEnabled(false);
+        }
+
+        return true;
+    }
 
     private static boolean isValidEmail(String email) {
         return !TextUtils.isEmpty(email) && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
@@ -247,10 +222,9 @@ public class MainActivity extends AppCompatActivity {
                     validateName();
                     break;
                 case R.id.input_email:
-//                    validateEmail();
+                    validateEmail();
                     break;
             }
         }
     }
-
 }

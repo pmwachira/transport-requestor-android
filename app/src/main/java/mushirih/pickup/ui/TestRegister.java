@@ -10,7 +10,7 @@ import mushirih.pickup.R;
  * Created by p-tah on 19/07/2016.
  * ACTIVITY USED TO TEST ALL LAYOUTS
  */
- public class Register extends AppCompatActivity {
+ public class TestRegister extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
