@@ -569,7 +569,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
          */
         //TODO: ON map load,show drivers in the area
         mMap = googleMap;
-        mMap.setMyLocationEnabled(true);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+        }
         //  mMap.setMaxZoomPreference(16);
         //  mMap.setMinZoomPreference(8);
 //    if(mLastLocation!=null) {
@@ -1094,15 +1096,15 @@ class AddressResultReceiver extends ResultReceiver {
     }
     //stop tracking when app is in background
 
-//    @Override
-//    protected void onPause() {
-//        super.onPause();
-//        stopLocationUpdates();
-//    }
-//
-//    private void stopLocationUpdates() {
-//        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,this);
-//    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+    private void stopLocationUpdates() {
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,this);
+    }
 
     //CUSTOM LOCATION METHODS
     public void flatMarker(GoogleMap mMap){
