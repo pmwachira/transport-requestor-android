@@ -544,6 +544,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     double lng = Double.parseDouble(point.get("lng"));
                     LatLng position = new LatLng(lat, lng);
 
+
                     points.add(position);
                 }
 
@@ -556,6 +557,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     }
+    /*
+    protected float calculateMiles() {
+        float totalDistance = 0;
+
+        for(int i = 1; i < points.getPoints().size(); i++) {
+            Location currLocation = new Location("this");
+            currLocation.setLatitude(points.getPoints().get(i).latitude);
+            currLocation.setLongitude(points.getPoints().get(i).longitude);
+
+            Location lastLocation = new Location("this");
+            currLocation.setLatitude(points.getPoints().get(i-1).latitude);
+            currLocation.setLongitude(points.getPoints().get(i-1).longitude);
+
+            totalDistance += lastLocation.distanceTo(currLocation);
+
+
+        }
+
+        return totalDistance;
+    }
+    */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         /**

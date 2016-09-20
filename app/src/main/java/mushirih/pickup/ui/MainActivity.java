@@ -11,6 +11,8 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -251,6 +253,31 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
         }
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        if(id==R.id.action_switch){
+
+                Intent sc=new Intent(getBaseContext(),TestScreen.class);
+                sc.putExtra("want",0);
+                startActivity(sc);
+                finish();
+
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
 }

@@ -63,6 +63,7 @@
     </activity>
         <activity
             android:name=".ui.TestScreen"
+            android:parentActivityName=".ui.MainActivity"
             android:label="@string/title_activity_maps">
             <!--LETS TEST SCREENS-->
             <!--INSERT LAUNCHER HERE FOR DEMO-->
