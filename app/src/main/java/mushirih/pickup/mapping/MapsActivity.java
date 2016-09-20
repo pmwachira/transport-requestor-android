@@ -459,10 +459,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.addMarker(new MarkerOptions().position(LOCATION_FROM).title("Pick Up Location"));
         MarkerOptions dest=new MarkerOptions().position(LOCATION_TO).title("Drop Location");
         Marker DEST= mMap.addMarker(dest);
-        //TODO HERE
+
         String url = getMapsApiDirectionsUrl();
         ReadTask readTask = new ReadTask();
         readTask.execute(url);
+        //TODO HERE LENGTH FIND in METERS
+//        Location a=new Location("");
+//        a.setLatitude(LOCATION_FROM.latitude);
+//        a.setLatitude(LOCATION_FROM.longitude);
+//        Location b=new Location("");
+//        b.setLatitude(LOCATION_TO.latitude);
+//        b.setLatitude(LOCATION_TO.longitude);
+//        Toast.makeText(mContext,"Length is"+a.distanceTo(b)+"by "+a.getProvider(),Toast.LENGTH_LONG).show();
     }
 
     private String getMapsApiDirectionsUrl() {
@@ -557,27 +565,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     }
-    /*
-    protected float calculateMiles() {
-        float totalDistance = 0;
 
-        for(int i = 1; i < points.getPoints().size(); i++) {
-            Location currLocation = new Location("this");
-            currLocation.setLatitude(points.getPoints().get(i).latitude);
-            currLocation.setLongitude(points.getPoints().get(i).longitude);
-
-            Location lastLocation = new Location("this");
-            currLocation.setLatitude(points.getPoints().get(i-1).latitude);
-            currLocation.setLongitude(points.getPoints().get(i-1).longitude);
-
-            totalDistance += lastLocation.distanceTo(currLocation);
-
-
-        }
-
-        return totalDistance;
-    }
-    */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         /**
