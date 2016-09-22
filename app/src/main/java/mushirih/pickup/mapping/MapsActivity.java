@@ -2,7 +2,6 @@ package mushirih.pickup.mapping;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -51,7 +50,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -266,7 +264,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                describe_load();
+                if(mCenterLatLong.latitude>4.9||mCenterLatLong.latitude<-4.8||mCenterLatLong.longitude<34||mCenterLatLong.longitude>41){
+                    Toast.makeText(mContext, "Only PickUp requests from Kenya Allowed", Toast.LENGTH_LONG).show();
+                }else {
+                    describe_load();
+                }
             }
         });
 
@@ -579,9 +581,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
          */
         //TODO: ON map load,show drivers in the area
         mMap = googleMap;
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
-        }
+          mMap.setMyLocationEnabled(true);
+
         //  mMap.setMaxZoomPreference(16);
         //  mMap.setMinZoomPreference(8);
 //    if(mLastLocation!=null) {
@@ -1106,34 +1107,34 @@ class AddressResultReceiver extends ResultReceiver {
     }
     //stop tracking when app is in background
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        stopLocationUpdates();
-    }
-
-    private void stopLocationUpdates() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,this);
-    }
-
-    //CUSTOM LOCATION METHODS
-    public void flatMarker(GoogleMap mMap){
-        LatLng mapCenter = new LatLng(41.889, -87.622);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mapCenter,13));
-        mMap.addMarker(new MarkerOptions()
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.snail))
-                .position(mapCenter)
-                .flat(true)
-                .rotation(245));
-
-        CameraPosition cameraPosition=CameraPosition.builder()
-                                                .target(mapCenter)
-                                                .zoom(13)
-                                                .bearing(90)
-                                                .build();
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition),2000,null);
-
-
-
-    }
+//    @Override
+//    protected void onPause() {
+//        super.onPause();
+//        stopLocationUpdates();
+//    }
+//
+//    private void stopLocationUpdates() {
+//        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,this);
+//    }
+//
+//    //CUSTOM LOCATION METHODS
+//    public void flatMarker(GoogleMap mMap){
+//        LatLng mapCenter = new LatLng(41.889, -87.622);
+//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mapCenter,13));
+//        mMap.addMarker(new MarkerOptions()
+//                .icon(BitmapDescriptorFactory.fromResource(R.drawable.snail))
+//                .position(mapCenter)
+//                .flat(true)
+//                .rotation(245));
+//
+//        CameraPosition cameraPosition=CameraPosition.builder()
+//                                                .target(mapCenter)
+//                                                .zoom(13)
+//                                                .bearing(90)
+//                                                .build();
+//        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition),2000,null);
+//
+//
+//
+//    }
 }
