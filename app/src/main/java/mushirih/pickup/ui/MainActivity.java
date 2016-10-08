@@ -45,8 +45,8 @@ import mushirih.pickup.mapping.MapsActivity;
 public class MainActivity extends AppCompatActivity {
 
 
-    @InjectView(R.id.et_username)
-    EditText etUsername;
+    @InjectView(R.id.et_useremail)
+    EditText etUseremail;
     @InjectView(R.id.et_password)
     EditText etPassword;
     @InjectView(R.id.bt_go)
@@ -55,16 +55,16 @@ public class MainActivity extends AppCompatActivity {
     CardView cv;
     @InjectView(R.id.register)
     TextView register;
-    String name,password;
+    String email,password;
     public String TAG="MainActivity.class";
-    private TextInputLayout inputLayoutName, inputLayoutPass;
+    private TextInputLayout inputLayoutEmail, inputLayoutPass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main0);
         ButterKnife.inject(this);
-        inputLayoutName= (TextInputLayout) findViewById(R.id.input_layout_name);
+        inputLayoutEmail= (TextInputLayout) findViewById(R.id.input_layout_email);
 
     }
 
@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
 //            return;
 //        }
 
-        name = etUsername.getText().toString();
+       email = etUseremail.getText().toString();
         password = etPassword.getText().toString();
 
         StringRequest strReq = new StringRequest(Request.Method.POST,
@@ -172,9 +172,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put("name", name);
+//                params.put("name", name);
+                params.put("email", email);
                 params.put("password", password);
-
 
                 Log.e(TAG, "params: " + params.toString());
                 return params;
@@ -200,12 +200,12 @@ public class MainActivity extends AppCompatActivity {
 
     // Validating name
     private boolean validateName() {
-        if (etUsername.getText().toString().trim().isEmpty()) {
-            etUsername.setError("Error message");
-            requestFocus(etUsername);
+        if (etUseremail.getText().toString().trim().isEmpty()) {
+            etUseremail.setError("Error message");
+            requestFocus(etUseremail);
             return false;
         } else {
-            inputLayoutName.setErrorEnabled(false);
+            inputLayoutEmail.setErrorEnabled(false);
         }
 
         return true;

@@ -81,6 +81,7 @@
         <activity android:name=".ui.LoginActivity">
             //GCM LOGIN
         </activity>
+        <activity android:name=".ui.RateDriver"></activity>
     </application>
 
 </manifest>

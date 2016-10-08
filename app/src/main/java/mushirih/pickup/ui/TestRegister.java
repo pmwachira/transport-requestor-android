@@ -25,9 +25,7 @@ import mushirih.pickup.R;
                 case "two":
                     setContentView(R.layout.cost_est);
                     break;
-                case "three":
-                    setContentView(R.layout.signage);
-                    break;
+
                 case "four":
                     setContentView(R.layout.activity_maps);
                     break;

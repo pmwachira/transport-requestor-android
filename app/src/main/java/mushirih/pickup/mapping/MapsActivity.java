@@ -2,9 +2,11 @@ package mushirih.pickup.mapping;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -17,7 +19,6 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -29,6 +30,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -39,9 +41,14 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.location.places.ui.PlacePicker;
@@ -67,7 +74,6 @@ import java.util.List;
 import mushirih.pickup.R;
 import mushirih.pickup.http.HttpConnection;
 import mushirih.pickup.http.Load;
-import mushirih.pickup.pdf.PDF;
 import mushirih.pickup.ui.PrefManager;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener  {
@@ -75,7 +81,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LinearLayout searchloc;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
-    PDF pdf;
     TextView mLocationText,pich_loc,drop_loc,loc_rep;
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     ToggleButton zero,one, two, three;
@@ -86,7 +91,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int REQUEST_CODE_AUTOCOMPLETE = 1;
     int PLACE_PICKER_REQUEST=2;
     int PLACE_PICKER_DEST_REQUEST=02022;
-    int PLACE_AUTOCOMPLETE_REQUEST_CODE = 20;
+    int REQUEST_CHECK_SETTINGS = 20;
     private AddressResultReceiver mResultReceiver;
     protected String mAddressOutput;
     protected String mAreaOutput;
@@ -107,6 +112,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String weight;
     ArrayList load_char;
     Bitmap image;
+    ProgressDialog progressDialog;
+    int showProgress=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -290,10 +297,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-
-
-
-       mResultReceiver = new AddressResultReceiver(new Handler());
+        mResultReceiver = new AddressResultReceiver(new Handler());
 
 
 // If this check succeeds, proceed with normal processing.
@@ -301,25 +305,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (checkPlayServices()) {
             // notify user
             if (!AppUtils.isLocationEnabled(mContext)) {
-
-                AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
-                dialog.setMessage("Location not enabled!");
-                dialog.setPositiveButton("Open location settings", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                        Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        startActivity(myIntent);
-                    }
-                });
-                dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                        // TODO Auto-generated method stub
-
-                    }
-                });
-                dialog.show();
+                showLocationPermissionDialog();
+//                AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
+//                dialog.setMessage("Location not enabled!");
+//                dialog.setPositiveButton("Open location settings", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+//                        //Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+//                        //startActivity(myIntent);
+//                        test();
+//                    }
+//                });
+//                dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//
+//                    @Override
+//                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+//                        // TODO Auto-generated method stub
+//
+//                    }
+//                });
+//                dialog.show();
             }
 
         } else {
@@ -333,6 +338,47 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             getWindow().setExitTransition(explode);
             getWindow().setEnterTransition(explode);
         }
+    }
+
+    private void showLocationPermissionDialog() {
+            GoogleApiClient googleApiClient = new GoogleApiClient.Builder(mContext)
+                    .addApi(LocationServices.API).build();
+            googleApiClient.connect();
+
+            LocationRequest locationRequest = LocationRequest.create();
+            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            locationRequest.setInterval(10000);
+            locationRequest.setFastestInterval(10000 / 2);
+
+            LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
+            builder.setAlwaysShow(true);
+
+            PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
+        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+                @Override
+                public void onResult(LocationSettingsResult result) {
+                    final Status status = result.getStatus();
+                    switch (status.getStatusCode()) {
+                        case LocationSettingsStatusCodes.SUCCESS:
+                            Log.i(TAG, "All location settings are satisfied.");
+                            break;
+                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                            Log.i(TAG, "Location settings are not satisfied. Show the user a dialog to upgrade location settings ");
+
+                            try {
+                                // Show the dialog by calling startResolutionForResult(), and check the result
+                                // in onActivityResult().
+                                status.startResolutionForResult(MapsActivity.this, REQUEST_CHECK_SETTINGS);
+                            } catch (IntentSender.SendIntentException e) {
+                                Log.i(TAG, "PendingIntent unable to execute request.");
+                            }
+                            break;
+                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                            Log.i(TAG, "Location settings are inadequate, and cannot be fixed here. Dialog not created.");
+                            break;
+                    }
+                }
+            });
     }
 
     private  void describe_load() {
@@ -570,6 +616,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
         /**
          * Manipulates the map once available.
          * This callback is triggered when the map is ready to be used.
@@ -580,8 +628,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
          * installed Google Play services and returned to the app.
          */
         //TODO: ON map load,show drivers in the area
-        mMap = googleMap;
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[] {
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION },
+                    123);
+        }
+//            LocationManager xs= (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+//            if(xs.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+//                Location vv = xs.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+//                changeMap(vv);
+//            }
+
+
+            googleMap.setMyLocationEnabled(true);
+            googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+
           mMap.setMyLocationEnabled(true);
+
 
         //  mMap.setMaxZoomPreference(16);
         //  mMap.setMinZoomPreference(8);
@@ -598,10 +663,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //    }else{
 //        Toast.makeText(MapsActivity.this, "NULL LOCS", Toast.LENGTH_SHORT).show();
 //    }
-
+//        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+//            @Override
+//            public void onCameraMove() {
+//                CameraPosition cameraPosition=mMap.getCameraPosition();
+//            }
+//        });
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
+
                 //TODO SHOW REQUEST PICK UP HERE FROM CENTER MAP COORDS
                 mCenterLatLong = cameraPosition.target;
                 final Location mLocation = new Location("");
@@ -675,40 +746,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //            }
             }
         });
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
         //ADDS LOCATION Finder option on map
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
-//or do this on myLocationButton
-/*
-            if(mMap.getMyLocation()!=null) {
-                LatLng here = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
-                mMap.clear();//Clear existing markers
-                mMap.addMarker(new MarkerOptions()
-                        .position(here)
-                        .title("Here I am")
-                        .snippet("Somewhere in Nairobi")
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.add_marker))
-                        .anchor(0.0f, 1.0f));
-                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(here, 16);
-                mMap.animateCamera(cameraUpdate);
-            }
-            */
-//SEE THE MOVEMENTS
         // flatMarker(mMap);
     }
     @Override
     public void onConnected(Bundle bundle) {
+        if(showProgress==1){
+                progressDialog.dismiss();
 
+        }
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -857,7 +905,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
-    }
+      }
 
     public static void setPickDate(int year, int monthOfYear, int dayOfMonth) {
         Load.setDate(dayOfMonth,monthOfYear,year);
@@ -969,6 +1017,23 @@ class AddressResultReceiver extends ResultReceiver {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        //LOCATIONS SETTINGS REQUEST
+        if(requestCode==REQUEST_CHECK_SETTINGS){
+            switch (resultCode) {
+                case Activity.RESULT_OK:
+                    showProgress=1;
+                progressDialog=new ProgressDialog(mContext);
+                    progressDialog.setIndeterminate(true);
+                    progressDialog.setMessage("Finding your position");
+                    progressDialog.setCancelable(false);
+                    progressDialog.show();
+                    break;
+                case Activity.RESULT_CANCELED:
+                 //TODO HANDLE USER NOT TURNED LOCATION
+                    break;
+            }
+
+        }
         //IMAGE_CAPTURE
         if(requestCode==REQUEST_IMAGE_CAPTURE){
             if (resultCode==RESULT_OK){

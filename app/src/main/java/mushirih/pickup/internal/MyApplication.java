@@ -65,6 +65,7 @@ return requestQueue;
     public void cancelPendingRequests(Object tag) {
         if (requestQueue != null) {
             requestQueue.cancelAll(tag);
+
         }
     }
     public void logout() {
