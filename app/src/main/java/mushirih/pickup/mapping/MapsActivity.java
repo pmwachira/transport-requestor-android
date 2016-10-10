@@ -107,6 +107,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     int DROP_FLAG=55;
     int MARKER_TYPE;
     static final int REQUEST_IMAGE_CAPTURE=802;
+    static final int REQUEST_CONTACTS_PERMISSION=12;
     PrefManager prefManager;
     LatLng LOCATION_TO,LOCATION_FROM;
     String weight;
@@ -414,6 +415,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         }
                     });
                     builder.setNegativeButton("Cancel", null);
+                    //TODO: Contact permission
+                    if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED){
+                        ActivityCompat.requestPermissions(MapsActivity.this, new String[] {
+                                        Manifest.permission.READ_CONTACTS},
+                                REQUEST_CONTACTS_PERMISSION);
+                    }
                     builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
                         View layoutInflater = View.inflate(mContext, R.layout.contact_details, null);
 
@@ -753,10 +760,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
     @Override
     public void onConnected(Bundle bundle) {
-        if(showProgress==1){
-                progressDialog.dismiss();
-
-        }
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -805,6 +808,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onLocationChanged(Location location) {
+        if(showProgress==1){
+            progressDialog.dismiss();
+        }
         try {
             if (location != null)
                 changeMap(location);

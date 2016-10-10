@@ -43,6 +43,7 @@ public class Load {
    private static Context mContext;
     private static String TAG="LOAD ALPHA REQUEST";
     private static int request_id_global=10;
+    static ProgressDialog loading;
 
 
 
@@ -64,6 +65,7 @@ public class Load {
 
     public static void requestService(final Context current, final LatLng LOCATION_FROM, final LatLng LOCATION_TO, final String weight, final ArrayList load_char, final EditText name, final EditText id, final EditText num, final Bitmap image) {
         mContext=current;
+        loading = ProgressDialog.show(mContext, "Submitting your request", "Please wait...",true,true);
 
         final StringRequest strReq = new StringRequest(Request.Method.POST,
                 MyApplication.ONLINE_ALPHA_REQUEST, new Response.Listener<String>() {
@@ -76,7 +78,7 @@ public class Load {
                     JSONObject obj = new JSONObject(response);
 
                     // check for error flag
-                    if (obj.getBoolean("error") == false) {
+                    if (obj.getString("error") == "false") {
                         // user successfully logged in
 
                         JSONObject userObj = obj.getJSONObject("response");
@@ -153,13 +155,13 @@ public class Load {
             class UploadImage extends AsyncTask<Bitmap,Void,String> {
 
 
-                ProgressDialog loading;
+
                 ImageRequestHandler rh = new ImageRequestHandler();
 
                 @Override
                 protected void onPreExecute() {
                     super.onPreExecute();
-                    loading = ProgressDialog.show(mContext, "Uploading Image", "Please wait...",true,true);
+
                 }
 
                 @Override

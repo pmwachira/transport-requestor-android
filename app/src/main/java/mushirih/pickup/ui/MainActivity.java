@@ -1,10 +1,14 @@
 package mushirih.pickup.ui;
 
 import android.app.ActivityOptions;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.design.widget.TextInputLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.text.Editable;
@@ -39,6 +43,7 @@ import butterknife.OnClick;
 import mushirih.pickup.R;
 import mushirih.pickup.internal.MyApplication;
 import mushirih.pickup.internal.User;
+import mushirih.pickup.mapping.AppUtils;
 import mushirih.pickup.mapping.MapsActivity;
 
 
@@ -58,13 +63,37 @@ public class MainActivity extends AppCompatActivity {
     String email,password;
     public String TAG="MainActivity.class";
     private TextInputLayout inputLayoutEmail, inputLayoutPass;
+    Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main0);
+        context=MainActivity.this;
         ButterKnife.inject(this);
         inputLayoutEmail= (TextInputLayout) findViewById(R.id.input_layout_email);
+        if (!AppUtils.isDataEnabled(MainActivity.this)){
+            AlertDialog.Builder dialog = new AlertDialog.Builder(context);
+                dialog.setMessage("Internet not enabled!");
+                dialog.setPositiveButton("Open Internet settings", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                        Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
+                        startActivity(myIntent);
+
+                    }
+                });
+                dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                        // TODO Auto-generated method stub
+
+                    }
+                });
+                dialog.show();
+            }
+
 
     }
 
@@ -88,9 +117,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.bt_go:
                 /*TODO REMOVE FOR DEBUG*/
-                startActivity(new Intent(getApplicationContext(), MapsActivity.class));
-                finish();
-                //login();
+//                startActivity(new Intent(getApplicationContext(), MapsActivity.class));
+//                finish();
+                login();
 
 
 //                Explode explode = null;
@@ -133,17 +162,18 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject obj = new JSONObject(response);
 
                     // check for error flag
-                    if (obj.getBoolean("error") == false) {
+                    if (obj.getString("error") == "false") {
                         // user successfully logged in
 
                         JSONObject userObj = obj.getJSONObject("user");
-                        User user = new User(userObj.getString("user_id"),
+                        User user = new User(userObj.getString("requestor_id"),
                                 userObj.getString("name"),
                                 userObj.getString("email"));
 
                         // storing user in shared preferences
                         MyApplication.getInstance().getPrefManager().storeUser(user);
-
+//                        Toast.makeText(getApplicationContext(), "Logged in as: " + userObj.getString("name")+"::"+
+//                                userObj.getString("email"), Toast.LENGTH_LONG).show();
                         // start main activity
                         startActivity(new Intent(getApplicationContext(), MapsActivity.class));
                         finish();
