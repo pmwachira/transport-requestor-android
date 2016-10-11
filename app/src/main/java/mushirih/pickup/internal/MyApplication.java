@@ -27,7 +27,7 @@ public class MyApplication extends Application {
     public static String Online_Login="http://noshybakery.co.ke/PICKUP/v1/user/login";
     public static String OffLine_Login="http://192.168.43.185/PICKUP/v1/user/login";
     public static final String ONLINE_ALPHA_REQUEST = "http://noshybakery.co.ke/PICKUP/v1/init_request";
-    public static final String UPLOAD_URL = "http://noshybakery.co.ke/PICKUP/v1/image";
+    public static final String IMAGE_UPLOAD_URL = "http://noshybakery.co.ke/PICKUP/include/image_upload.php";
 
     @Override
     public void onCreate() {

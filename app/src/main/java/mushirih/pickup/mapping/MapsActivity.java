@@ -21,6 +21,7 @@ import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
@@ -30,7 +31,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -74,7 +74,9 @@ import java.util.List;
 import mushirih.pickup.R;
 import mushirih.pickup.http.HttpConnection;
 import mushirih.pickup.http.Load;
+import mushirih.pickup.ui.DatePickerFragment;
 import mushirih.pickup.ui.PrefManager;
+import mushirih.pickup.ui.TimePickerFragment;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener  {
    static Context mContext;
@@ -115,7 +117,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Bitmap image;
     ProgressDialog progressDialog;
     int showProgress=0;
-
+    int DISTANCE_BETWEEN=0;
+    String namee,idd,numm;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -275,7 +278,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if(mCenterLatLong.latitude>4.9||mCenterLatLong.latitude<-4.8||mCenterLatLong.longitude<34||mCenterLatLong.longitude>41){
                     Toast.makeText(mContext, "Only PickUp requests from Kenya Allowed", Toast.LENGTH_LONG).show();
                 }else {
-                    describe_load();
+                    //SET DATES FIRST
+                    //time pick
+                    DialogFragment newFragment = new TimePickerFragment();
+                    newFragment.show(getSupportFragmentManager(), "timePicker");
+                    //datePicker
+                    DialogFragment newfragment = new DatePickerFragment();
+                    newfragment.show(getSupportFragmentManager(), "datePicker");
+                    //then proceed with load
+                        describe_load();
                 }
             }
         });
@@ -288,7 +299,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             builder.setTitle("Prompt");
             builder.setMessage("By clicking okay,you accept our T&c's");
             builder.setNegativeButton("Cancel", null);
-            builder.setPositiveButton("Okay", null);
+            builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Load.send();
+                }
+            });
             builder.show();
                 }
             });
@@ -321,7 +337,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //
 //                    @Override
 //                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-//                        // TODO Auto-generated method stub
+//                        //  TODO Auto-generated method stub
 //
 //                    }
 //                });
@@ -417,7 +433,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     builder.setNegativeButton("Cancel", null);
                     //TODO: Contact permission
                     if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED){
-                        ActivityCompat.requestPermissions(MapsActivity.this, new String[] {
+                      ActivityCompat.requestPermissions(MapsActivity.this, new String[] {
                                         Manifest.permission.READ_CONTACTS},
                                 REQUEST_CONTACTS_PERMISSION);
                     }
@@ -454,7 +470,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                                         @Override
                                         public void onClick(View view) {
-
+                                            namee=name.getText().toString();
+                                            numm=num.getText().toString();
+                                            idd=id.getText().toString();
                                             if (name.getText().length() == 0) {
                                                 name.setError("Please fill in all details");
                                             }else  if (id.getText().length() == 0) {
@@ -463,19 +481,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 num.setError("Please fill in all details");
                                             }
                                             else {
+                                                Load.bulkSet(mContext,LOCATION_FROM,LOCATION_TO,weight,load_char,namee,idd,numm,DISTANCE_BETWEEN);
                                                 //TODO CAPTURE PICTURE OF THE LOAD
                                                 Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                                 if (takePicture.resolveActivity(getPackageManager()) != null) {
                                                     startActivityForResult(takePicture, REQUEST_IMAGE_CAPTURE);
                                                     alertDialog.cancel();
-                                                    //TODO change requestor button
+//                                                    //TODO change requestor button
                                                     confirm.setVisibility(View.VISIBLE);
                                                     confirm.setText("Request Delivery");
                                                     confirm.setOnClickListener(new View.OnClickListener() {
                                                         @Override
                                                         public void onClick(View v) {
-                                                            Load load=new Load();
-                                                            load.requestService(mContext,LOCATION_FROM,LOCATION_TO,weight,load_char,name,id,num,image);
+                                                            Load.send();
                                                         }
                                                     });
 
@@ -519,13 +537,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ReadTask readTask = new ReadTask();
         readTask.execute(url);
         //TODO HERE LENGTH FIND in METERS
-//        Location a=new Location("");
-//        a.setLatitude(LOCATION_FROM.latitude);
-//        a.setLatitude(LOCATION_FROM.longitude);
-//        Location b=new Location("");
-//        b.setLatitude(LOCATION_TO.latitude);
-//        b.setLatitude(LOCATION_TO.longitude);
-//        Toast.makeText(mContext,"Length is"+a.distanceTo(b)+"by "+a.getProvider(),Toast.LENGTH_LONG).show();
+        Location a=new Location("");
+        a.setLatitude(LOCATION_FROM.latitude);
+        a.setLatitude(LOCATION_FROM.longitude);
+        Location b=new Location("");
+        b.setLatitude(LOCATION_TO.latitude);
+        b.setLatitude(LOCATION_TO.longitude);
+        DISTANCE_BETWEEN= (int) a.distanceTo(b);
+
     }
 
     private String getMapsApiDirectionsUrl() {
@@ -913,15 +932,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
       }
 
-    public static void setPickDate(int year, int monthOfYear, int dayOfMonth) {
-        Load.setDate(dayOfMonth,monthOfYear,year);
-    }
-
-    public static void setPickTime(int hourOfDay, int minute) {
-       Load.setTime(hourOfDay,minute);
-    }
-
-
     /**
  * Receiver for data sent from FetchAddressIntentService.
  */
@@ -1045,9 +1055,7 @@ class AddressResultReceiver extends ResultReceiver {
             if (resultCode==RESULT_OK){
                 Bundle extras=data.getExtras();
                 image= (Bitmap) extras.get("data");
-
-                //LinearLayout linearLayout= (LinearLayout) findViewById(R.id.test);
-                //linearLayout.setBackground((Drawable)new BitmapDrawable(image));
+                Load.setImage(image);
             }
         }
         //CONTACTPICKER
@@ -1066,6 +1074,7 @@ class AddressResultReceiver extends ResultReceiver {
             phoneNo = phoneNo.replace("-", "");
             //TODO GET CALLING NUMBER
            EDIT_TEXT_TO_EDIT.setText(phoneNo);
+            cursor.close();
         }
     }
         if(requestCode==PLACE_PICKER_DEST_REQUEST){
@@ -1177,7 +1186,6 @@ class AddressResultReceiver extends ResultReceiver {
         }
     }
     //stop tracking when app is in background
-
 //    @Override
 //    protected void onPause() {
 //        super.onPause();

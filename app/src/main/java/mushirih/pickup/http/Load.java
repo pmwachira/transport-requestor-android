@@ -4,18 +4,18 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 import mushirih.pickup.internal.MyApplication;
@@ -42,11 +43,18 @@ public class Load {
     private static int MINUTE;
    private static Context mContext;
     private static String TAG="LOAD ALPHA REQUEST";
-    private static int request_id_global=10;
+    private static String request_id_global="A";
     static ProgressDialog loading;
+    private static Context CONTEXT;
+    private static LatLng LOCATION_FROM;
+    private static LatLng LOCATION_TO;
+    private static String WEIGHT;
+    private static ArrayList LOAD_CHAR;
+   private static String NAMEE, IDD, NUMM;
+   private static int DISTANCE_BETWEEN;
 
 
-
+//DONE
     public static void setImage(Bitmap image) {
         IMAGE = image;
     }
@@ -62,8 +70,24 @@ public class Load {
         HOUR=hourOfDay;
         MINUTE=minute;
     }
+    public static void bulkSet(Context mContext, LatLng location_from, LatLng location_to, String weight, ArrayList load_char, String namee, String idd, String numm, int distance_between) {
+        CONTEXT=mContext;
+        LOCATION_FROM=location_from;
+        LOCATION_TO=location_to;
+        WEIGHT=weight;
+        LOAD_CHAR=load_char;
+        NAMEE=namee;
+        IDD=idd;
+        NUMM=numm;
+        DISTANCE_BETWEEN=distance_between;
 
-    public static void requestService(final Context current, final LatLng LOCATION_FROM, final LatLng LOCATION_TO, final String weight, final ArrayList load_char, final EditText name, final EditText id, final EditText num, final Bitmap image) {
+    }
+
+    public static void send(){
+        requestService(CONTEXT,LOCATION_FROM,LOCATION_TO,WEIGHT,LOAD_CHAR,NAMEE,IDD,NUMM,IMAGE,DISTANCE_BETWEEN);
+    }
+
+    public static void requestService(final Context current, final LatLng LOCATION_FROM, final LatLng LOCATION_TO, final String weight, final ArrayList load_char, final String name, final String id, final String num, final Bitmap image, final int DISTANCE_BETWEEN) {
         mContext=current;
         loading = ProgressDialog.show(mContext, "Submitting your request", "Please wait...",true,true);
 
@@ -81,8 +105,8 @@ public class Load {
                     if (obj.getString("error") == "false") {
                         // user successfully logged in
 
-                        JSONObject userObj = obj.getJSONObject("response");
-                         int request_id=userObj.getInt("request_id");
+                        JSONObject responseObj = obj.getJSONObject("response");
+                         String request_id=responseObj.getString("request_id");
                         request_id_global =request_id;
 //                        User user = new User(userObj.getString("user_id"),
 //                                userObj.getString("name"),
@@ -120,13 +144,17 @@ public class Load {
             @Override
             public Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put("from", LOCATION_FROM.toString());
-                params.put("to", LOCATION_TO.toString());
-                params.put("weight", weight.toString());
-                params.put("load_char",load_char.toString());
-                params.put("name", name.toString());
-                params.put("id", id.toString());
-                params.put("num",num.toString());
+                params.put("drop_id", LOCATION_TO.toString());
+                params.put("drop_num","");
+                params.put("requestor_id","");
+                params.put("pick_num",num.toString());
+                params.put("pick_coords", LOCATION_FROM.toString());
+                params.put("load_desc", "weight: "+weight.toString()+"Load Description: "+load_char.toString());
+                params.put("image","");
+                params.put("est_dist", String.valueOf(DISTANCE_BETWEEN));
+                params.put("est_cost","");
+                params.put("pick_time","");
+                params.put("drop_coords","");
 
                 Log.e(TAG, "params: " + params.toString());
                 return params;
@@ -142,97 +170,64 @@ public class Load {
         //TODO UPLOAD IMAGE to
         //request_id
         // Bitmap image
-        int requesting_id= request_id_global;
+        //TODO FETCH REQUEST_ID FROM ABOVE RESPONSEE
+        String requesting_id= request_id_global;
         uploadImage(image,requesting_id);
 
         //Adding request to request queue
       //  MyApplication.getInstance().addToRequestQueue(strReq);
     }
 
-    private static void uploadImage(final Bitmap image, final int requested_id) {
+    private static void uploadImage(Bitmap image, final String requesting_id) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        image.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] imageBytes = baos.toByteArray();
+        final String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, MyApplication.IMAGE_UPLOAD_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String s) {
+                        //Disimissing the progress dialog
+                        loading.dismiss();
+                        //Showing toast message of the response
+                        Toast.makeText(mContext, s , Toast.LENGTH_LONG).show();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        //Dismissing the progress dialog
+                        loading.dismiss();
+
+                        //Showing toast
+                        Toast.makeText(mContext, volleyError.getMessage().toString(), Toast.LENGTH_LONG).show();
+                    }
+                }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                //Converting Bitmap to String
+                String image = encodedImage;
 
 
-            class UploadImage extends AsyncTask<Bitmap,Void,String> {
+                //Creating parameters
+                Map<String,String> params = new Hashtable<String, String>();
 
+                //Adding parameters
+                params.put("KEY_IMAGE", image);
+                params.put("KEY_ID", requesting_id+"");
 
-
-                ImageRequestHandler rh = new ImageRequestHandler();
-
-                @Override
-                protected void onPreExecute() {
-                    super.onPreExecute();
-
-                }
-
-                @Override
-                protected void onPostExecute(String s) {
-                    super.onPostExecute(s);
-                    loading.dismiss();
-                    //Toast.makeText(mContext,s,Toast.LENGTH_LONG).show();
-                }
-
-                @Override
-                protected String doInBackground(Bitmap... params) {
-                    Bitmap bitmap = params[0];
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                    byte[] imageBytes = baos.toByteArray();
-                    String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
-
-                    HashMap<String,String> data = new HashMap<>();
-//                    data.put("UPLOAD_KEY FOR "+requested_id, encodedImage);
-                    data.put("image", encodedImage);
-
-                    String result = rh.sendPostRequest(MyApplication.UPLOAD_URL,data);
-
-                    return result;
-                }
+                //returning parameters
+                return params;
             }
-        UploadImage ui = new UploadImage();
-        ui.execute(image);
+        };
 
+        //Creating a Request Queue
+        RequestQueue requestQueue = Volley.newRequestQueue(mContext);
 
-
-
+        //Adding request to the queue
+        requestQueue.add(stringRequest);
     }
-   /* private static void getImage() {
-        String id = editTextId.getText().toString().trim();
-        class GetImage extends AsyncTask<String,Void,Bitmap>{
-            ProgressDialog loading;
 
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                loading = ProgressDialog.show(ViewImage.this, "Uploading...", null,true,true);
-            }
 
-            @Override
-            protected void onPostExecute(Bitmap b) {
-                super.onPostExecute(b);
-                loading.dismiss();
-                imageView.setImageBitmap(b);
-            }
 
-            @Override
-            protected Bitmap doInBackground(String... params) {
-                String id = params[0];
-                String add = "http://simplifiedcoding.16mb.com/ImageUpload/getImage.php?id="+id;
-                URL url = null;
-                Bitmap image = null;
-                try {
-                    url = new URL(add);
-                    image = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return image;
-            }
-        }
-
-        GetImage gi = new GetImage();
-        gi.execute(id);
-    }
-    */
 }

@@ -8,7 +8,7 @@ import android.widget.DatePicker;
 
 import java.util.Calendar;
 
-import mushirih.pickup.mapping.MapsActivity;
+import mushirih.pickup.http.Load;
 
 
 /**
@@ -30,6 +30,6 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
 
     @Override
     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-        MapsActivity.setPickDate(year,monthOfYear,dayOfMonth);
+        Load.setDate(dayOfMonth,monthOfYear,year);
     }
 }
