@@ -1,6 +1,7 @@
 package mushirih.pickup.ui;
 
 import android.app.ActivityOptions;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -64,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
     public String TAG="MainActivity.class";
     private TextInputLayout inputLayoutEmail, inputLayoutPass;
     Context context;
-
+    ProgressDialog loading;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -145,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void login() {
-
+        loading = ProgressDialog.show(context, "Authenticating", "Please wait...",true,true);
         if (!validateEmail()) {
             return;
         }
@@ -164,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
                     // check for error flag
                     if (obj.getString("error").equals("false")) {
                         // user successfully logged in
-
+                        loading.dismiss();
                         JSONObject userObj = obj.getJSONObject("user");
                         User user = new User(userObj.getString("requestor_id"),
                                 userObj.getString("name"),
@@ -180,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
 
                     } else {
                         // login error - simply toast the message
+                        loading.dismiss();
                         Toast.makeText(getApplicationContext(), "" + obj.getJSONObject("error").getString("message"), Toast.LENGTH_LONG).show();
                     }
 
@@ -193,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 NetworkResponse networkResponse = error.networkResponse;
+                loading.dismiss();
                 Log.e(TAG, "Volley error: " + error.getMessage() + ", code: " + networkResponse+" and "+error.getMessage());
                 Toast.makeText(getApplicationContext(), "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
 

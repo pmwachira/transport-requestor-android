@@ -8,7 +8,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
-import mushirih.pickup.ui.LoginActivity;
+import mushirih.pickup.ui.MainActivity;
 
 /**
  * Created by p-tah on 13/08/2016.
@@ -70,7 +70,7 @@ return requestQueue;
     }
     public void logout() {
         pref.clear();
-        Intent intent = new Intent(this, LoginActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }

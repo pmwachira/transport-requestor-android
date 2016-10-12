@@ -147,22 +147,18 @@ public class Load {
             @Override
             public Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-//                params.put("drop_id", LOCATION_TO.toString());
+
                 params.put("drop_id","0000");
                 params.put("drop_num","0000");
                 params.put("requestor_id","0000");
-//                params.put("pick_num",num.toString());
-                params.put("pick_num","0000");
-//                params.put("pick_coords", LOCATION_FROM.toString());
-                params.put("pick_coords","0,0");
-//                params.put("load_desc", "weight: "+weight.toString()+"Load Description: "+load_char.toString());
-                params.put("load_desc", "0000");
+                params.put("pick_num",num.toString());
+                params.put("pick_coords", LOCATION_FROM.toString());
+                params.put("load_desc", "weight: "+weight.toString()+"Load Description: "+load_char.toString());
                 params.put("image","0000");
-//                params.put("est_dist", String.valueOf(DISTANCE_BETWEEN));
-                params.put("est_dist","0000");
+                params.put("est_dist", String.valueOf(DISTANCE_BETWEEN));
                 params.put("est_cost","0000");
-                params.put("pick_time","0000");
-                params.put("drop_coords","0,0");
+                params.put("pick_time",DAY+"/"+MONTH+"/"+YEAR+" "+HOUR+":"+MINUTE);
+                params.put("drop_coords",LOCATION_TO.toString());
 
                 Log.e(TAG, "params: " + params.toString());
                 return params;
@@ -178,6 +174,8 @@ public class Load {
         //Adding request to request queue
         MyApplication.getInstance().addToRequestQueue(strReq);
         new Uploader(image,request_id_global).execute();
+        //store transaction id+state to sp
+        MyApplication.getInstance().getPrefManager().storeTRansactionId(request_id_global,"ALPHA");
 
     }
     private static class Uploader extends AsyncTask<Void, Void, Void>{
@@ -216,6 +214,7 @@ public class Load {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             loading.dismiss();
+            Toast.makeText(mContext,"Request submitted for submission",Toast.LENGTH_SHORT).show();
         }
     }
     private static HttpParams getHttpRequestParams(){

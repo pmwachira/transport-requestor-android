@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import java.util.HashSet;
+
 /**
  * Created by p-tah on 13/08/2016.
  */
@@ -32,6 +34,7 @@ public class MyPreferenceManager {
     private static final String KEY_USER_NAME = "user_name";
     private static final String KEY_USER_EMAIL = "user_email";
     private static final String KEY_NOTIFICATIONS = "notifications";
+    private static final String KEY_MY_TRANSATION = "my_transaction";
 
     // Constructor
     public MyPreferenceManager(Context context) {
@@ -83,5 +86,20 @@ public class MyPreferenceManager {
     public void clear() {
         editor.clear();
         editor.commit();
+    }
+
+    public void storeTRansactionId(String request_id_global, String alpha) {
+        HashSet<String> trans=new HashSet<>();
+        trans.add(request_id_global);
+        trans.add(alpha);
+        editor.putStringSet(KEY_MY_TRANSATION,trans);
+        editor.commit();
+    }
+    public String[] getTransaction(){
+        String[] trans = new String[0];
+        if(pref.getStringSet(KEY_MY_TRANSATION,null)!=null){
+             trans=pref.getStringSet(KEY_MY_TRANSATION,null).toArray(new String[pref.getStringSet(KEY_MY_TRANSATION,null).size()]);
+        }
+        return trans;
     }
 }
