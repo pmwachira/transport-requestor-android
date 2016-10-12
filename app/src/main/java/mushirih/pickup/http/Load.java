@@ -2,8 +2,8 @@ package mushirih.pickup.http;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
@@ -11,24 +11,29 @@ import android.widget.Toast;
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.model.LatLng;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 
 import mushirih.pickup.internal.MyApplication;
-import mushirih.pickup.ui.MainActivity;
 
 /**
  * Created by p-tah on 09/08/2016.
@@ -43,7 +48,7 @@ public class Load {
     private static int MINUTE;
    private static Context mContext;
     private static String TAG="LOAD ALPHA REQUEST";
-    private static String request_id_global="A";
+    private static String request_id_global;
     static ProgressDialog loading;
     private static Context CONTEXT;
     private static LatLng LOCATION_FROM;
@@ -58,14 +63,12 @@ public class Load {
     public static void setImage(Bitmap image) {
         IMAGE = image;
     }
-
     public static void setDate(int dayOfMonth, int monthOfYear, int year) {
         DAY=dayOfMonth;
         MONTH=monthOfYear;
         YEAR=year;
         
     }
-
     public static void setTime(int hourOfDay, int minute) {
         HOUR=hourOfDay;
         MINUTE=minute;
@@ -82,13 +85,12 @@ public class Load {
         DISTANCE_BETWEEN=distance_between;
 
     }
-
     public static void send(){
         requestService(CONTEXT,LOCATION_FROM,LOCATION_TO,WEIGHT,LOAD_CHAR,NAMEE,IDD,NUMM,IMAGE,DISTANCE_BETWEEN);
     }
-
     public static void requestService(final Context current, final LatLng LOCATION_FROM, final LatLng LOCATION_TO, final String weight, final ArrayList load_char, final String name, final String id, final String num, final Bitmap image, final int DISTANCE_BETWEEN) {
         mContext=current;
+
         loading = ProgressDialog.show(mContext, "Submitting your request", "Please wait...",true,true);
 
         final StringRequest strReq = new StringRequest(Request.Method.POST,
@@ -99,15 +101,16 @@ public class Load {
                 Log.e("LOAD REQUESTOR", "response: " + response);
 
                 try {
-                    JSONObject obj = new JSONObject(response);
+                    JSONObject object = new JSONObject(response);
 
                     // check for error flag
-                    if (obj.getString("error") == "false") {
+                    if (object.getString("error").equals("false")) {
                         // user successfully logged in
 
-                        JSONObject responseObj = obj.getJSONObject("response");
-                         String request_id=responseObj.getString("request_id");
-                        request_id_global =request_id;
+                        //JSONObject responseObj = obj.getJSONObject("response");
+                          String request_id=object.getString("request_id");
+
+                        request_id_global=request_id;
 //                        User user = new User(userObj.getString("user_id"),
 //                                userObj.getString("name"),
 //                                userObj.getString("email"));
@@ -116,12 +119,12 @@ public class Load {
                        // MyApplication.getInstance().getPrefManager().storeUser(user);
 
                         // start main activity
-                        current.startActivity(new Intent(current, MainActivity.class));
+                        //current.startActivity(new Intent(current, MainActivity.class));
                        // current.finish();
 
                     } else {
                         // login error - simply toast the message
-                        Toast.makeText(mContext, "" + obj.getJSONObject("error").getString("message"), Toast.LENGTH_LONG).show();
+                        Toast.makeText(mContext, "" + object.getJSONObject("error").getString("message"), Toast.LENGTH_LONG).show();
                     }
 
                 } catch (JSONException e) {
@@ -144,17 +147,22 @@ public class Load {
             @Override
             public Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put("drop_id", LOCATION_TO.toString());
-                params.put("drop_num","");
-                params.put("requestor_id","");
-                params.put("pick_num",num.toString());
-                params.put("pick_coords", LOCATION_FROM.toString());
-                params.put("load_desc", "weight: "+weight.toString()+"Load Description: "+load_char.toString());
-                params.put("image","");
-                params.put("est_dist", String.valueOf(DISTANCE_BETWEEN));
-                params.put("est_cost","");
-                params.put("pick_time","");
-                params.put("drop_coords","");
+//                params.put("drop_id", LOCATION_TO.toString());
+                params.put("drop_id","0000");
+                params.put("drop_num","0000");
+                params.put("requestor_id","0000");
+//                params.put("pick_num",num.toString());
+                params.put("pick_num","0000");
+//                params.put("pick_coords", LOCATION_FROM.toString());
+                params.put("pick_coords","0,0");
+//                params.put("load_desc", "weight: "+weight.toString()+"Load Description: "+load_char.toString());
+                params.put("load_desc", "0000");
+                params.put("image","0000");
+//                params.put("est_dist", String.valueOf(DISTANCE_BETWEEN));
+                params.put("est_dist","0000");
+                params.put("est_cost","0000");
+                params.put("pick_time","0000");
+                params.put("drop_coords","0,0");
 
                 Log.e(TAG, "params: " + params.toString());
                 return params;
@@ -167,67 +175,53 @@ public class Load {
             }
 
         };
-        //TODO UPLOAD IMAGE to
-        //request_id
-        // Bitmap image
-        //TODO FETCH REQUEST_ID FROM ABOVE RESPONSEE
-        String requesting_id= request_id_global;
-        uploadImage(image,requesting_id);
-
         //Adding request to request queue
-      //  MyApplication.getInstance().addToRequestQueue(strReq);
+        MyApplication.getInstance().addToRequestQueue(strReq);
+        new Uploader(image,request_id_global).execute();
+
     }
+    private static class Uploader extends AsyncTask<Void, Void, Void>{
+        Bitmap image;
+        String name;
+        public Uploader(Bitmap image,String name) {
+            this.image=image;
+            this.name=name;
+        }
 
-    private static void uploadImage(Bitmap image, final String requesting_id) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        image.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] imageBytes = baos.toByteArray();
-        final String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, MyApplication.IMAGE_UPLOAD_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String s) {
-                        //Disimissing the progress dialog
-                        loading.dismiss();
-                        //Showing toast message of the response
-                        Toast.makeText(mContext, s , Toast.LENGTH_LONG).show();
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-                        //Dismissing the progress dialog
-                        loading.dismiss();
+        @Override
+        protected Void doInBackground(Void... params) {
+            ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
+            image.compress(Bitmap.CompressFormat.JPEG,100,byteArrayOutputStream);
+            String encodedImage=Base64.encodeToString(byteArrayOutputStream.toByteArray(),Base64.DEFAULT);
 
-                        //Showing toast
-                        Toast.makeText(mContext, volleyError.getMessage().toString(), Toast.LENGTH_LONG).show();
-                    }
-                }){
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                //Converting Bitmap to String
-                String image = encodedImage;
+            ArrayList<NameValuePair> dataToSend=new ArrayList<>();
+            dataToSend.add(new BasicNameValuePair("image",encodedImage));
+            dataToSend.add(new BasicNameValuePair("name",name));
 
+            HttpParams httpRequestParams=getHttpRequestParams();
 
-                //Creating parameters
-                Map<String,String> params = new Hashtable<String, String>();
+            HttpClient httpClient=new DefaultHttpClient(httpRequestParams);
+            HttpPost httpPost=new HttpPost(MyApplication.IMAGE_UPLOAD_URL);
 
-                //Adding parameters
-                params.put("KEY_IMAGE", image);
-                params.put("KEY_ID", requesting_id+"");
-
-                //returning parameters
-                return params;
+            try{
+                httpPost.setEntity(new UrlEncodedFormEntity(dataToSend));
+                httpClient.execute(httpPost);
+            }catch (Exception e){
+                e.printStackTrace();
             }
-        };
+            return null;
+        }
 
-        //Creating a Request Queue
-        RequestQueue requestQueue = Volley.newRequestQueue(mContext);
-
-        //Adding request to the queue
-        requestQueue.add(stringRequest);
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            loading.dismiss();
+        }
     }
-
-
-
+    private static HttpParams getHttpRequestParams(){
+        HttpParams httpRequestParams=new BasicHttpParams();
+        HttpConnectionParams.setConnectionTimeout(httpRequestParams,30*1000);
+        HttpConnectionParams.setSoTimeout(httpRequestParams,30*1000);
+        return httpRequestParams;
+    }
 }

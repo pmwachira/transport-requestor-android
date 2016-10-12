@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
         context=MainActivity.this;
         ButterKnife.inject(this);
         inputLayoutEmail= (TextInputLayout) findViewById(R.id.input_layout_email);
+
         if (!AppUtils.isDataEnabled(MainActivity.this)){
             AlertDialog.Builder dialog = new AlertDialog.Builder(context);
                 dialog.setMessage("Internet not enabled!");
@@ -116,10 +117,13 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.bt_go:
-                /*TODO REMOVE FOR DEBUG*/
-//                startActivity(new Intent(getApplicationContext(), MapsActivity.class));
-//                finish();
-                login();
+                if(etUseremail.getText().toString().trim().equals("1234")){
+                      /*TODO REMOVE FOR DEBUG*/
+                    //todo debug trapdoor
+                    startActivity(new Intent(getApplicationContext(), MapsActivity.class));
+                    finish();
+                }else {
+                    login();
 
 
 //                Explode explode = null;
@@ -135,22 +139,18 @@ public class MainActivity extends AppCompatActivity {
 //                    finish();
 //                }
 
-                break;
+                    break;
+                }
         }
     }
 
     private void login() {
-        if (!validateName()) {
+
+        if (!validateEmail()) {
             return;
         }
-
-//        if (!validateEmail()) {
-//            return;
-//        }
-
-       email = etUseremail.getText().toString();
-        password = etPassword.getText().toString();
-
+        email = etUseremail.getText().toString().trim();
+        password = etPassword.getText().toString().trim();
         StringRequest strReq = new StringRequest(Request.Method.POST,
                 MyApplication.Online_Login, new Response.Listener<String>() {
 
@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject obj = new JSONObject(response);
 
                     // check for error flag
-                    if (obj.getString("error") == "false") {
+                    if (obj.getString("error").equals("false")) {
                         // user successfully logged in
 
                         JSONObject userObj = obj.getJSONObject("user");
@@ -200,11 +200,12 @@ public class MainActivity extends AppCompatActivity {
         }) {
 
             @Override
+
             public Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
 //                params.put("name", name);
-                params.put("email", email);
-                params.put("password", password);
+                params.put("email",email);
+                params.put("password",password);
 
                 Log.e(TAG, "params: " + params.toString());
                 return params;
@@ -241,23 +242,25 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-//    // Validating email
-//    private boolean validateEmail() {
-//        String email = inputEmail.getText().toString().trim();
-//
-//        if (email.isEmpty() || !isValidEmail(email)) {
-//            inputLayoutEmail.setError("Error message");
-//            requestFocus(inputEmail);
-//            return false;
-//        } else {
-//            inputLayoutEmail.setErrorEnabled(false);
-//        }
-//
-//        return true;
-//    }
+    // Validating email
+    private boolean validateEmail() {
+        email = etUseremail.getText().toString().trim();
+        if (email.isEmpty() || !isValidEmail(email)) {
+            etUseremail.setError("Enter a valid email");
+            requestFocus(etUseremail);
+            return false;
+        } else {
+            inputLayoutEmail.setErrorEnabled(false);
+            return true;
+        }
+    }
 
     private static boolean isValidEmail(String email) {
-        return !TextUtils.isEmpty(email) && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+        if(TextUtils.isEmpty(email) && !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+            return false;
+        }else {
+            return true;
+        }
     }
 
     private class MyTextWatcher implements TextWatcher {
