@@ -136,14 +136,12 @@ public class Load {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-
                 NetworkResponse networkResponse = error.networkResponse;
                 Log.e(TAG, "Volley error: " + error.getMessage() + ", code: " + networkResponse+" and "+error.getMessage());
                 Toast.makeText(mContext, "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
 
             }
         }) {
-
             @Override
             public Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
@@ -169,7 +167,6 @@ public class Load {
                 params.put("Content-Type","application/x-www-form-urlencoded");
                 return params;
             }
-
         };
         //Adding request to request queue
         MyApplication.getInstance().addToRequestQueue(strReq);

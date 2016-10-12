@@ -28,32 +28,26 @@ public class MyApplication extends Application {
     public static String OffLine_Login="http://192.168.43.185/PICKUP/v1/user/login";
     public static final String ONLINE_ALPHA_REQUEST = "http://noshybakery.co.ke/PICKUP/v1/init_request";
     public static final String IMAGE_UPLOAD_URL = "http://noshybakery.co.ke/PICKUP/include/image_upload.php";
-
     @Override
     public void onCreate() {
         super.onCreate();
         mInstance = this;
     }
-
     public static synchronized MyApplication getInstance() {
         return mInstance;
     }
-
     public RequestQueue getRequestQueue(){
         if (requestQueue==null){
             requestQueue= Volley.newRequestQueue(getApplicationContext());
         }
 return requestQueue;
     }
-
     public MyPreferenceManager getPrefManager() {
         if (pref == null) {
             pref = new MyPreferenceManager(this);
         }
-
         return pref;
     }
-
     public <T> void addToRequestQueue(Request<T> req, String tag) {
         req.setTag(TextUtils.isEmpty(tag) ? TAG : tag);
         getRequestQueue().add(req);
@@ -65,7 +59,6 @@ return requestQueue;
     public void cancelPendingRequests(Object tag) {
         if (requestQueue != null) {
             requestQueue.cancelAll(tag);
-
         }
     }
     public void logout() {

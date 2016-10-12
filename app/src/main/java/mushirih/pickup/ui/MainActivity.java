@@ -90,13 +90,10 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface paramDialogInterface, int paramInt) {
                         // TODO Auto-generated method stub
-
                     }
                 });
                 dialog.show();
             }
-
-
     }
 
     @OnClick({R.id.bt_go, R.id.register})
@@ -107,8 +104,6 @@ public class MainActivity extends AppCompatActivity {
                     getWindow().setExitTransition(null);
                     getWindow().setEnterTransition(null);
                 }
-
-
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     ActivityOptions options =
                             ActivityOptions.makeSceneTransitionAnimation(this, register, register.getTransitionName());
@@ -125,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
                     finish();
                 }else {
                     login();
-
 
 //                Explode explode = null;
 //                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
@@ -219,9 +213,7 @@ public class MainActivity extends AppCompatActivity {
                 params.put("Content-Type","application/x-www-form-urlencoded");
                 return params;
             }
-
         };
-
         //Adding request to request queue
         MyApplication.getInstance().addToRequestQueue(strReq);
     }
@@ -231,7 +223,6 @@ public class MainActivity extends AppCompatActivity {
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         }
     }
-
     // Validating name
     private boolean validateName() {
         if (etUseremail.getText().toString().trim().isEmpty()) {
@@ -310,10 +301,7 @@ public class MainActivity extends AppCompatActivity {
                 sc.putExtra("want",0);
                 startActivity(sc);
                 finish();
-
         }
-
         return super.onOptionsItemSelected(item);
     }
-
 }
