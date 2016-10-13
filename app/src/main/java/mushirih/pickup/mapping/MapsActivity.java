@@ -125,6 +125,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     boolean am_done=false;
     TextView progressTitle,next_action;
     StepperIndicator progressStepper;
+    String[] options;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -375,7 +376,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //TODO Button visibility
         confirm.setVisibility(View.GONE);
         load_char=new ArrayList();
-        final String[] options={"Urgent","Fragile ","Perishable","In need of packing boxes","I need help loading"};
+         options= new String[]{"Urgent", "Fragile ", "Perishable", "In need of packing boxes", "I need help loading"};
         final String[] weight_options={"Load under 5 Kgs","Load between 5-30 Kgs","Load over 30Kgs"};
         AlertDialog.Builder builder=new AlertDialog.Builder(this);
         builder.setTitle("Please describe your load")
@@ -464,6 +465,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 num.setError("Please fill in all details");
                                             }
                                             else {
+                                                String desc="";
+                                                for(int i=0;i<load_char.size();i++){
+                                                    desc+=options[(int)load_char.get(i)];
+                                                }
                                                 Load.bulkSet(mContext,LOCATION_FROM,LOCATION_TO,weight,load_char,namee,idd,numm,DISTANCE_BETWEEN);
                                                 //TODO CAPTURE PICTURE OF THE LOAD
                                                 Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);

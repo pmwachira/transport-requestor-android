@@ -170,7 +170,12 @@ public class Load {
         };
         //Adding request to request queue
         MyApplication.getInstance().addToRequestQueue(strReq);
+        if(null==request_id_global){
+            request_id_global=System.currentTimeMillis()+"";
+            Log.e("IMAGE UPLOAD","NULL REQUEST ID");
+        }else{
         new Uploader(image,request_id_global).execute();
+        }
         //store transaction id+state to sp
         MyApplication.getInstance().getPrefManager().storeTRansactionId(request_id_global,"ALPHA");
 
