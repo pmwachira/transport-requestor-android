@@ -48,6 +48,7 @@
         <activity
             android:parentActivityName=".ui.TestScreen"
             android:name=".mapping.MapsActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_maps">
         </activity>
         <activity

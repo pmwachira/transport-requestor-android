@@ -439,7 +439,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 }
                             });
                             builder.setPositiveButton("Take picture of load", null);
-                            builder.setNegativeButton("Cancel", null);
+//                            builder.setNegativeButton("Cancel", null);
                             final AlertDialog alertDialog = builder.create();
                             alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
                                 @Override
@@ -470,17 +470,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 if (takePicture.resolveActivity(getPackageManager()) != null) {
                                                     startActivityForResult(takePicture, REQUEST_IMAGE_CAPTURE);
                                                     alertDialog.cancel();
-                                                    updateProgress(false,5, "Details Completed",true);
-                                                    am_done=true;
-//                                                    //TODO change requestor button
-                                                    confirm.setVisibility(View.VISIBLE);
-                                                    confirm.setText("Request Delivery");
-                                                    confirm.setOnClickListener(new View.OnClickListener() {
-                                                        @Override
-                                                        public void onClick(View v) {
-                                                            Load.send();
-                                                        }
-                                                    });
+
 
                                                 }
                                             }
@@ -747,8 +737,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mGoogleApiClient);
         if (mLastLocation != null) {
           changeMap(mLastLocation);
-            VIEW_TO_CHANGE = drop_loc;
-            startIntentService(mLastLocation);
+           // VIEW_TO_CHANGE = drop_loc;
+            //startIntentService(mLastLocation);
             Log.d(TAG, "ON connected");
 
         } else
@@ -761,8 +751,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         try {
             LocationRequest mLocationRequest = new LocationRequest();
-            mLocationRequest.setInterval(10000);
-            mLocationRequest.setFastestInterval(5000);
+//            mLocationRequest.setInterval(10000);
+//            mLocationRequest.setFastestInterval(5000);
+            mLocationRequest.setInterval(20000);
+            mLocationRequest.setFastestInterval(10000);
             mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
             LocationServices.FusedLocationApi.requestLocationUpdates(
                     mGoogleApiClient, mLocationRequest, this);
@@ -1011,6 +1003,18 @@ class AddressResultReceiver extends ResultReceiver {
                 Bundle extras=data.getExtras();
                 image= (Bitmap) extras.get("data");
                 Load.setImage(image);
+                am_done=true;
+                updateProgress(false,5, "Details Completed",true);
+
+//                                                    //TODO change requestor button
+                confirm.setVisibility(View.VISIBLE);
+                confirm.setText("Request Delivery");
+                confirm.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Load.send();
+                    }
+                });
             }
         }
         //CONTACTPICKER
