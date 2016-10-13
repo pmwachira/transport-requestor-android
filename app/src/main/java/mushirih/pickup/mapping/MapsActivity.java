@@ -122,6 +122,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     boolean pick_point_set=false;
     boolean load_desc_set=false;
     boolean load_weight_set=false;
+    boolean am_done=false;
     TextView progressTitle,next_action;
     StepperIndicator progressStepper;
     @Override
@@ -142,7 +143,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         next_action= (TextView) findViewById(R.id.next_action);
         progressStepper= (StepperIndicator) findViewById(R.id.progressStepper);
 
-        updateProgress(true,"Set Collection Point",false);
+        updateProgress(true,0,"Set Collection Point",false);
         mLocationText= (TextView) findViewById(R.id.locationtext);
 
         zero=(ToggleButton) findViewById(R.id.toggleButton0);
@@ -322,15 +323,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             getWindow().setEnterTransition(explode);
         }
     }
-    private void updateProgress(boolean initial, String nextActivity, boolean end){
+    private void updateProgress(boolean initial,int where, String nextActivity, boolean end){
         final int max=progressStepper.getStepCount();
-        if(!end) {
+        if(where<=max) {
             next_action.setText(nextActivity);
-            if (!initial) {
-                progressStepper.setCurrentStep(progressStepper.getCurrentStep() + 1);
-            }else{
-                progressStepper.setCurrentStep(0);
-            }
+            progressStepper.setCurrentStep(where);
         }
     }
     private void showLocationPermissionDialog() {
@@ -383,16 +380,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         AlertDialog.Builder builder=new AlertDialog.Builder(this);
         builder.setTitle("Please describe your load")
                 .setCancelable(false)
-                .setSingleChoiceItems(weight_options, 2, new DialogInterface.OnClickListener() {
+                .setSingleChoiceItems(weight_options,-1 , new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         weight=weight_options[which].toString();
-
                         if(load_weight_set==false) {
-                            updateProgress(false, "Provide a description of load", false);
+                            updateProgress(false,3, "Provide a description of load", false);
                             load_weight_set=true;
                         }
+
                     }
+
                 })
             .setPositiveButton("Okay",new DialogInterface.OnClickListener() {
                 @Override
@@ -405,7 +403,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         @Override
                         public void onClick(DialogInterface dialog, int which, boolean isChecked) {
                             if(load_desc_set==false) {
-                                updateProgress(false, "Provide details of collector", false);
+                                updateProgress(false,4, "Provide details of collector", false);
                             }
                             load_desc_set=true;
                             if (isChecked) {
@@ -415,7 +413,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             }
                         }
                     });
-                    updateProgress(false, "Provide details of collector",false);
                     builder.setNegativeButton("Cancel", null);
                     //TODO: Contact permission
                     if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED){
@@ -473,7 +470,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 if (takePicture.resolveActivity(getPackageManager()) != null) {
                                                     startActivityForResult(takePicture, REQUEST_IMAGE_CAPTURE);
                                                     alertDialog.cancel();
-                                                    updateProgress(false, "Details Completed",true);
+                                                    updateProgress(false,5, "Details Completed",true);
+                                                    am_done=true;
 //                                                    //TODO change requestor button
                                                     confirm.setVisibility(View.VISIBLE);
                                                     confirm.setText("Request Delivery");
@@ -683,7 +681,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         Toast.makeText(getApplicationContext(), "Please check your internet connection", Toast.LENGTH_SHORT).show();
                                     }
                                 }
-                                updateProgress(false, "Provide load weight", false);
+                                updateProgress(false,2, "Provide load weight", false);
                                 describe_load();
                             }
 
@@ -710,7 +708,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     // pich_loc.setText(mAddressOutput);
                                     mLocationText.setText("Set drop point here");
                                     Toast.makeText(getApplicationContext(), "Goods pick up point set at pin", Toast.LENGTH_LONG).show();
-                                    updateProgress(false, "Set destination point", false);
+                                    updateProgress(false,1, "Set destination point", false);
                                     LOCATION_FROM = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
                                     mMap.setMinZoomPreference(10);
                                 }
@@ -748,7 +746,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
         if (mLastLocation != null) {
-            changeMap(mLastLocation);
+          changeMap(mLastLocation);
             VIEW_TO_CHANGE = drop_loc;
             startIntentService(mLastLocation);
             Log.d(TAG, "ON connected");
@@ -844,7 +842,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void changeMap(Location location) {
-        if(!load_weight_set) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
@@ -855,33 +852,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // for ActivityCompat#requestPermissions for more details.
                 return;
             }
+if(!am_done) {
+    // check if map is created successfully or not
+    if (mMap != null) {
+        mMap.getUiSettings().setZoomControlsEnabled(false);
+        LatLng latLong;
 
-            // check if map is created successfully or not
-            if (mMap != null) {
-                mMap.getUiSettings().setZoomControlsEnabled(false);
-                LatLng latLong;
 
-
-                latLong = new LatLng(location.getLatitude(), location.getLongitude());
-                //TODO: CAMERA TILT TOPOGRAPHY
+        latLong = new LatLng(location.getLatitude(), location.getLongitude());
+        //TODO: CAMERA TILT TOPOGRAPHY
 //            CameraPosition cameraPosition = new CameraPosition.Builder().target(latLong).zoom(19f).tilt(70).build();
-                CameraPosition cameraPosition = new CameraPosition.Builder().target(latLong).zoom(19f).build();
+        CameraPosition cameraPosition = new CameraPosition.Builder().target(latLong).zoom(19f).build();
 
-                mMap.setMyLocationEnabled(true);
-                mMap.getUiSettings().setMyLocationButtonEnabled(true);
-                //TODO: CAMERA TILT TOPOGRAPHY
-                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-                //mLocationMarkerText.setText("Lat : " + location.getLatitude() + "," + "Long : " + location.getLongitude());
+        mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        //TODO: CAMERA TILT TOPOGRAPHY
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        //mLocationMarkerText.setText("Lat : " + location.getLatitude() + "," + "Long : " + location.getLongitude());
 //TODO Location getter
 //            startIntentService(location);
 
 
-            } else {
-                Toast.makeText(getApplicationContext(),
-                        "Sorry! unable to create maps", Toast.LENGTH_SHORT)
-                        .show();
-            }
-        }
+    } else {
+        Toast.makeText(getApplicationContext(),
+                "Sorry! unable to create maps"+am_done, Toast.LENGTH_LONG)
+                .show();
+    }
+}
+
     }
 
     @Override
@@ -1048,7 +1046,7 @@ class AddressResultReceiver extends ResultReceiver {
                     startIntentService(x);
                     drop_loc.setText(null);
                     hide.setVisibility(View.VISIBLE);
-                    updateProgress(false,"Set Destination Point",false);
+                    updateProgress(false,1,"Set Destination Point",false);
                 }else if(MARKER_TYPE==DROP_FLAG){
                     LOCATION_TO=new LatLng(x.getLatitude(),x.getLongitude());
                     if(!LOCATION_FROM.equals(null)&&!LOCATION_TO.equals(null)){
@@ -1062,7 +1060,7 @@ class AddressResultReceiver extends ResultReceiver {
                     mMap.animateCamera(cameraUpdate);
                     startIntentService(x);
 
-                    updateProgress(false,"Provide load weight",false);
+                    updateProgress(false,2,"Provide load weight",false);
                     describe_load();
 
                 }

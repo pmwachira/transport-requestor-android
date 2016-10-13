@@ -350,19 +350,43 @@ android:layout_height="match_parent">
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Request Completion" />
+                <LinearLayout
+                    android:layout_below="@+id/next_action"
+                    android:id="@+id/request_pane"
+                    android:layout_gravity="bottom"
+                    android:layout_width="match_parent"
+                    android:orientation="vertical"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <android.support.v7.widget.AppCompatButton
+                            android:layout_margin="6dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/confirm"
+                            android:text="Confirm Request"
+                            android:textColor="@color/white"
+                            android:background="@color/colorPrimary"
+                            />
+                    </LinearLayout>
+                </LinearLayout>
             </RelativeLayout>
+
         </android.support.v7.widget.CardView>
-        <LinearLayout
-            android:id="@+id/request_pane"
-            android:layout_gravity="bottom"
-            android:layout_width="match_parent"
-            android:orientation="vertical"
-            android:layout_height="wrap_content"
-            android:visibility="gone">
-            <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+        <!--<LinearLayout-->
+            <!--android:id="@+id/request_pane"-->
+            <!--android:layout_gravity="bottom"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:orientation="vertical"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:visibility="gone">-->
+            <!--<LinearLayout-->
+                <!--android:orientation="vertical"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content">-->
 
             <!--<LinearLayout-->
                 <!--android:layout_marginBottom="2dp"-->
@@ -429,17 +453,17 @@ android:layout_height="match_parent">
                         <!--android:text="Add Button"/>-->
                 <!--</LinearLayout>-->
             <!--</LinearLayout>-->
-                <android.support.v7.widget.AppCompatButton
-                    android:layout_margin="6dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/confirm"
-                    android:text="Confirm Request"
-                    android:textColor="@color/white"
-                    android:background="@color/colorPrimary"
-                    />
+                <!--<android.support.v7.widget.AppCompatButton-->
+                    <!--android:layout_margin="6dp"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:id="@+id/confirm"-->
+                    <!--android:text="Confirm Request"-->
+                    <!--android:textColor="@color/white"-->
+                    <!--android:background="@color/colorPrimary"-->
+                    <!--/>-->
 
-                </LinearLayout>
-    </LinearLayout>
+                <!--</LinearLayout>-->
+    <!--</LinearLayout>-->
     </FrameLayout>
    </LinearLayout>
