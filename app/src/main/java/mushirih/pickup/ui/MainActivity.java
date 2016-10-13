@@ -12,9 +12,7 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -255,31 +253,7 @@ public class MainActivity extends AppCompatActivity {
         }else {
             return true;
         }
-    }
 
-    private class MyTextWatcher implements TextWatcher {
-
-        private View view;
-        private MyTextWatcher(View view) {
-            this.view = view;
-        }
-
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        }
-
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        }
-
-        public void afterTextChanged(Editable editable) {
-            switch (view.getId()) {
-                case R.id.input_name:
-                    validateName();
-                    break;
-                case R.id.input_email:
-//                    validateEmail();
-                    break;
-            }
-        }
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

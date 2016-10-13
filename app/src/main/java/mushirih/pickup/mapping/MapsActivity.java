@@ -35,6 +35,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.badoualy.stepperindicator.StepperIndicator;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -83,7 +84,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LinearLayout searchloc;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
-    TextView mLocationText,pich_loc,drop_loc,loc_rep;
+    TextView mLocationText,pich_loc,drop_loc;
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     ToggleButton zero,one, two, three;
     LinearLayout l0,l1, l2, l3,request_pane,request_time,describe_load,destination_pane,location_pick_graphic,top_dest;
@@ -91,7 +92,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String TAG="MAPSACTIVITY LOG";
     private LatLng mCenterLatLong;
     private static final int REQUEST_CODE_AUTOCOMPLETE = 1;
-    int PLACE_PICKER_REQUEST=2;
     int PLACE_PICKER_DEST_REQUEST=02022;
     int REQUEST_CHECK_SETTINGS = 20;
     private AddressResultReceiver mResultReceiver;
@@ -101,7 +101,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected String mStateOutput;
     Activity activity;
    Location mLastLocation;
-    CardView hide,go;
+    CardView hide;
   TextView VIEW_TO_CHANGE;
     EditText EDIT_TEXT_TO_EDIT;
     int CONTACT_PICKER_RESULT=999;
@@ -119,6 +119,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     int showProgress=0;
     int DISTANCE_BETWEEN=0;
     String namee,idd,numm;
+    boolean pick_point_set=false;
+    boolean load_desc_set=false;
+    boolean load_weight_set=false;
+    TextView progressTitle,next_action;
+    StepperIndicator progressStepper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -133,6 +138,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         buildGoogleApiClient();
         setContentView(R.layout.activity_maps);
 
+        progressTitle= (TextView) findViewById(R.id.progressTitle);
+        next_action= (TextView) findViewById(R.id.next_action);
+        progressStepper= (StepperIndicator) findViewById(R.id.progressStepper);
+
+        updateProgress(true,"Set Collection Point",false);
         mLocationText= (TextView) findViewById(R.id.locationtext);
 
         zero=(ToggleButton) findViewById(R.id.toggleButton0);
@@ -171,8 +181,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
         pich_loc=(TextView) findViewById(R.id.top_bar_location);
 
+
+       drop_loc= (TextView) findViewById(R.id.top_bar_location_rep);
         searchloc= (LinearLayout) findViewById(R.id.search_loc);
-        loc_rep= (TextView) findViewById(R.id.top_bar_location_rep);
         searchloc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -199,32 +210,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
         request_pane= (LinearLayout) findViewById(R.id.request_pane);
-           /*
-        request_time= (LinearLayout) findViewById(R.id.set_time);
-        request_time.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //time pick
-                DialogFragment newFragment = new TimePickerFragment();
-                newFragment.show(getSupportFragmentManager(), "timePicker");
-                //datePicker
-                DialogFragment newfragment = new DatePickerFragment();
-                newfragment.show(getSupportFragmentManager(), "datePicker");
-
-            }
-        });
-
-        describe_load= (LinearLayout) findViewById(R.id.describe_load);
-        describe_load.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                describe_load();
-            }
-        });
-
-*/
-        destination_pane= (LinearLayout) findViewById(R.id.dest_loc);
-        destination_pane.setOnClickListener(new View.OnClickListener() {
+        //TODO TODAYS EDIT
+        hide= (CardView) findViewById(R.id.second_hide);
+        hide.setVisibility(View.GONE);
+        hide.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(pich_loc.getText().equals("Select pick up location")) {
@@ -233,7 +222,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }else{
                     PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder()/*.setLatLngBounds(LatLngBounds.builder().include(mCenterLatLong).build()*/;
                     try {
-                        VIEW_TO_CHANGE=loc_rep;
+                        VIEW_TO_CHANGE=drop_loc;
                         MARKER_TYPE=DROP_FLAG;
                         startActivityForResult(builder.build(activity), PLACE_PICKER_DEST_REQUEST);
 
@@ -245,31 +234,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         });
-        // Toast.makeText(context,"Call PDF ? ",Toast.LENGTH_LONG).show();
-        drop_loc= (TextView) findViewById(R.id.bottom_bar_location);
-        hide= (CardView) findViewById(R.id.second_hide);
-        hide.setVisibility(View.GONE);
-        go= (CardView) findViewById(R.id.go);
-
-
         location_pick_graphic= (LinearLayout) findViewById(R.id.locationMarker);
-        top_dest= (LinearLayout) findViewById(R.id.top_dest_holder);
-        top_dest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder()/*.setLatLngBounds(LatLngBounds.builder().include(mCenterLatLong).build()*/;
-                try {
-                    VIEW_TO_CHANGE=loc_rep;
-                    MARKER_TYPE=DROP_FLAG;
-                    startActivityForResult(builder.build(activity), PLACE_PICKER_DEST_REQUEST);
-
-                } catch (GooglePlayServicesRepairableException e) {
-                    e.printStackTrace();
-                } catch (GooglePlayServicesNotAvailableException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        //TODO PUT THIS IN CONTEXT
         confirm= (Button) findViewById(R.id.confirm);
         confirm.setText("Describe load");
         confirm.setOnClickListener(new View.OnClickListener() {
@@ -356,7 +322,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             getWindow().setEnterTransition(explode);
         }
     }
-
+    private void updateProgress(boolean initial, String nextActivity, boolean end){
+        final int max=progressStepper.getStepCount();
+        if(!end) {
+            next_action.setText(nextActivity);
+            if (!initial) {
+                progressStepper.setCurrentStep(progressStepper.getCurrentStep() + 1);
+            }else{
+                progressStepper.setCurrentStep(0);
+            }
+        }
+    }
     private void showLocationPermissionDialog() {
             GoogleApiClient googleApiClient = new GoogleApiClient.Builder(mContext)
                     .addApi(LocationServices.API).build();
@@ -411,6 +387,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         weight=weight_options[which].toString();
+
+                        if(load_weight_set==false) {
+                            updateProgress(false, "Provide a description of load", false);
+                            load_weight_set=true;
+                        }
                     }
                 })
             .setPositiveButton("Okay",new DialogInterface.OnClickListener() {
@@ -423,6 +404,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     builder.setMultiChoiceItems(options, null, new DialogInterface.OnMultiChoiceClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                            if(load_desc_set==false) {
+                                updateProgress(false, "Provide details of collector", false);
+                            }
+                            load_desc_set=true;
                             if (isChecked) {
                                 load_char.add(which);
                             } else if (load_char.contains(which)) {
@@ -430,6 +415,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             }
                         }
                     });
+                    updateProgress(false, "Provide details of collector",false);
                     builder.setNegativeButton("Cancel", null);
                     //TODO: Contact permission
                     if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED){
@@ -487,6 +473,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 if (takePicture.resolveActivity(getPackageManager()) != null) {
                                                     startActivityForResult(takePicture, REQUEST_IMAGE_CAPTURE);
                                                     alertDialog.cancel();
+                                                    updateProgress(false, "Details Completed",true);
 //                                                    //TODO change requestor button
                                                     confirm.setVisibility(View.VISIBLE);
                                                     confirm.setText("Request Delivery");
@@ -593,9 +580,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         @Override
         protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
-
-
-
             try {
                 jsonObject=new JSONObject(jsonData[0]);
                 PathJsonParser pathJsonParser=new PathJsonParser();
@@ -604,7 +588,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 e.printStackTrace();
             }
             return routes;
-
         }
 
         @Override
@@ -634,17 +617,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 polyLineOptions.width(10);
                 polyLineOptions.color(Color.BLUE);
             }
-
-                mMap.addPolyline(polyLineOptions);
+            mMap.addPolyline(polyLineOptions);
         }
-
-
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
         /**
          * Manipulates the map once available.
          * This callback is triggered when the map is ready to be used.
@@ -679,15 +658,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     mLocation.setLongitude(mCenterLatLong.longitude);
 
                     //Check for drop of marker move
-                    if (pich_loc.getText().length() != 0 && (mLocationText.getText().equals("Goods pick up point") | mLocationText.getText().equals("Set drop point here"))) {
+                    if (mLocationText.getText().equals("Set drop point here") || pick_point_set) {
                         mLocationText.setText("Set drop point here");
+                        //SET DESTINATION
                         mLocationText.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                VIEW_TO_CHANGE = loc_rep;
+                                VIEW_TO_CHANGE = drop_loc;
                                 MARKER_TYPE = DROP_FLAG;
+                                mAddressOutput = "";
                                 startIntentService(mLocation);
-                                go.setVisibility(View.GONE);
                                 hide.setVisibility(View.VISIBLE);
                                 //TODO change this to pop
                                 request_pane.setVisibility(View.VISIBLE);
@@ -703,6 +683,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         Toast.makeText(getApplicationContext(), "Please check your internet connection", Toast.LENGTH_SHORT).show();
                                     }
                                 }
+                                updateProgress(false, "Provide load weight", false);
+                                describe_load();
                             }
 
                         });
@@ -714,9 +696,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             mLocationText.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
+                                    hide.setVisibility(View.VISIBLE);
+                                    hide.setVisibility(View.GONE);
                                     //TODO Try find clicked location
                                     MARKER_TYPE = PICK_FLAG;
                                     VIEW_TO_CHANGE = pich_loc;
+                                    mAddressOutput = "";
                                     startIntentService(mLocation);
                                     if (pich_loc.getText().equals("Select pick up location")) {
                                         pich_loc.setTextColor(Color.DKGRAY);
@@ -725,6 +710,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     // pich_loc.setText(mAddressOutput);
                                     mLocationText.setText("Set drop point here");
                                     Toast.makeText(getApplicationContext(), "Goods pick up point set at pin", Toast.LENGTH_LONG).show();
+                                    updateProgress(false, "Set destination point", false);
                                     LOCATION_FROM = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
                                     mMap.setMinZoomPreference(10);
                                 }
@@ -748,6 +734,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
     @Override
     public void onConnected(Bundle bundle) {
+        //TODO TEST IF MAPS RELOADS
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -758,11 +745,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
         if (mLastLocation != null) {
             changeMap(mLastLocation);
-            VIEW_TO_CHANGE= loc_rep;
+            VIEW_TO_CHANGE = drop_loc;
             startIntentService(mLastLocation);
             Log.d(TAG, "ON connected");
 
@@ -785,7 +772,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
@@ -796,19 +782,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onLocationChanged(Location location) {
-        if(showProgress==1){
-            progressDialog.dismiss();
-        }
-        try {
-            if (location != null)
-                changeMap(location);
+            if (showProgress == 1) {
+                progressDialog.dismiss();
+            }
+            try {
+                if (location != null)
+                    changeMap(location);
 
-            LocationServices.FusedLocationApi.removeLocationUpdates(
-                    mGoogleApiClient, this);
+                LocationServices.FusedLocationApi.removeLocationUpdates(
+                        mGoogleApiClient, this);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -858,41 +844,43 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void changeMap(Location location) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
+        if(!load_weight_set) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
 
-        // check if map is created successfully or not
-        if (mMap != null) {
-            mMap.getUiSettings().setZoomControlsEnabled(false);
-            LatLng latLong;
+            // check if map is created successfully or not
+            if (mMap != null) {
+                mMap.getUiSettings().setZoomControlsEnabled(false);
+                LatLng latLong;
 
 
-            latLong = new LatLng(location.getLatitude(), location.getLongitude());
-            //TODO: CAMERA TILT TOPOGRAPHY
+                latLong = new LatLng(location.getLatitude(), location.getLongitude());
+                //TODO: CAMERA TILT TOPOGRAPHY
 //            CameraPosition cameraPosition = new CameraPosition.Builder().target(latLong).zoom(19f).tilt(70).build();
-            CameraPosition cameraPosition = new CameraPosition.Builder().target(latLong).zoom(19f).build();
+                CameraPosition cameraPosition = new CameraPosition.Builder().target(latLong).zoom(19f).build();
 
-            mMap.setMyLocationEnabled(true);
-            mMap.getUiSettings().setMyLocationButtonEnabled(true);
-            //TODO: CAMERA TILT TOPOGRAPHY
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-            //mLocationMarkerText.setText("Lat : " + location.getLatitude() + "," + "Long : " + location.getLongitude());
+                mMap.setMyLocationEnabled(true);
+                mMap.getUiSettings().setMyLocationButtonEnabled(true);
+                //TODO: CAMERA TILT TOPOGRAPHY
+                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                //mLocationMarkerText.setText("Lat : " + location.getLatitude() + "," + "Long : " + location.getLongitude());
 //TODO Location getter
 //            startIntentService(location);
 
 
-        } else {
-            Toast.makeText(getApplicationContext(),
-                    "Sorry! unable to create maps", Toast.LENGTH_SHORT)
-                    .show();
+            } else {
+                Toast.makeText(getApplicationContext(),
+                        "Sorry! unable to create maps", Toast.LENGTH_SHORT)
+                        .show();
+            }
         }
     }
 
@@ -947,7 +935,7 @@ class AddressResultReceiver extends ResultReceiver {
             //SEND THIS LOCATION TO DRIVER REQUEST
            //Toast.makeText(getApplicationContext(),"This location is "+mAddressOutput,Toast.LENGTH_SHORT).show();
             VIEW_TO_CHANGE.setText(mAddressOutput);
-
+            mAddressOutput="";
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1048,23 +1036,20 @@ class AddressResultReceiver extends ResultReceiver {
     }
         if(requestCode==PLACE_PICKER_DEST_REQUEST){
             if(resultCode==RESULT_OK){
-                String Latlong="";
                 Place place=PlacePicker.getPlace(this,data);
-                //TODO THISSSSSSSSSSSSSSSSSSSS
-//
                 Location x=new Location("");
                 x.setLatitude(place.getLatLng().latitude);
                 x.setLongitude(place.getLatLng().longitude);
                 if(MARKER_TYPE==PICK_FLAG){
                     LOCATION_FROM=new LatLng(x.getLatitude(),x.getLongitude());
+                    pick_point_set=true;
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_FROM, 16);
                     mMap.animateCamera(cameraUpdate);
-//                    if(!LOCATION_FROM.equals(null)&&!LOCATION_TO.equals(null)){
-//                        String url = getMapsApiDirectionsUrl();
-//                        ReadTask readTask = new ReadTask();
-//                        readTask.execute(url);
-//                    }
-                }else{
+                    startIntentService(x);
+                    drop_loc.setText(null);
+                    hide.setVisibility(View.VISIBLE);
+                    updateProgress(false,"Set Destination Point",false);
+                }else if(MARKER_TYPE==DROP_FLAG){
                     LOCATION_TO=new LatLng(x.getLatitude(),x.getLongitude());
                     if(!LOCATION_FROM.equals(null)&&!LOCATION_TO.equals(null)){
                         if(AppUtils.isDataEnabled(mContext)) {
@@ -1073,42 +1058,16 @@ class AddressResultReceiver extends ResultReceiver {
                     }else{
                         Toast.makeText(getApplicationContext(),"Please check your internet connection",Toast.LENGTH_SHORT).show();
                     }
-                }
-                if(MARKER_TYPE==DROP_FLAG){
-//                    mMap.addMarker(new MarkerOptions()
-//                            .position(LOCATION_TO)
-//                            .title("Drop point")
-//                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.add_marker))
-//                            .anchor(0.0f, 1.0f));
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_TO, 16);
                     mMap.animateCamera(cameraUpdate);
+                    startIntentService(x);
+
+                    updateProgress(false,"Provide load weight",false);
+                    describe_load();
+
                 }
-                mAddressOutput=null;
-
-                startIntentService(x);
-
-                go.setVisibility(View.GONE);
-                hide.setVisibility(View.VISIBLE);
-
-//                drop_loc.setText(mAddressOutput);
-                request_pane.setVisibility(View.VISIBLE);
-
-//                Toast.makeText(this, Latlong, Toast.LENGTH_LONG).show();
             }
         }
-        //Place Picker Request
-        if(requestCode==PLACE_PICKER_REQUEST){
-            if(resultCode==RESULT_OK){
-                String Latlong="";
-                Place place=PlacePicker.getPlace(this,data);
-//                String toastMsg = String.format("Place: %s", place.getLatLng());
-                if(place.getLatLng().toString().contains("lat/lng")){
-                    Latlong = place.getLatLng().toString().replace("lat/lng:","").replace(" ","").replace("(","").replace(")","");
-                }
-                Toast.makeText(this, Latlong, Toast.LENGTH_LONG).show();
-            }
-        }
-
         //location autocomplete check
         // Check that the result was from the autocomplete widget.
         if (requestCode == REQUEST_CODE_AUTOCOMPLETE) {
