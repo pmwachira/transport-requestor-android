@@ -516,14 +516,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         String url = getMapsApiDirectionsUrl();
         ReadTask readTask = new ReadTask();
         readTask.execute(url);
-        //TODO HERE LENGTH FIND in METERS
-        Location a=new Location("");
-        a.setLatitude(LOCATION_FROM.latitude);
-        a.setLatitude(LOCATION_FROM.longitude);
-        Location b=new Location("");
-        b.setLatitude(LOCATION_TO.latitude);
-        b.setLatitude(LOCATION_TO.longitude);
-        DISTANCE_BETWEEN= (int) a.distanceTo(b);
 
     }
 
@@ -612,6 +604,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
             if(null!=polyLineOptions) {
                 mMap.addPolyline(polyLineOptions);
+                float totalDistance = 0;
+                for(int k = 1; k < polyLineOptions.getPoints().size(); k++) {
+                    Location currLocation = new Location("this");
+                    currLocation.setLatitude(polyLineOptions.getPoints().get(k).latitude);
+                    currLocation.setLongitude(polyLineOptions.getPoints().get(k).longitude);
+                    Location lastLocation = new Location("that");
+                    lastLocation.setLatitude(polyLineOptions.getPoints().get(k-1).latitude);
+                    lastLocation.setLongitude(polyLineOptions.getPoints().get(k-1).longitude);
+                    totalDistance += lastLocation.distanceTo(currLocation);
+                }
+                DISTANCE_BETWEEN= (int) (totalDistance/1000);
+
             }
         }
     }
