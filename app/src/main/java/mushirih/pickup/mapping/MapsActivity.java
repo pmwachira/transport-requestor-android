@@ -23,12 +23,14 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.SharedElementCallback;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.transition.Explode;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -246,15 +248,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if(mCenterLatLong.latitude>4.9||mCenterLatLong.latitude<-4.8||mCenterLatLong.longitude<34||mCenterLatLong.longitude>41){
                     Toast.makeText(mContext, "Only PickUp requests from Kenya Allowed", Toast.LENGTH_LONG).show();
                 }else {
-                    //SET DATES FIRST
-                    //time pick
-                    DialogFragment newFragment = new TimePickerFragment();
-                    newFragment.show(getSupportFragmentManager(), "timePicker");
-                    //datePicker
-                    DialogFragment newfragment = new DatePickerFragment();
-                    newfragment.show(getSupportFragmentManager(), "datePicker");
+//                    //SET DATES FIRST
+//                    //time pick
+//                    DialogFragment newFragment = new TimePickerFragment();
+//                    newFragment.show(getSupportFragmentManager(), "timePicker");
+//                    //datePicker
+//                    DialogFragment newfragment = new DatePickerFragment();
+//                    newfragment.show(getSupportFragmentManager(), "datePicker");
                     //then proceed with load
-                        describe_load();
+                      //  describe_load();
                 }
             }
         });
@@ -371,7 +373,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             });
     }
+    private void setDateTime() {
+        //time pick
+        DialogFragment newFragment = new TimePickerFragment();
+        newFragment.setCancelable(false);
+        newFragment.show(getSupportFragmentManager(), "timePicker2");
 
+        //datePicker
+        DialogFragment newfragment = new DatePickerFragment();
+       newfragment.setCancelable(false);
+      newfragment.show(getSupportFragmentManager(), "datePicker2");
+
+            //SET DATES FIRST
+        updateProgress(false, 3, "Indicate weight of load", false);
+
+            describe_load();
+
+
+    }
     private  void describe_load() {
         //TODO Button visibility
         confirm.setVisibility(View.GONE);
@@ -386,7 +405,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     public void onClick(DialogInterface dialog, int which) {
                         weight=weight_options[which].toString();
                         if(load_weight_set==false) {
-                            updateProgress(false,3, "Provide a description of load", false);
+                            updateProgress(false,4, "Provide a description of load", false);
                             load_weight_set=true;
                         }
 
@@ -404,7 +423,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         @Override
                         public void onClick(DialogInterface dialog, int which, boolean isChecked) {
                             if(load_desc_set==false) {
-                                updateProgress(false,4, "Provide details of collector", false);
+                                updateProgress(false,5, "Provide details of collector", false);
                             }
                             load_desc_set=true;
                             if (isChecked) {
@@ -467,9 +486,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                             else {
                                                 String desc="";
                                                 for(int i=0;i<load_char.size();i++){
-                                                    desc+=options[(int)load_char.get(i)];
+                                                    desc+=options[(int)load_char.get(i)]+" ";
                                                 }
-                                                Load.bulkSet(mContext,LOCATION_FROM,LOCATION_TO,weight,load_char,namee,idd,numm,DISTANCE_BETWEEN);
+                                                Load.bulkSet(mContext,LOCATION_FROM,LOCATION_TO,weight,desc,namee,idd,numm,DISTANCE_BETWEEN);
                                                 //TODO CAPTURE PICTURE OF THE LOAD
                                                 Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                                 if (takePicture.resolveActivity(getPackageManager()) != null) {
@@ -683,7 +702,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     }
                                 }
                                 updateProgress(false,2, "Provide load weight", false);
-                                describe_load();
+                                setDateTime();
                             }
 
                         });
@@ -1015,7 +1034,7 @@ class AddressResultReceiver extends ResultReceiver {
                 image= (Bitmap) extras.get("data");
                 Load.setImage(image);
                 am_done=true;
-                updateProgress(false,5, "Details Completed",true);
+                updateProgress(false,6, "Details Completed",true);
 
 //                                                    //TODO change requestor button
                 confirm.setVisibility(View.VISIBLE);
@@ -1074,9 +1093,9 @@ class AddressResultReceiver extends ResultReceiver {
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_TO, 16);
                     mMap.animateCamera(cameraUpdate);
                     startIntentService(x);
+                    setDateTime();
+                    updateProgress(false,2,"Choose Date and time of transport",false);
 
-                    updateProgress(false,2,"Provide load weight",false);
-                    describe_load();
 
                 }
             }

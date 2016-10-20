@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import mushirih.pickup.internal.MyApplication;
+import mushirih.pickup.internal.User;
 
 /**
  * Created by p-tah on 09/08/2016.
@@ -54,7 +55,7 @@ public class Load {
     private static LatLng LOCATION_FROM;
     private static LatLng LOCATION_TO;
     private static String WEIGHT;
-    private static ArrayList LOAD_CHAR;
+    private static String LOAD_CHAR;
    private static String NAMEE, IDD, NUMM;
    private static int DISTANCE_BETWEEN;
 
@@ -73,7 +74,7 @@ public class Load {
         HOUR=hourOfDay;
         MINUTE=minute;
     }
-    public static void bulkSet(Context mContext, LatLng location_from, LatLng location_to, String weight, ArrayList load_char, String namee, String idd, String numm, int distance_between) {
+    public static void bulkSet(Context mContext, LatLng location_from, LatLng location_to, String weight, String load_char, String namee, String idd, String numm, int distance_between) {
         CONTEXT=mContext;
         LOCATION_FROM=location_from;
         LOCATION_TO=location_to;
@@ -88,10 +89,10 @@ public class Load {
     public static void send(){
         requestService(CONTEXT,LOCATION_FROM,LOCATION_TO,WEIGHT,LOAD_CHAR,NAMEE,IDD,NUMM,IMAGE,DISTANCE_BETWEEN);
     }
-    public static void requestService(final Context current, final LatLng LOCATION_FROM, final LatLng LOCATION_TO, final String weight, final ArrayList load_char, final String name, final String id, final String num, final Bitmap image, final int DISTANCE_BETWEEN) {
+    public static void requestService(final Context current, final LatLng LOCATION_FROM, final LatLng LOCATION_TO, final String weight, final String load_char, final String name, final String id, final String num, final Bitmap image, final int DISTANCE_BETWEEN) {
         mContext=current;
 
-        loading = ProgressDialog.show(mContext, "Submitting your request", "Please wait...",true,true);
+        loading = ProgressDialog.show(mContext, "Submitting your request", "Please wait...",true,false);
 
         final StringRequest strReq = new StringRequest(Request.Method.POST,
                 MyApplication.ONLINE_ALPHA_REQUEST, new Response.Listener<String>() {
@@ -146,9 +147,9 @@ public class Load {
             public Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
 
-                params.put("drop_id","0000");
+                params.put("drop_id",User.id);
                 params.put("drop_num","0000");
-                params.put("requestor_id","0000");
+                params.put("requestor_id", User.id);
                 params.put("pick_num",num.toString());
                 params.put("pick_lat", String.valueOf(LOCATION_FROM.latitude));
                 params.put("pick_long", String.valueOf(LOCATION_FROM.longitude));

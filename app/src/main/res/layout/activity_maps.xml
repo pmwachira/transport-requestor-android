@@ -341,7 +341,7 @@ android:layout_height="match_parent">
                     android:id="@+id/progressStepper"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:stpi_stepCount="5"/>
+                    app:stpi_stepCount="6"/>
                 <TextView
                     android:layout_below="@+id/progressStepper"
                     android:layout_marginTop="4dp"

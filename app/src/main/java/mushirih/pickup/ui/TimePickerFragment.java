@@ -18,15 +18,18 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        final Calendar c=Calendar.getInstance();
+        final Calendar c= Calendar.getInstance();
         int hour=c.get(Calendar.HOUR_OF_DAY);
         int minute=c.get(Calendar.MINUTE);
 
-        return new TimePickerDialog(getActivity(),this,hour,minute, !android.text.format.DateFormat.is24HourFormat(getActivity()));
+        TimePickerDialog tpd=new TimePickerDialog(getActivity(),this,hour,minute, !android.text.format.DateFormat.is24HourFormat(getActivity()));
+        tpd.setTitle("Set preferred time of travel");
+        return tpd;
     }
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
         Load.setTime(hourOfDay,minute);
+
     }
 }

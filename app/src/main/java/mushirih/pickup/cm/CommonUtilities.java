@@ -19,7 +19,7 @@ public class CommonUtilities {
     static final String TAG = "Mushhirih Push";
 
     public static final String DISPLAY_MESSAGE_ACTION =
-            "mushirih.dropoff.pushnotifications.DISPLAY_MESSAGE";
+            "mushirih.PICKUP.pushnotifications.DISPLAY_MESSAGE";
 
     public static final String EXTRA_MESSAGE = "message";
 

@@ -241,7 +241,6 @@ public class RegisterActivity extends AppCompatActivity {
         } else {
             // Device is already registered on GCM
             if (GCMRegistrar.isRegisteredOnServer(mContext)) {
-                // Skips registration.
                 ServerUtilities.register(mContext, user_name, DRIVER_EMAIL, regId);
                 loading.dismiss();
                 Toast.makeText(getApplicationContext(), "Already registered with GCM", Toast.LENGTH_LONG).show();
