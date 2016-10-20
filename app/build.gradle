@@ -32,6 +32,5 @@ dependencies {
     compile 'com.android.volley:volley:1.0.0'
     compile 'com.jakewharton:butterknife:5.1.1'
     compile 'com.github.badoualy:stepper-indicator:1.0.6'
-
-
+    compile files('libs/gcm.jar')
 }

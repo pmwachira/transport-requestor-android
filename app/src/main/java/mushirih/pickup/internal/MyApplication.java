@@ -17,6 +17,8 @@ public class MyApplication extends Application {
 
     public static final String TAG = MyApplication.class
             .getSimpleName();
+    public static final String ADD_USER = "http://noshybakery.co.ke/PICKUP/v1/user/add";
+
 
 
     private static MyApplication mInstance;

@@ -12,7 +12,6 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,6 +39,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import mushirih.pickup.R;
+import mushirih.pickup.RegisterActivity;
 import mushirih.pickup.internal.MyApplication;
 import mushirih.pickup.internal.User;
 import mushirih.pickup.mapping.AppUtils;
@@ -111,13 +111,30 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.bt_go:
-                if(etUseremail.getText().toString().trim().equals("1234")){
+                email = etUseremail.getText().toString().trim();
+                password = etPassword.getText().toString().trim();
+                if(email.equals("1234")){
                       /*TODO REMOVE FOR DEBUG*/
                     //todo debug trapdoor
                     startActivity(new Intent(getApplicationContext(), MapsActivity.class));
                     finish();
-                }else {
-                    login();
+                }else{
+                        if (email.isEmpty()) {
+                            etUseremail.setError("Enter a valid email");
+                            if (etUseremail.requestFocus()) {
+                                getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                            }
+                        } else if(!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+                            etUseremail.setError("Enter a valid email");
+                            if (etUseremail.requestFocus()) {
+                                getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                            }
+                        }
+                        else {
+                            inputLayoutEmail.setErrorEnabled(false);
+                            login();
+                        }
+                }
 
 //                Explode explode = null;
 //                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
@@ -134,16 +151,11 @@ public class MainActivity extends AppCompatActivity {
 
                     break;
                 }
-        }
+
     }
 
     private void login() {
         loading = ProgressDialog.show(context, "Authenticating", "Please wait...",true,true);
-        if (!validateEmail()) {
-            return;
-        }
-        email = etUseremail.getText().toString().trim();
-        password = etPassword.getText().toString().trim();
         StringRequest strReq = new StringRequest(Request.Method.POST,
                 MyApplication.Online_Login, new Response.Listener<String>() {
 
@@ -216,45 +228,6 @@ public class MainActivity extends AppCompatActivity {
         MyApplication.getInstance().addToRequestQueue(strReq);
     }
 
-    private void requestFocus(View view) {
-        if (view.requestFocus()) {
-            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-        }
-    }
-    // Validating name
-    private boolean validateName() {
-        if (etUseremail.getText().toString().trim().isEmpty()) {
-            etUseremail.setError("Error message");
-            requestFocus(etUseremail);
-            return false;
-        } else {
-            inputLayoutEmail.setErrorEnabled(false);
-        }
-
-        return true;
-    }
-
-    // Validating email
-    private boolean validateEmail() {
-        email = etUseremail.getText().toString().trim();
-        if (email.isEmpty() || !isValidEmail(email)) {
-            etUseremail.setError("Enter a valid email");
-            requestFocus(etUseremail);
-            return false;
-        } else {
-            inputLayoutEmail.setErrorEnabled(false);
-            return true;
-        }
-    }
-
-    private static boolean isValidEmail(String email) {
-        if(TextUtils.isEmpty(email) && !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()){
-            return false;
-        }else {
-            return true;
-        }
-
-    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -269,13 +242,6 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if(id==R.id.action_switch){
-
-                Intent sc=new Intent(getBaseContext(),TestScreen.class);
-                sc.putExtra("want",0);
-                startActivity(sc);
-                finish();
-        }
         return super.onOptionsItemSelected(item);
     }
 }

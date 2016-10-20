@@ -4,7 +4,9 @@ package mushirih.pickup.internal;
  * Created by p-tah on 13/08/2016.
  */
 public class User {
-    String id, name, email;
+    public static String id;
+    public static String name;
+    public static String email;
 
     public User() {
     }

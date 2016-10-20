@@ -150,13 +150,16 @@ public class Load {
                 params.put("drop_num","0000");
                 params.put("requestor_id","0000");
                 params.put("pick_num",num.toString());
-                params.put("pick_coords", LOCATION_FROM.toString());
+                params.put("pick_lat", String.valueOf(LOCATION_FROM.latitude));
+                params.put("pick_long", String.valueOf(LOCATION_FROM.longitude));
                 params.put("load_desc", "weight: "+weight.toString()+"Load Description: "+load_char.toString());
                 params.put("image","0000");
                 params.put("est_dist", String.valueOf(DISTANCE_BETWEEN));
                 params.put("est_cost","0000");
-                params.put("pick_time",DAY+"/"+MONTH+"/"+YEAR+" "+HOUR+":"+MINUTE);
-                params.put("drop_coords",LOCATION_TO.toString());
+                params.put("pick_time",HOUR+":"+MINUTE);
+                params.put("pick_date",DAY+"/"+MONTH+"/"+YEAR);
+                params.put("drop_lat", String.valueOf(LOCATION_TO.latitude));
+                params.put("drop_long", String.valueOf(LOCATION_TO.longitude));
 
                 Log.e(TAG, "params: " + params.toString());
                 return params;
