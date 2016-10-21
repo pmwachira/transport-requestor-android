@@ -23,14 +23,12 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.SharedElementCallback;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.transition.Explode;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -196,7 +194,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     VIEW_TO_CHANGE=pich_loc;
                     MARKER_TYPE=PICK_FLAG;
                     startActivityForResult(builder.build(activity), PLACE_PICKER_DEST_REQUEST);
-
+                    hide.setVisibility(View.VISIBLE);
                 } catch (GooglePlayServicesRepairableException e) {
                     e.printStackTrace();
                 } catch (GooglePlayServicesNotAvailableException e) {
@@ -731,6 +729,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     updateProgress(false,1, "Set destination point", false);
                                     LOCATION_FROM = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
                                     mMap.setMinZoomPreference(10);
+                                    hide.setVisibility(View.VISIBLE);
                                 }
 
                             });
