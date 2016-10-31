@@ -666,87 +666,84 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
                 @Override
                 public void onCameraChange(CameraPosition cameraPosition) {
-
                     //TODO SHOW REQUEST PICK UP HERE FROM CENTER MAP COORDS
                     mCenterLatLong = cameraPosition.target;
                     final Location mLocation = new Location("");
                     mLocation.setLatitude(mCenterLatLong.latitude);
                     mLocation.setLongitude(mCenterLatLong.longitude);
-
-                    //Check for drop of marker move
-                    if (mLocationText.getText().equals("Set drop point here") || pick_point_set) {
-                        mLocationText.setText("Set drop point here");
-                        //SET DESTINATION
-                        mLocationText.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                VIEW_TO_CHANGE = drop_loc;
-                                MARKER_TYPE = DROP_FLAG;
-                                mAddressOutput = "";
-                                startIntentService(mLocation);
-                                hide.setVisibility(View.VISIBLE);
-                                //TODO change this to pop
-                                request_pane.setVisibility(View.VISIBLE);
-                                location_pick_graphic.setVisibility(View.INVISIBLE);
-                                mMap.setMinZoomPreference(10);
-                                LOCATION_TO = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
-                                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_TO, 16);
-                                mMap.animateCamera(cameraUpdate);
-                                if (!LOCATION_FROM.equals(null) && !LOCATION_TO.equals(null)) {
-                                    if (AppUtils.isDataEnabled(mContext)) {
-                                        showRoute();
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), "Please check your internet connection", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                                updateProgress(false,2, "Provide load weight", false);
-                                setDateTime();
-                            }
-
-                        });
-
-                    } else {
-                        request_pane.setVisibility(View.GONE);
-                        try {
-                            mLocationText.setText("Click to request pick up here");
-                            mLocationText.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    hide.setVisibility(View.VISIBLE);
-                                    hide.setVisibility(View.GONE);
-                                    //TODO Try find clicked location
-                                    MARKER_TYPE = PICK_FLAG;
-                                    VIEW_TO_CHANGE = pich_loc;
-                                    mAddressOutput = "";
-                                    startIntentService(mLocation);
-                                    if (pich_loc.getText().equals("Select pick up location")) {
-                                        pich_loc.setTextColor(Color.DKGRAY);
-                                        pich_loc.setTextSize(16);
-                                    }
-                                    // pich_loc.setText(mAddressOutput);
-                                    mLocationText.setText("Set drop point here");
-                                    Toast.makeText(getApplicationContext(), "Goods pick up point set at pin", Toast.LENGTH_LONG).show();
-                                    updateProgress(false,1, "Set destination point", false);
-                                    LOCATION_FROM = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
-                                    mMap.setMinZoomPreference(10);
-                                    hide.setVisibility(View.VISIBLE);
-                                }
-
-                            });
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-//            if(!pich_loc.getText().equals("Select pick up location")&&!loc_rep.getText().equals("Drop Location")){
-//                location_pick_graphic.setVisibility(View.INVISIBLE);
-//            }
+                    centerMarkerClick(mLocation);
                 }
             });
-            //ADDS LOCATION Finder option on map
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        }
+            //ADDS LOCATION Finder option on map
             // flatMarker(mMap);
+    }
+    private void centerMarkerClick(final Location mLocation) {
+        //Check for drop of marker move
+        if (mLocationText.getText().equals("Set drop point here") || pick_point_set) {
+            mLocationText.setText("Set drop point here");
+            //SET DESTINATION
+            mLocationText.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    VIEW_TO_CHANGE = drop_loc;
+                    MARKER_TYPE = DROP_FLAG;
+                    mAddressOutput = "";
+                    startIntentService(mLocation);
+                    hide.setVisibility(View.VISIBLE);
+                    //TODO change this to pop
+                    request_pane.setVisibility(View.VISIBLE);
+                    location_pick_graphic.setVisibility(View.INVISIBLE);
+                    mMap.setMinZoomPreference(10);
+                    LOCATION_TO = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_TO, 16);
+                    mMap.animateCamera(cameraUpdate);
+                    if (!LOCATION_FROM.equals(null) && !LOCATION_TO.equals(null)) {
+                        if (AppUtils.isDataEnabled(mContext)) {
+                            showRoute();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Please check your internet connection", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    updateProgress(false,2, "Provide load weight", false);
+                    setDateTime();
+                }
+
+            });
+
+        } else {
+            request_pane.setVisibility(View.GONE);
+            try {
+                mLocationText.setText("Click to request pick up here");
+                mLocationText.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        hide.setVisibility(View.VISIBLE);
+                        hide.setVisibility(View.GONE);
+                        //TODO Try find clicked location
+                        MARKER_TYPE = PICK_FLAG;
+                        VIEW_TO_CHANGE = pich_loc;
+                        mAddressOutput = "";
+                        startIntentService(mLocation);
+                        if (pich_loc.getText().equals("Select pick up location")) {
+                            pich_loc.setTextColor(Color.DKGRAY);
+                            pich_loc.setTextSize(16);
+                        }
+                        // pich_loc.setText(mAddressOutput);
+                        mLocationText.setText("Set drop point here");
+                        Toast.makeText(getApplicationContext(), "Goods pick up point set at pin", Toast.LENGTH_LONG).show();
+                        updateProgress(false,1, "Set destination point", false);
+                        LOCATION_FROM = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
+                        mMap.setMinZoomPreference(10);
+                        hide.setVisibility(View.VISIBLE);
+                    }
+
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
     @Override
@@ -803,6 +800,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onLocationChanged(Location location) {
             if (showProgress == 1) {
                 progressDialog.dismiss();
+                centerMarkerClick(location);
             }
             try {
                 if (location != null)
@@ -1092,8 +1090,8 @@ class AddressResultReceiver extends ResultReceiver {
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_TO, 16);
                     mMap.animateCamera(cameraUpdate);
                     startIntentService(x);
-                    setDateTime();
-                    updateProgress(false,2,"Choose Date and time of transport",false);
+                  //  setDateTime();
+                    //updateProgress(false,2,"Choose Date and time of transport",false);
 
 
                 }

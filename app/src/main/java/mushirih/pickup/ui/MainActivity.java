@@ -201,8 +201,20 @@ public class MainActivity extends AppCompatActivity {
                 NetworkResponse networkResponse = error.networkResponse;
                 loading.dismiss();
                 Log.e(TAG, "Volley error: " + error.getMessage() + ", code: " + networkResponse+" and "+error.getMessage());
-                Toast.makeText(getApplicationContext(), "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-
+               Toast.makeText(getApplicationContext(), "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+////------------------------------
+//                String body="";
+//                //get status code here
+//                String statusCode = String.valueOf(error.networkResponse.statusCode);
+//                //get response body and parse with appropriate encoding
+//                if(error.networkResponse.data!=null) {
+//                    try {
+//                        body = new String(error.networkResponse.data,"UTF-8");
+//                    } catch (UnsupportedEncodingException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//                Toast.makeText(context,"Body="+body,Toast.LENGTH_SHORT).show();
             }
         }) {
 
@@ -210,7 +222,6 @@ public class MainActivity extends AppCompatActivity {
 
             public Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-//                params.put("name", name);
                 params.put("email",email);
                 params.put("password",password);
 

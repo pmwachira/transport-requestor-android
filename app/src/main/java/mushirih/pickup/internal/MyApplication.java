@@ -28,7 +28,6 @@ public class MyApplication extends Application {
     private MyPreferenceManager pref;
     public static final String ADD_USER = "http://noshybakery.co.ke/PICKUP/v1/user/add";
     public static String Online_Login="http://noshybakery.co.ke/PICKUP/v1/user/login";
-    public static String OffLine_Login="http://192.168.43.185/PICKUP/v1/user/login";
     public static final String ONLINE_ALPHA_REQUEST = "http://noshybakery.co.ke/PICKUP/v1/init_request";
     public static final String IMAGE_UPLOAD_URL = "http://noshybakery.co.ke/PICKUP/include/image_upload.php";
     @Override
@@ -57,6 +56,7 @@ return requestQueue;
     }
     public <T> void addToRequestQueue(Request<T> req) {
 //        req.setTag(TAG);
+        req.setShouldCache(false);
         getRequestQueue().add(req);
     }
     public void cancelPendingRequests(Object tag) {

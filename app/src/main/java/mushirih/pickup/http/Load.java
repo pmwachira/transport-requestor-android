@@ -3,7 +3,6 @@ package mushirih.pickup.http;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
@@ -11,26 +10,19 @@ import android.widget.Toast;
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.model.LatLng;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 import mushirih.pickup.internal.MyApplication;
@@ -112,6 +104,12 @@ public class Load {
                           String request_id=object.getString("request_id");
 
                         request_id_global=request_id;
+                        if(null==request_id_global){
+                            request_id_global=System.currentTimeMillis()+"";
+                            Log.e("IMAGE UPLOAD","NULL REQUEST ID");
+                        }else{
+                            uploader(image,request_id_global);
+                        }
 //                        User user = new User(userObj.getString("user_id"),
 //                                userObj.getString("name"),
 //                                userObj.getString("email"));
@@ -129,7 +127,7 @@ public class Load {
                     }
 
                 } catch (JSONException e) {
-                    Log.e(TAG, "json parsing error: " + e.getMessage());
+                    Log.e(TAG, "json parsing error: " + response+"::"+e.getMessage());
                     Toast.makeText(mContext, "Json parse error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -146,10 +144,17 @@ public class Load {
             @Override
             public Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
+                String userid;
+                //todo trial
+                if(User.id==null){
+                    userid="0000";
+                }else{
+                    userid=User.id;
+                }
 
-                params.put("drop_id",User.id);
+                params.put("drop_id",userid);
                 params.put("drop_num","0000");
-                params.put("requestor_id", User.id);
+                params.put("requestor_id", userid);
                 params.put("pick_num",num.toString());
                 params.put("pick_lat", String.valueOf(LOCATION_FROM.latitude));
                 params.put("pick_long", String.valueOf(LOCATION_FROM.longitude));
@@ -174,59 +179,79 @@ public class Load {
         };
         //Adding request to request queue
         MyApplication.getInstance().addToRequestQueue(strReq);
-        if(null==request_id_global){
-            request_id_global=System.currentTimeMillis()+"";
-            Log.e("IMAGE UPLOAD","NULL REQUEST ID");
-        }else{
-        new Uploader(image,request_id_global).execute();
-        }
         //store transaction id+state to sp
         MyApplication.getInstance().getPrefManager().storeTRansactionId(request_id_global,"ALPHA");
 
     }
-    private static class Uploader extends AsyncTask<Void, Void, Void>{
-        Bitmap image;
-        String name;
-        public Uploader(Bitmap image,String name) {
-            this.image=image;
-            this.name=name;
-        }
 
-        @Override
-        protected Void doInBackground(Void... params) {
-            ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
-            image.compress(Bitmap.CompressFormat.JPEG,100,byteArrayOutputStream);
-            String encodedImage=Base64.encodeToString(byteArrayOutputStream.toByteArray(),Base64.DEFAULT);
+    private static void uploader(Bitmap image, final String request_id_global) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        image.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+        final String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
+        //
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, MyApplication.IMAGE_UPLOAD_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String s) {
+                        //Disimissing the progress dialog
+                        loading.dismiss();
+                        //Showing toast message of the response
+                        Toast.makeText(mContext, s, Toast.LENGTH_LONG).show();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        //Dismissing the progress dialog
+                        loading.dismiss();
 
-            ArrayList<NameValuePair> dataToSend=new ArrayList<>();
-            dataToSend.add(new BasicNameValuePair("image",encodedImage));
-            dataToSend.add(new BasicNameValuePair("name",name));
+                        //Showing toast
+                        Toast.makeText(mContext, volleyError.getMessage().toString(), Toast.LENGTH_LONG).show();
+                    }
+                }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
 
-            HttpParams httpRequestParams=getHttpRequestParams();
+                //Creating parameters
+                Map<String, String> params = new Hashtable<String, String>();
 
-            HttpClient httpClient=new DefaultHttpClient(httpRequestParams);
-            HttpPost httpPost=new HttpPost(MyApplication.IMAGE_UPLOAD_URL);
+                //Adding parameters
+                params.put("image", encodedImage);
+                params.put("name", request_id_global);
 
-            try{
-                httpPost.setEntity(new UrlEncodedFormEntity(dataToSend));
-                httpClient.execute(httpPost);
-            }catch (Exception e){
-                e.printStackTrace();
+                //returning parameters
+                return params;
             }
-            return null;
-        }
+        };
 
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            loading.dismiss();
-            Toast.makeText(mContext,"Request submitted for submission",Toast.LENGTH_SHORT).show();
-        }
+        //Creating a Request Queue
+        RequestQueue requestQueue = Volley.newRequestQueue(mContext);
+
+        //Adding request to the queue
+        requestQueue.add(stringRequest);
     }
-    private static HttpParams getHttpRequestParams(){
-        HttpParams httpRequestParams=new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(httpRequestParams,30*1000);
-        HttpConnectionParams.setSoTimeout(httpRequestParams,30*1000);
-        return httpRequestParams;
-    }
+            //
+//
+//            ArrayList<NameValuePair> dataToSend=new ArrayList<>();
+//            dataToSend.add(new BasicNameValuePair("image",encodedImage));
+//            dataToSend.add(new BasicNameValuePair("name",name));
+//
+//            HttpParams httpRequestParams=getHttpRequestParams();
+//
+//            HttpClient httpClient=new DefaultHttpClient(httpRequestParams);
+//            HttpPost httpPost=new HttpPost(MyApplication.IMAGE_UPLOAD_URL);
+//
+//            try{
+//                httpPost.setEntity(new UrlEncodedFormEntity(dataToSend));
+//                httpClient.execute(httpPost);
+//            }catch (Exception e){
+//                e.printStackTrace();
+//            }
+//    private static HttpParams getHttpRequestParams(){
+//        HttpParams httpRequestParams=new BasicHttpParams();
+//        HttpConnectionParams.setConnectionTimeout(httpRequestParams,30*1000);
+//        HttpConnectionParams.setSoTimeout(httpRequestParams,30*1000);
+//        return httpRequestParams;
+//    }
 }
+

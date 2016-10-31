@@ -11,7 +11,9 @@ public class CommonUtilities {
     public static final String SERVER_URL = "http://noshybakery.co.ke/PICKUP/v1/user/gcm";
 
     // Google project id
-    public static final String SENDER_ID = "495371649755";
+
+//    public static final String SENDER_ID = "495371649755";
+  public static final String SENDER_ID = "710981012625";
 
     /**
      * Tag used on log messages.
