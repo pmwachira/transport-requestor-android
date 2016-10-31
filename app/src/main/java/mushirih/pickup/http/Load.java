@@ -206,7 +206,7 @@ public class Load {
                         loading.dismiss();
 
                         //Showing toast
-                        Toast.makeText(mContext, volleyError.getMessage().toString(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(mContext, volleyError.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }) {
             @Override
