@@ -14,7 +14,6 @@ import com.google.android.gcm.GCMRegistrar;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -160,13 +159,4 @@ public class ServerUtilities {
             CommonUtilities.displayMessage(context, message);
         }
     }
-
-    /**
-     * Issue a POST request to the server.
-     *
-     * @param endpoint POST address.
-     * @param params request parameters.
-     *
-     * @throws IOException propagated from POST.
-     */
 }
