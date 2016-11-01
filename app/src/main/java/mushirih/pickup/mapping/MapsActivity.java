@@ -126,6 +126,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     TextView progressTitle,next_action;
     StepperIndicator progressStepper;
     String[] options;
+    int CAMERA_ZOOM=16;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -698,8 +699,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     location_pick_graphic.setVisibility(View.INVISIBLE);
                     mMap.setMinZoomPreference(10);
                     LOCATION_TO = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
-                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_TO, 16);
-                    mMap.animateCamera(cameraUpdate);
                     if (!LOCATION_FROM.equals(null) && !LOCATION_TO.equals(null)) {
                         if (AppUtils.isDataEnabled(mContext)) {
                             showRoute();
@@ -707,6 +706,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             Toast.makeText(getApplicationContext(), "Please check your internet connection", Toast.LENGTH_SHORT).show();
                         }
                     }
+                    LatLng x= new LatLng((LOCATION_FROM.latitude+LOCATION_TO.latitude)/2,(LOCATION_FROM.longitude+LOCATION_TO.longitude)/2);
+                    mMap.resetMinMaxZoomPreference();
+                    if(DISTANCE_BETWEEN<30){
+                        CAMERA_ZOOM=8;
+                    }
+                    else if(DISTANCE_BETWEEN>30&&DISTANCE_BETWEEN<60){
+                        CAMERA_ZOOM=6;
+                    }else{
+                        CAMERA_ZOOM=4;
+                    }
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(x, CAMERA_ZOOM);
+                    mMap.animateCamera(cameraUpdate);
                     updateProgress(false,2, "Provide load weight", false);
                     setDateTime();
                 }
