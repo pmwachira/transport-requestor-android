@@ -122,11 +122,13 @@ public class Load {
                        // current.finish();
 
                     } else {
+                        loading.dismiss();
                         // login error - simply toast the message
                         Toast.makeText(mContext, "" + object.getJSONObject("error").getString("message"), Toast.LENGTH_LONG).show();
                     }
 
                 } catch (JSONException e) {
+                    loading.dismiss();
                     Log.e(TAG, "json parsing error: " + response+"::"+e.getMessage());
                     Toast.makeText(mContext, "Json parse error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
@@ -135,6 +137,7 @@ public class Load {
 
             @Override
             public void onErrorResponse(VolleyError error) {
+                loading.dismiss();
                 NetworkResponse networkResponse = error.networkResponse;
                 Log.e(TAG, "Volley error: " + error.getMessage() + ", code: " + networkResponse+" and "+error.getMessage());
                 Toast.makeText(mContext, "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
@@ -145,11 +148,12 @@ public class Load {
             public Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
                 String userid;
+                User user= MyApplication.getInstance().getPrefManager().getUser();
                 //todo trial
-                if(User.id==null){
+                if(user.getId()==null){
                     userid="0000";
                 }else{
-                    userid=User.id;
+                    userid=user.getId();
                 }
 
                 params.put("drop_id",userid);

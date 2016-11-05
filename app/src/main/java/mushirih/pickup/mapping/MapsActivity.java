@@ -22,11 +22,14 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.Toolbar;
 import android.transition.Explode;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -75,11 +78,14 @@ import java.util.List;
 import mushirih.pickup.R;
 import mushirih.pickup.http.HttpConnection;
 import mushirih.pickup.http.Load;
+import mushirih.pickup.internal.MyApplication;
+import mushirih.pickup.internal.MyPreferenceManager;
 import mushirih.pickup.ui.DatePickerFragment;
+import mushirih.pickup.ui.MainActivity;
 import mushirih.pickup.ui.PrefManager;
 import mushirih.pickup.ui.TimePickerFragment;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener  {
+public class MapsActivity extends ActionBarActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener  {
    static Context mContext;
     LinearLayout searchloc;
     private GoogleMap mMap;
@@ -140,7 +146,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         activity=this;
         buildGoogleApiClient();
         setContentView(R.layout.activity_maps);
-
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         progressTitle= (TextView) findViewById(R.id.progressTitle);
         next_action= (TextView) findViewById(R.id.next_action);
         progressStepper= (StepperIndicator) findViewById(R.id.progressStepper);
@@ -1010,6 +1017,29 @@ class AddressResultReceiver extends ResultReceiver {
             Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
 
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate your Menu
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        if(id==R.id.action_logOut){
+            MyPreferenceManager myPreferenceManager=new MyPreferenceManager(this);
+            myPreferenceManager.logOutUser();
+            startActivity(new Intent(getBaseContext(),MainActivity.class));
+            finish();
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     /**

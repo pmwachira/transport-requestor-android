@@ -50,6 +50,14 @@ public class MyPreferenceManager {
 
         Log.e(TAG, "User is stored in shared preferences. " + user.getName() + ", " + user.getEmail());
     }
+    public void logOutUser() {
+        editor.putString(KEY_USER_ID,null);
+        editor.putString(KEY_USER_NAME, null);
+        editor.putString(KEY_USER_EMAIL, null);
+        editor.commit();
+
+        Log.e(TAG, "User Logged Out");
+    }
 
     public User getUser() {
         if (pref.getString(KEY_USER_ID, null) != null) {

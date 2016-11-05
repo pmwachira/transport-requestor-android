@@ -41,6 +41,7 @@ import butterknife.OnClick;
 import mushirih.pickup.R;
 import mushirih.pickup.RegisterActivity;
 import mushirih.pickup.internal.MyApplication;
+import mushirih.pickup.internal.MyPreferenceManager;
 import mushirih.pickup.internal.User;
 import mushirih.pickup.mapping.AppUtils;
 import mushirih.pickup.mapping.MapsActivity;
@@ -64,9 +65,15 @@ public class MainActivity extends AppCompatActivity {
     private TextInputLayout inputLayoutEmail, inputLayoutPass;
     Context context;
     ProgressDialog loading;
+    MyPreferenceManager myPreferenceManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        myPreferenceManager=new MyPreferenceManager(this);
+        if( null!=myPreferenceManager.getUser()){
+            startActivity(new Intent(getApplicationContext(), MapsActivity.class));
+            finish();
+        }
         setContentView(R.layout.activity_main0);
         context=MainActivity.this;
         ButterKnife.inject(this);
@@ -242,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+      //  getMenuInflater().inflate(R.menu.menu_main, menu);
 
         return true;
     }

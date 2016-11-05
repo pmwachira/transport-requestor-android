@@ -149,9 +149,9 @@ public class RegisterActivity extends AppCompatActivity {
                         user_email=userObj.getString("email");
                         user_name= userObj.getString("name");
                         user_id=userObj.getString("user_id");
-                        User user = new User(user_email,
+                        User user = new User(user_id,
                                 user_name,
-                                user_id);
+                                user_email);
 
                         // storing user in shared preferences
                         MyApplication.getInstance().getPrefManager().storeUser(user);
