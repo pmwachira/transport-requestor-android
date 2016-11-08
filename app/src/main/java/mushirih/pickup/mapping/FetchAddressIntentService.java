@@ -188,7 +188,7 @@ public class FetchAddressIntentService extends IntentService {
                 }
             //TODO OTHER THIS
             //8888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
-            backupplan(location.getLatitude(),location.getLongitude());
+          //  backupplan(location.getLatitude(),location.getLongitude());
             // 88888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
 
         } catch (IllegalArgumentException illegalArgumentException) {

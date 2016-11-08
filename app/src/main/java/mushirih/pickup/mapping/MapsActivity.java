@@ -78,7 +78,6 @@ import java.util.List;
 import mushirih.pickup.R;
 import mushirih.pickup.http.HttpConnection;
 import mushirih.pickup.http.Load;
-import mushirih.pickup.internal.MyApplication;
 import mushirih.pickup.internal.MyPreferenceManager;
 import mushirih.pickup.ui.DatePickerFragment;
 import mushirih.pickup.ui.MainActivity;
@@ -531,7 +530,6 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
         builder.setNegativeButton("Cancel",null);
          builder.show();
     }
-
     private void showRoute() {
         mMap.clear();
         mMap.addMarker(new MarkerOptions().position(LOCATION_FROM).title("Pick Up Location"));
@@ -543,7 +541,6 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
         readTask.execute(url);
 
     }
-
     private String getMapsApiDirectionsUrl() {
         String waypoints="&waypoints=optimize:true|"+
                 LOCATION_FROM.latitude+","+LOCATION_FROM.longitude+
@@ -560,7 +557,6 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
 
         return url;
     }
-
     private class ReadTask extends AsyncTask<String,Void,String> {
 
 
@@ -583,7 +579,6 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
             new ParserTask().execute(s);
         }
     }
-
     private class ParserTask extends AsyncTask<String,Integer,List<List<HashMap<String,String>>>>{
         JSONObject jsonObject;
         List<List<HashMap<String,String>>> routes=null;
@@ -644,7 +639,6 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
             }
         }
     }
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -781,6 +775,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                 mGoogleApiClient);
         if (mLastLocation != null) {
           changeMap(mLastLocation);
+            centerMarkerClick(mLastLocation);
            // VIEW_TO_CHANGE = drop_loc;
             //startIntentService(mLastLocation);
             Log.d(TAG, "ON connected");
@@ -807,7 +802,6 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
             e.printStackTrace();
         }
     }
-
     @Override
     public void onConnectionSuspended(int i) {
         Log.i(TAG, "Connection suspended");
@@ -818,11 +812,12 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     public void onLocationChanged(Location location) {
             if (showProgress == 1) {
                 progressDialog.dismiss();
-                centerMarkerClick(location);
+//                centerMarkerClick(location);
             }
             try {
                 if (location != null)
                     changeMap(location);
+                centerMarkerClick(location);
 
                 LocationServices.FusedLocationApi.removeLocationUpdates(
                         mGoogleApiClient, this);
@@ -1053,7 +1048,7 @@ class AddressResultReceiver extends ResultReceiver {
             switch (resultCode) {
                 case Activity.RESULT_OK:
                     showProgress=1;
-                progressDialog=new ProgressDialog(mContext);
+                    progressDialog=new ProgressDialog(mContext);
                     progressDialog.setIndeterminate(true);
                     progressDialog.setMessage("Finding your position");
                     progressDialog.setCancelable(false);
@@ -1128,9 +1123,12 @@ class AddressResultReceiver extends ResultReceiver {
                     }else{
                         Toast.makeText(getApplicationContext(),"Please check your internet connection",Toast.LENGTH_SHORT).show();
                     }
-                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_TO, 16);
+
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_TO, CAMERA_ZOOM);
                     mMap.animateCamera(cameraUpdate);
                     startIntentService(x);
+                    //TODO WATCHING
+                    centerMarkerClick(x);
                   //  setDateTime();
                     //updateProgress(false,2,"Choose Date and time of transport",false);
 
