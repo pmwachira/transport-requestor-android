@@ -38,6 +38,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.badoualy.stepperindicator.StepperIndicator;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -74,10 +80,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import mushirih.pickup.R;
 import mushirih.pickup.http.HttpConnection;
 import mushirih.pickup.http.Load;
+import mushirih.pickup.internal.MyApplication;
 import mushirih.pickup.internal.MyPreferenceManager;
 import mushirih.pickup.ui.DatePickerFragment;
 import mushirih.pickup.ui.MainActivity;
@@ -132,6 +140,8 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     StepperIndicator progressStepper;
     String[] options;
     int CAMERA_ZOOM=16;
+    ProgressDialog loading;
+    String desc="";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -381,7 +391,6 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     private void setDateTime() {
         //time pick
         DialogFragment newFragment = new TimePickerFragment();
-        newFragment.setCancelable(false);
         newFragment.show(getSupportFragmentManager(), "timePicker2");
 
         //datePicker
@@ -489,7 +498,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                                                 num.setError("Please fill in all details");
                                             }
                                             else {
-                                                String desc="";
+
                                                 for(int i=0;i<load_char.size();i++){
                                                     desc+=options[(int)load_char.get(i)]+" ";
                                                 }
@@ -1075,7 +1084,9 @@ class AddressResultReceiver extends ResultReceiver {
                 confirm.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Load.send();
+                        //TODO ESTIMATE PRICE FIRST
+                        getCostEstimate();
+                        //Load.send();
                     }
                 });
             }
@@ -1180,6 +1191,102 @@ class AddressResultReceiver extends ResultReceiver {
             // Indicates that the activity closed before a selection was made. For example if
             // the user pressed the back button.
         }
+    }
+
+    private void getCostEstimate() {
+        //On acceping price
+        //Load.send();
+            loading = ProgressDialog.show(mContext, null, "Calculating price...",true,false);
+            StringRequest strCost = new StringRequest(Request.Method.POST,
+                    MyApplication.ONLINE_CALCULATE_COST, new Response.Listener<String>() {
+
+                @Override
+                public void onResponse(String response) {
+                    Log.e(TAG, "response: " + response);
+                    try {
+                        JSONObject obj = new JSONObject(response);
+                        // check for error flag
+                        if (obj.getString("error").equals("false")) {
+                            // user successfully logged in
+                            loading.dismiss();
+                            View layoutInflater = View.inflate(mContext, R.layout.cost_est, null);
+                            TextView est,tme;
+                            Button accept,decline;
+                                final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                                builder.setCancelable(false);
+                                //.setTitle("Request Details.");
+                                builder.setView(layoutInflater);
+                           est= (TextView) layoutInflater.findViewById(R.id.tvestimatedcost);
+                            est.setText(obj.getString("cost"));
+                           tme= (TextView) layoutInflater.findViewById(R.id.tvtimeanddate);
+                            tme.setText(Load.DAY+"/"+Load.MONTH+"/"+Load.YEAR);
+                             accept= (Button) layoutInflater.findViewById(R.id.accept);
+                            accept.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Load.send();
+                                }
+                            });
+                             decline= (Button) layoutInflater.findViewById(R.id.decline);
+                            //builder.setPositiveButton("OKKKK", null);
+//                            builder.setNegativeButton("Cancel", null);
+                            final AlertDialog alertDialog = builder.create();
+                            alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                                    @Override
+                                    public void onShow(DialogInterface dialog) {
+                                        Button b = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                                    }
+                                    });
+                            alertDialog.show();
+
+
+                        } else {
+                            // login error - simply toast the message
+                            loading.dismiss();
+                            Toast.makeText(getApplicationContext(), "" + obj.getJSONObject("error").getString("message"), Toast.LENGTH_LONG).show();
+                        }
+
+                    } catch (JSONException e) {
+                        Log.e(TAG, "json parsing error: " + e.getMessage());
+                        Toast.makeText(getApplicationContext(), "Json parse error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }, new Response.ErrorListener() {
+
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    NetworkResponse networkResponse = error.networkResponse;
+                    loading.dismiss();
+                    Log.e(TAG, "Volley error: " + error.getMessage() + ", code: " + networkResponse+" and "+error.getMessage());
+                    Toast.makeText(getApplicationContext(), "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+
+                }
+            }) {
+
+                @Override
+
+                public Map<String, String> getParams() throws AuthFailureError {
+                    Map<String, String> params = new HashMap<>();
+                    params.put("eng_id", String.valueOf(000));
+                    params.put("distance",String.valueOf(DISTANCE_BETWEEN));
+                    params.put("weight",weight);
+                    params.put("nature",desc);
+                    params.put("value", String.valueOf(000));
+
+                    Log.e(TAG, "params: " + params.toString());
+                    return params;
+                }
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String,String> params = new HashMap<String, String>();
+                    params.put("Content-Type","application/x-www-form-urlencoded");
+                    return params;
+                }
+            };
+            //Adding request to request queue
+            MyApplication.getInstance().addToRequestQueue(strCost
+            );
+
     }
     //stop tracking when app is in background
 //    @Override

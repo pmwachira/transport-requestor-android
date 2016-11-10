@@ -39,7 +39,7 @@
     <application
         android:allowBackup="true"
         android:name=".internal.MyApplication"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
