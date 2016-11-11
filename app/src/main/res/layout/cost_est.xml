@@ -84,7 +84,7 @@
                 android:text="Proposed Time &amp; Date"
                 android:layout_gravity="center_horizontal" />
             <TextView
-                android:gravity="center_horizontal"
+                android:layout_gravity="center_horizontal"
                 android:layout_margin="8dp"
                 android:textColor="@color/colorPrimary"
                 android:textSize="20sp"

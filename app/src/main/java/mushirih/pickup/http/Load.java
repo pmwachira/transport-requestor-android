@@ -2,7 +2,9 @@ package mushirih.pickup.http;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.support.v7.app.AlertDialog;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
@@ -27,6 +29,7 @@ import java.util.Map;
 
 import mushirih.pickup.internal.MyApplication;
 import mushirih.pickup.internal.User;
+import mushirih.pickup.mapping.MapsActivity;
 
 /**
  * Created by p-tah on 09/08/2016.
@@ -187,7 +190,6 @@ public class Load {
         MyApplication.getInstance().getPrefManager().storeTRansactionId(request_id_global,"ALPHA");
 
     }
-
     private static void uploader(Bitmap image, final String request_id_global) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         image.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
@@ -201,6 +203,17 @@ public class Load {
                         loading.dismiss();
                         //Showing toast message of the response
                         Toast.makeText(mContext, s, Toast.LENGTH_LONG).show();
+                        //TODO Tell user something
+                        AlertDialog.Builder builder=new AlertDialog.Builder(mContext);
+                        builder.setTitle("Request successful").setCancelable(false)
+                                .setMessage("A driver going the direction of your load will get back to you")
+                                .setPositiveButton("Okay",new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        MapsActivity.requestSuccessful();
+                                    }
+                                });
+                        builder.show();
                     }
                 },
                 new Response.ErrorListener() {
@@ -234,28 +247,5 @@ public class Load {
         //Adding request to the queue
         requestQueue.add(stringRequest);
     }
-            //
-//
-//            ArrayList<NameValuePair> dataToSend=new ArrayList<>();
-//            dataToSend.add(new BasicNameValuePair("image",encodedImage));
-//            dataToSend.add(new BasicNameValuePair("name",name));
-//
-//            HttpParams httpRequestParams=getHttpRequestParams();
-//
-//            HttpClient httpClient=new DefaultHttpClient(httpRequestParams);
-//            HttpPost httpPost=new HttpPost(MyApplication.IMAGE_UPLOAD_URL);
-//
-//            try{
-//                httpPost.setEntity(new UrlEncodedFormEntity(dataToSend));
-//                httpClient.execute(httpPost);
-//            }catch (Exception e){
-//                e.printStackTrace();
-//            }
-//    private static HttpParams getHttpRequestParams(){
-//        HttpParams httpRequestParams=new BasicHttpParams();
-//        HttpConnectionParams.setConnectionTimeout(httpRequestParams,30*1000);
-//        HttpConnectionParams.setSoTimeout(httpRequestParams,30*1000);
-//        return httpRequestParams;
-//    }
 }
 

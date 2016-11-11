@@ -112,7 +112,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     protected String mAreaOutput;
     protected String mCityOutput;
     protected String mStateOutput;
-    Activity activity;
+    static Activity activity;
    Location mLastLocation;
     CardView hide;
   TextView VIEW_TO_CHANGE;
@@ -146,13 +146,14 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext=this;
+        activity=this;
         prefManager=new PrefManager(mContext);
         if(!prefManager.isFirstLaunch()){
             //TODO SHOW APP INTRO
         }
 
         //pdf=new PDF(context, mBitmap);
-        activity=this;
+
         buildGoogleApiClient();
         setContentView(R.layout.activity_maps);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -210,7 +211,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                 try {
                     VIEW_TO_CHANGE=pich_loc;
                     MARKER_TYPE=PICK_FLAG;
-                    startActivityForResult(builder.build(activity), PLACE_PICKER_DEST_REQUEST);
+                    startActivityForResult(builder.build(MapsActivity.this), PLACE_PICKER_DEST_REQUEST);
                     hide.setVisibility(View.VISIBLE);
                 } catch (GooglePlayServicesRepairableException e) {
                     e.printStackTrace();
@@ -243,7 +244,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                     try {
                         VIEW_TO_CHANGE=drop_loc;
                         MARKER_TYPE=DROP_FLAG;
-                        startActivityForResult(builder.build(activity), PLACE_PICKER_DEST_REQUEST);
+                        startActivityForResult(builder.build(MapsActivity.this), PLACE_PICKER_DEST_REQUEST);
 
                     } catch (GooglePlayServicesRepairableException e) {
                         e.printStackTrace();
@@ -566,6 +567,11 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
 
         return url;
     }
+
+    public static void requestSuccessful() {
+         activity.finish();
+    }
+
     private class ReadTask extends AsyncTask<String,Void,String> {
 
 
@@ -1221,16 +1227,25 @@ class AddressResultReceiver extends ResultReceiver {
                            tme= (TextView) layoutInflater.findViewById(R.id.tvtimeanddate);
                             tme.setText(Load.DAY+"/"+Load.MONTH+"/"+Load.YEAR);
                              accept= (Button) layoutInflater.findViewById(R.id.accept);
+                            decline= (Button) layoutInflater.findViewById(R.id.decline);
+                            final AlertDialog alertDialog = builder.create();
                             accept.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
+                                    alertDialog.cancel();
                                     Load.send();
                                 }
                             });
-                             decline= (Button) layoutInflater.findViewById(R.id.decline);
+                             decline.setOnClickListener(new View.OnClickListener() {
+                                 @Override
+                                 public void onClick(View v) {
+                                     //TODO ASK COMMENT,ASK PRICE EXPECTED
+                                     finish();
+                                 }
+                             });
                             //builder.setPositiveButton("OKKKK", null);
 //                            builder.setNegativeButton("Cancel", null);
-                            final AlertDialog alertDialog = builder.create();
+
                             alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
                                     @Override
                                     public void onShow(DialogInterface dialog) {
