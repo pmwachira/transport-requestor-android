@@ -113,16 +113,6 @@ public class Load {
                         }else{
                             uploader(image,request_id_global);
                         }
-//                        User user = new User(userObj.getString("user_id"),
-//                                userObj.getString("name"),
-//                                userObj.getString("email"));
-
-                        // storing user in shared preferences
-                       // MyApplication.getInstance().getPrefManager().storeUser(user);
-
-                        // start main activity
-                        //current.startActivity(new Intent(current, MainActivity.class));
-                       // current.finish();
 
                     } else {
                         loading.dismiss();
