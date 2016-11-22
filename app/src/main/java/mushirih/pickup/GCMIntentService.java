@@ -6,14 +6,16 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gcm.GCMBaseIntentService;
 
+import java.util.StringTokenizer;
+
 import mushirih.pickup.cm.ServerUtilities;
 import mushirih.pickup.internal.User;
-import mushirih.pickup.ui.MainActivity;
 
 import static mushirih.pickup.cm.CommonUtilities.SENDER_ID;
 import static mushirih.pickup.cm.CommonUtilities.displayMessage;
@@ -57,7 +59,7 @@ import static mushirih.pickup.cm.CommonUtilities.displayMessage;
         @Override
         protected void onMessage(Context context, Intent intent) {
             Log.i(TAG, "Received message");
-            String message = intent.getExtras().getString("message");
+            String message = intent.getExtras().getString("messages");
 
             displayMessage(context, message);
             // notifies user
@@ -104,29 +106,26 @@ import static mushirih.pickup.cm.CommonUtilities.displayMessage;
                     context.getSystemService(Context.NOTIFICATION_SERVICE);
             Notification notification = new Notification(icon, message, when);
 
-            String title = context.getString(R.string.app_name);
+            StringTokenizer splits = new StringTokenizer(message, "::::");
+            String firstMessage = splits.nextToken();
+            String secondMessage = splits.nextToken();
+//            String firstMessage = message;
+//            String secondMessage = "0712613052";
 
-            Intent notificationIntent = new Intent(context, MainActivity.class);
+            String title = context.getString(R.string.app_name);
+//TODO CHANGE RECIEVING INTENT
+            Intent notificationIntent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + secondMessage));
             // set intent so it does not start a new activity
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
                     Intent.FLAG_ACTIVITY_SINGLE_TOP);
             PendingIntent intent =
                     PendingIntent.getActivity(context, 0, notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT);
-//            notification.setLatestEventInfo(context, title, message, intent);
-            //notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
-            // Play default notification sound
-           // notification.defaults |=Notification.DEFAULT_SOUND ;
-
-            // Vibrate if vibrate is enabled
-            //notification.defaults |= Notification.DEFAULT_VIBRATE;
-//            notificationManager.notify(0, notification);
-            ///-----------------------------------------------------------
-           NotificationCompat.Builder builder=new NotificationCompat.Builder(context).setSmallIcon(R.mipmap.ic_launcher)
+           NotificationCompat.Builder builder=new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic)
                    .setContentTitle(title).setContentText(message);
             builder.setDefaults(Notification.DEFAULT_SOUND);
             builder.setDefaults(Notification.DEFAULT_VIBRATE);
-            builder.setStyle(new NotificationCompat.BigTextStyle().bigText("John :Am going to the direction of your load\nCan I transport for you?"));
+            builder.setStyle(new NotificationCompat.BigTextStyle().bigText(firstMessage+": I will be transporting your load\nClick to call me."));
             builder.setAutoCancel(true);
             builder.setContentIntent(intent);
             notificationManager.notify(0,builder.build());

@@ -27,7 +27,7 @@ public class MyPreferenceManager {
     int PRIVATE_MODE = 0;
 
     // Sharedpref file name
-    private static final String PREF_NAME = "mushirih";
+    private static final String PREF_NAME = "mushirihx";
 
     // All Shared Preferences Keys
     private static final String KEY_USER_ID = "user_id";

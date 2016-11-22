@@ -505,6 +505,11 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                                                 }
                                                 Load.bulkSet(mContext,LOCATION_FROM,LOCATION_TO,weight,desc,namee,idd,numm,DISTANCE_BETWEEN);
                                                 //TODO CAPTURE PICTURE OF THE LOAD
+                                                if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                                                    ActivityCompat.requestPermissions(MapsActivity.this, new String[]{
+                                                                    Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                                            879);
+                                                }
                                                 Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                                 if (takePicture.resolveActivity(getPackageManager()) != null) {
                                                     startActivityForResult(takePicture, REQUEST_IMAGE_CAPTURE);
@@ -614,7 +619,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
         protected void onPostExecute(List<List<HashMap<String, String>>> lists) {
             ArrayList<LatLng> points = null;
             PolylineOptions polyLineOptions = null;
-
+        if(routes.size()>0){
             // traversing through routes
             for (int i = 0; i < routes.size(); i++) {
                 points = new ArrayList<LatLng>();
@@ -628,8 +633,6 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                     double lat = Double.parseDouble(point.get("lat"));
                     double lng = Double.parseDouble(point.get("lng"));
                     LatLng position = new LatLng(lat, lng);
-
-
                     points.add(position);
                 }
 
@@ -637,6 +640,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                 polyLineOptions.width(10);
                 polyLineOptions.color(Color.BLUE);
             }
+        }
             if(null!=polyLineOptions) {
                 mMap.addPolyline(polyLineOptions);
                 float totalDistance = 0;
