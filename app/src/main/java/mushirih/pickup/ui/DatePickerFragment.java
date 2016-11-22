@@ -27,7 +27,7 @@ public  class DatePickerFragment extends DialogFragment implements DatePickerDia
         int date=c.get(Calendar.DATE);
 
         DatePickerDialog dpd=new DatePickerDialog(getActivity(),this,year,month,date);
-        dpd.setTitle("Choose Date of journey");
+        dpd.setTitle("Pick date for transport");
         return dpd;
     }
 

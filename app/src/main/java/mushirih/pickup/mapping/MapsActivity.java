@@ -407,8 +407,8 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
 
     }
     private  void describe_load() {
-        //TODO Button visibility
-        confirm.setVisibility(View.GONE);
+        //TODO test to see if button dissapears
+        //confirm.setVisibility(View.GONE);
         load_char=new ArrayList();
          options= new String[]{"Urgent", "Fragile ", "Perishable", "In need of packing boxes", "I need help loading"};
         final String[] weight_options={"Load under 5 Kgs","Load between 5-30 Kgs","Load over 30Kgs"};
@@ -741,7 +741,8 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
             });
 
         } else {
-            request_pane.setVisibility(View.GONE);
+            //TODO test to see if button dissapears
+           // request_pane.setVisibility(View.GONE);
             try {
                 mLocationText.setText("Click to request pick up here");
                 mLocationText.setOnClickListener(new View.OnClickListener() {
@@ -1091,6 +1092,7 @@ class AddressResultReceiver extends ResultReceiver {
                     @Override
                     public void onClick(View v) {
                         //TODO ESTIMATE PRICE FIRST
+                        mMap.stopAnimation();
                         getCostEstimate();
                         //Load.send();
                     }

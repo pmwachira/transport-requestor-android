@@ -67,7 +67,6 @@
             android:name=".mapping.FetchAddressIntentService"
             android:exported="false" />
         <activity
-            android:parentActivityName=".ui.TestScreen"
             android:name=".mapping.MapsActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/AppTheme.NoActionBar"
@@ -115,7 +114,6 @@
                 <category android:name="mushirih.pickup.cm.pushnotifications" />
             </intent-filter>
         </receiver>
-
         <service android:name=".GCMIntentService" />
     </application>
 
