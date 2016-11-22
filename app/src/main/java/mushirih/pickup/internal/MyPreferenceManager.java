@@ -35,6 +35,7 @@ public class MyPreferenceManager {
     private static final String KEY_USER_EMAIL = "user_email";
     private static final String KEY_NOTIFICATIONS = "notifications";
     private static final String KEY_MY_TRANSATION = "my_transaction";
+    private static  final String IS_FIRST_LAUNCH="IS_FIRST_LAUNCH";
 
     // Constructor
     public MyPreferenceManager(Context context) {
@@ -109,5 +110,13 @@ public class MyPreferenceManager {
              trans=pref.getStringSet(KEY_MY_TRANSATION,null).toArray(new String[pref.getStringSet(KEY_MY_TRANSATION,null).size()]);
         }
         return trans;
+    }
+    public void setIsFirstLaunch(boolean isFirstTime){
+        editor.putBoolean(IS_FIRST_LAUNCH,isFirstTime);
+        editor.commit();
+    }
+
+    public boolean isFirstLaunch(){
+        return pref.getBoolean(IS_FIRST_LAUNCH,true);
     }
 }

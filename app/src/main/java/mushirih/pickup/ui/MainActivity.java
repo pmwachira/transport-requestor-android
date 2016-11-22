@@ -2,9 +2,12 @@ package mushirih.pickup.ui;
 
 import android.app.ActivityOptions;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -28,6 +31,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.google.android.gcm.GCMRegistrar;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,11 +44,17 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 import mushirih.pickup.R;
 import mushirih.pickup.RegisterActivity;
+import mushirih.pickup.cm.ServerUtilities;
+import mushirih.pickup.cm.WakeLocker;
 import mushirih.pickup.internal.MyApplication;
 import mushirih.pickup.internal.MyPreferenceManager;
 import mushirih.pickup.internal.User;
 import mushirih.pickup.mapping.AppUtils;
 import mushirih.pickup.mapping.MapsActivity;
+
+import static mushirih.pickup.cm.CommonUtilities.DISPLAY_MESSAGE_ACTION;
+import static mushirih.pickup.cm.CommonUtilities.EXTRA_MESSAGE;
+import static mushirih.pickup.cm.CommonUtilities.SENDER_ID;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -60,12 +70,14 @@ public class MainActivity extends AppCompatActivity {
     CardView cv;
     @InjectView(R.id.register)
     TextView register;
-    String email,password;
+    String name,email,password;
     public String TAG="MainActivity.class";
     private TextInputLayout inputLayoutEmail, inputLayoutPass;
     Context context;
     ProgressDialog loading;
     MyPreferenceManager myPreferenceManager;
+    AsyncTask<Void, Void, Void> mRegisterTask;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -178,15 +190,16 @@ public class MainActivity extends AppCompatActivity {
                         // user successfully logged in
                         loading.dismiss();
                         JSONObject userObj = obj.getJSONObject("user");
-                        User user = new User(userObj.getString("requestor_id"),
-                                userObj.getString("name"),
-                                userObj.getString("email"));
-
+                        String id=userObj.getString("requestor_id");
+                        String nam= userObj.getString("name");
+                        String ema=userObj.getString("email");
+                        User user = new User(id,nam,ema);
                         // storing user in shared preferences
                         MyApplication.getInstance().getPrefManager().storeUser(user);
-//                        Toast.makeText(getApplicationContext(), "Logged in as: " + userObj.getString("name")+"::"+
-//                                userObj.getString("email"), Toast.LENGTH_LONG).show();
-                        // start main activity
+                        if(myPreferenceManager.isFirstLaunch()){
+                            reRegisterGCM(nam,ema);
+                            myPreferenceManager.setIsFirstLaunch(false);
+                        }
                         startActivity(new Intent(getApplicationContext(), MapsActivity.class));
                         finish();
 
@@ -209,19 +222,6 @@ public class MainActivity extends AppCompatActivity {
                 loading.dismiss();
                 Log.e(TAG, "Volley error: " + error.getMessage() + ", code: " + networkResponse+" and "+error.getMessage());
                Toast.makeText(getApplicationContext(), "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-////------------------------------
-//                String body="";
-//                //get status code here
-//                String statusCode = String.valueOf(error.networkResponse.statusCode);
-//                //get response body and parse with appropriate encoding
-//                if(error.networkResponse.data!=null) {
-//                    try {
-//                        body = new String(error.networkResponse.data,"UTF-8");
-//                    } catch (UnsupportedEncodingException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//                Toast.makeText(context,"Body="+body,Toast.LENGTH_SHORT).show();
             }
         }) {
 
@@ -246,6 +246,80 @@ public class MainActivity extends AppCompatActivity {
         MyApplication.getInstance().addToRequestQueue(strReq);
     }
 
+    private void reRegisterGCM(final String nam, final String ema) {
+            context=this;
+            // Make sure the device has the proper dependencies.
+            GCMRegistrar.checkDevice(this);
+
+            // Make sure the manifest was properly set - comment out this line
+            // while developing the app, then uncomment it when it's ready.
+            GCMRegistrar.checkManifest(this);
+
+            registerReceiver(mHandleMessageReceiver, new IntentFilter(
+                    DISPLAY_MESSAGE_ACTION));
+
+            // Get GCM registration id
+            final String regId = GCMRegistrar.getRegistrationId(context);
+            // Check if regid already presents
+            if (regId.equals("")) {
+                // Registration is not present, register now with GCM
+                GCMRegistrar.register(context,SENDER_ID);
+
+            } else {
+                // Device is already registered on GCM
+                if (GCMRegistrar.isRegisteredOnServer(context)) {
+                    // Skips registration.
+                    ServerUtilities.register(context, nam, ema, regId);
+
+                    Toast.makeText(getApplicationContext(), "Already registered with GCM", Toast.LENGTH_LONG).show();
+                } else {
+
+                    // Try to register again, but not in the UI thread.
+                    // It's also necessary to cancel the thread onDestroy(),
+                    // hence the use of AsyncTask instead of a raw thread.
+                    mRegisterTask = new AsyncTask<Void, Void, Void>() {
+
+                        @Override
+                        protected Void doInBackground(Void... params) {
+                            // Register on our server
+                            // On server creates a new user
+                            ServerUtilities.register(context, nam, ema, regId);
+                            return null;
+                        }
+
+                        @Override
+                        protected void onPostExecute(Void result) {
+                            mRegisterTask = null;
+                        }
+
+                    };
+                    mRegisterTask.execute(null, null, null);
+                }
+            }
+
+    }
+
+    private final BroadcastReceiver mHandleMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String newMessage = intent.getExtras().getString(EXTRA_MESSAGE);
+            // Waking up mobile if it is sleeping
+            WakeLocker.acquire(getApplicationContext());
+
+            /**
+             * Take appropriate action on this message
+             * depending upon your app requirement
+             * For now i am just displaying it on the screen
+             * */
+
+            // Showing received message
+            Toast.makeText(getApplicationContext(), "New Message: " + newMessage, Toast.LENGTH_LONG).show();
+
+            // Releasing wake lock
+            WakeLocker.release();
+        }
+    };
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -261,5 +335,19 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mRegisterTask != null) {
+            mRegisterTask.cancel(true);
+        }
+        try {
+            unregisterReceiver(mHandleMessageReceiver);
+            GCMRegistrar.onDestroy(this);
+        } catch (Exception e) {
+            Log.e("UnRegister Receiver Error", "> " + e.getMessage());
+        }
+        super.onDestroy();
     }
 }
