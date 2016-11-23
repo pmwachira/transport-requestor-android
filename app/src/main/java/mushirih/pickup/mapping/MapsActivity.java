@@ -140,7 +140,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     StepperIndicator progressStepper;
     String[] options;
     int CAMERA_ZOOM=16;
-    ProgressDialog loading;
+    ProgressDialog loading,loader;
     String desc="";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -299,6 +299,12 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        showProgress = 1;
+        loader = new ProgressDialog(mContext);
+        loader.setIndeterminate(true);
+        loader.setMessage("Finding your location");
+        loader.setCancelable(false);
+        loader.show();
 
         mResultReceiver = new AddressResultReceiver(new Handler());
 
@@ -408,7 +414,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     }
     private  void describe_load() {
         //TODO test to see if button dissapears
-        //confirm.setVisibility(View.GONE);
+        confirm.setVisibility(View.GONE);
         load_char=new ArrayList();
          options= new String[]{"Urgent", "Fragile ", "Perishable", "In need of packing boxes", "I need help loading"};
         final String[] weight_options={"Load under 5 Kgs","Load between 5-30 Kgs","Load over 30Kgs"};
@@ -454,6 +460,11 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                       ActivityCompat.requestPermissions(MapsActivity.this, new String[] {
                                         Manifest.permission.READ_CONTACTS},
                                 REQUEST_CONTACTS_PERMISSION);
+                    }
+                    if (ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(MapsActivity.this, new String[]{
+                                       Manifest.permission.CALL_PHONE},
+                                8709);
                     }
                     builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
                         View layoutInflater = View.inflate(mContext, R.layout.contact_details, null);
@@ -746,7 +757,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
 
         } else {
             //TODO test to see if button dissapears
-           // request_pane.setVisibility(View.GONE);
+            request_pane.setVisibility(View.GONE);
             try {
                 mLocationText.setText("Click to request pick up here");
                 mLocationText.setOnClickListener(new View.OnClickListener() {
@@ -793,6 +804,9 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
         }
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
+        if (showProgress == 1&&mLastLocation!=null) {
+            loader.dismiss();
+        }
         if (mLastLocation != null) {
           changeMap(mLastLocation);
             centerMarkerClick(mLastLocation);
@@ -831,7 +845,8 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     @Override
     public void onLocationChanged(Location location) {
             if (showProgress == 1) {
-                progressDialog.dismiss();
+               //progressDialog.dismiss();
+                loader.dismiss();
 //                centerMarkerClick(location);
             }
             try {
@@ -1068,11 +1083,11 @@ class AddressResultReceiver extends ResultReceiver {
             switch (resultCode) {
                 case Activity.RESULT_OK:
                     showProgress=1;
-                    progressDialog=new ProgressDialog(mContext);
-                    progressDialog.setIndeterminate(true);
-                    progressDialog.setMessage("Finding your position");
-                    progressDialog.setCancelable(false);
-                    progressDialog.show();
+//                    progressDialog=new ProgressDialog(mContext);
+//                    progressDialog.setIndeterminate(true);
+//                    progressDialog.setMessage("Finding your position");
+//                    progressDialog.setCancelable(false);
+//                    progressDialog.show();
                     break;
                 case Activity.RESULT_CANCELED:
                  //TODO HANDLE USER NOT TURNED LOCATION
@@ -1089,14 +1104,13 @@ class AddressResultReceiver extends ResultReceiver {
                 am_done=true;
                 updateProgress(false,6, "Details Completed",true);
 
-//                                                    //TODO change requestor button
+  //TODO change requestor button
                 confirm.setVisibility(View.VISIBLE);
                 confirm.setText("Request Delivery");
                 confirm.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         //TODO ESTIMATE PRICE FIRST
-                        mMap.stopAnimation();
                         getCostEstimate();
                         //Load.send();
                     }
@@ -1310,15 +1324,17 @@ class AddressResultReceiver extends ResultReceiver {
 
     }
     //stop tracking when app is in background
-//    @Override
-//    protected void onPause() {
-//        super.onPause();
-//        stopLocationUpdates();
-//    }
-//
-//    private void stopLocationUpdates() {
-//        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,this);
-//    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(null!=mGoogleApiClient&&mGoogleApiClient.isConnected()) {
+            stopLocationUpdates();
+        }
+    }
+
+    private void stopLocationUpdates() {
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,this);
+    }
 //
 //    //CUSTOM LOCATION METHODS
 //    public void flatMarker(GoogleMap mMap){

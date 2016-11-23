@@ -113,7 +113,6 @@ import static mushirih.pickup.cm.CommonUtilities.displayMessage;
 //            String secondMessage = "0712613052";
 
             String title = context.getString(R.string.app_name);
-//TODO CHANGE RECIEVING INTENT
             Intent notificationIntent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + secondMessage));
             // set intent so it does not start a new activity
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
