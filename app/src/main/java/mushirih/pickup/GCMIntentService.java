@@ -126,7 +126,8 @@ import static mushirih.pickup.cm.CommonUtilities.displayMessage;
             builder.setDefaults(Notification.DEFAULT_SOUND);
             builder.setDefaults(Notification.DEFAULT_VIBRATE);
             builder.setStyle(new NotificationCompat.BigTextStyle().bigText(firstMessage+": I will be transporting your load\nClick to call me."));
-            builder.setAutoCancel(true);
+            //builder.setAutoCancel(true);
+            builder.setAutoCancel(false);
             builder.setContentIntent(intent);
             notificationManager.notify(0,builder.build());
 
