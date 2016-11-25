@@ -53,6 +53,7 @@ public class Load {
     private static String LOAD_CHAR;
    private static String NAMEE, IDD, NUMM;
    private static int DISTANCE_BETWEEN;
+    private static String COST;
 
 
 //DONE
@@ -158,7 +159,7 @@ public class Load {
                 params.put("load_desc", "weight: "+weight.toString()+"Load Description: "+load_char.toString());
                 params.put("image","0000");
                 params.put("est_dist", String.valueOf(DISTANCE_BETWEEN));
-                params.put("est_cost","0000");
+                params.put("est_cost",COST);
                 params.put("pick_time",HOUR+":"+MINUTE);
                 params.put("pick_date",DAY+"/"+MONTH+"/"+YEAR);
                 params.put("drop_lat", String.valueOf(LOCATION_TO.latitude));
@@ -236,6 +237,10 @@ public class Load {
 
         //Adding request to the queue
         requestQueue.add(stringRequest);
+    }
+
+    public static void setCost(String cost) {
+        COST=cost;
     }
 }
 

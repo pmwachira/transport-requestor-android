@@ -1243,7 +1243,9 @@ class AddressResultReceiver extends ResultReceiver {
                                 //.setTitle("Request Details.");
                                 builder.setView(layoutInflater);
                            est= (TextView) layoutInflater.findViewById(R.id.tvestimatedcost);
-                            est.setText(obj.getString("cost"));
+                            String cost=obj.getString("cost");
+                            est.setText(cost);
+                            Load.setCost(cost);
                            tme= (TextView) layoutInflater.findViewById(R.id.tvtimeanddate);
                             tme.setText(Load.DAY+"/"+Load.MONTH+"/"+Load.YEAR);
                              accept= (Button) layoutInflater.findViewById(R.id.accept);
@@ -1319,8 +1321,7 @@ class AddressResultReceiver extends ResultReceiver {
                 }
             };
             //Adding request to request queue
-            MyApplication.getInstance().addToRequestQueue(strCost
-            );
+            MyApplication.getInstance().addToRequestQueue(strCost);
 
     }
     //stop tracking when app is in background
