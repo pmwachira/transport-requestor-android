@@ -105,12 +105,13 @@ import static mushirih.pickup.cm.CommonUtilities.displayMessage;
             NotificationManager notificationManager = (NotificationManager)
                     context.getSystemService(Context.NOTIFICATION_SERVICE);
             Notification notification = new Notification(icon, message, when);
-
+            String firstMessage="";
+            String secondMessage="";
             StringTokenizer splits = new StringTokenizer(message, "::::");
-            String firstMessage = splits.nextToken();
-            String secondMessage = splits.nextToken();
-//            String firstMessage = message;
-//            String secondMessage = "0712613052";
+            if(null!=splits) {
+                firstMessage = splits.nextToken();
+                secondMessage = splits.nextToken();
+            }
 
             String title = context.getString(R.string.app_name);
             Intent notificationIntent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + secondMessage));

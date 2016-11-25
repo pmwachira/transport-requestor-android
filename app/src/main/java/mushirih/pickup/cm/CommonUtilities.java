@@ -23,7 +23,7 @@ public class CommonUtilities {
     public static final String DISPLAY_MESSAGE_ACTION =
             "mushirih.PICKUP.pushnotifications.DISPLAY_MESSAGE";
 
-    public static final String EXTRA_MESSAGE = "message";
+    public static final String EXTRA_MESSAGE = "messages";
 
     /**
      * Notifies UI to display a message.
