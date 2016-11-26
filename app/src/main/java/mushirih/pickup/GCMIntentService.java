@@ -122,14 +122,14 @@ import static mushirih.pickup.cm.CommonUtilities.displayMessage;
                     PendingIntent.getActivity(context, 0, notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT);
 
            NotificationCompat.Builder builder=new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic)
-                   .setContentTitle(title).setContentText(message);
+                   .setContentTitle(title).setContentText(firstMessage+": I will be transporting your load\nClick to call me.");
             builder.setDefaults(Notification.DEFAULT_SOUND);
             builder.setDefaults(Notification.DEFAULT_VIBRATE);
             builder.setStyle(new NotificationCompat.BigTextStyle().bigText(firstMessage+": I will be transporting your load\nClick to call me."));
-            //builder.setAutoCancel(true);
-            builder.setAutoCancel(false);
+            builder.setAutoCancel(true);
             builder.setContentIntent(intent);
-            notificationManager.notify(0,builder.build());
+//            notificationManager.notify(0,builder.build());
+            notificationManager.notify((int) System.currentTimeMillis(),builder.build());
 
 
         }
