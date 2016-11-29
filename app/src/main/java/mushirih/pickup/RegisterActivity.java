@@ -127,7 +127,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void registerUser(final String username, final String userid, final String useremail, final String password1) {
 
-        loading = ProgressDialog.show(mContext, "Authenticating", "Please wait...",true,false);
+        loading = ProgressDialog.show(mContext, null, "Registering.Please wait...",true,false);
         if (!validateEmail(useremail)) {
             return;
         }

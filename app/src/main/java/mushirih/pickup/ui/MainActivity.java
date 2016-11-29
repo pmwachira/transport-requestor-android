@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void login() {
-        loading = ProgressDialog.show(context, "Authenticating", "Please wait...",true,true);
+        loading = ProgressDialog.show(context, null, "Authenticating.Please wait...",true,true);
         StringRequest strReq = new StringRequest(Request.Method.POST,
                 MyApplication.Online_Login, new Response.Listener<String>() {
 

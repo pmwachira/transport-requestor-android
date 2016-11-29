@@ -88,7 +88,7 @@ public class Load {
     public static void requestService(final Context current, final LatLng LOCATION_FROM, final LatLng LOCATION_TO, final String weight, final String load_char, final String name, final String id, final String num, final Bitmap image, final int DISTANCE_BETWEEN) {
         mContext=current;
 
-        loading = ProgressDialog.show(mContext, "Submitting your request", "Please wait...",true,false);
+        loading = ProgressDialog.show(mContext,null, "Submitting your request.Please wait...",true,false);
 
         final StringRequest strReq = new StringRequest(Request.Method.POST,
                 MyApplication.ONLINE_ALPHA_REQUEST, new Response.Listener<String>() {
