@@ -56,6 +56,7 @@ public class Load {
     private static String COST;
 
 
+
 //DONE
     public static void setImage(Bitmap image) {
         IMAGE = image;
@@ -81,6 +82,7 @@ public class Load {
         NUMM=numm;
         DISTANCE_BETWEEN=distance_between;
 
+
     }
     public static void send(){
         requestService(CONTEXT,LOCATION_FROM,LOCATION_TO,WEIGHT,LOAD_CHAR,NAMEE,IDD,NUMM,IMAGE,DISTANCE_BETWEEN);
@@ -88,7 +90,7 @@ public class Load {
     public static void requestService(final Context current, final LatLng LOCATION_FROM, final LatLng LOCATION_TO, final String weight, final String load_char, final String name, final String id, final String num, final Bitmap image, final int DISTANCE_BETWEEN) {
         mContext=current;
 
-        loading = ProgressDialog.show(mContext,null, "Submitting your request.Please wait...",true,false);
+        loading = ProgressDialog.show(mContext,null, "Submitting request.Please wait.",true,false);
 
         final StringRequest strReq = new StringRequest(Request.Method.POST,
                 MyApplication.ONLINE_ALPHA_REQUEST, new Response.Listener<String>() {
@@ -165,6 +167,7 @@ public class Load {
                 params.put("drop_lat", String.valueOf(LOCATION_TO.latitude));
                 params.put("drop_long", String.valueOf(LOCATION_TO.longitude));
 
+
                 Log.e(TAG, "params: " + params.toString());
                 return params;
             }
@@ -181,30 +184,40 @@ public class Load {
         MyApplication.getInstance().getPrefManager().storeTRansactionId(request_id_global,"ALPHA");
 
     }
-    private static void uploader(Bitmap image, final String request_id_global) {
+    private static void uploader(final Bitmap image, final String request_id_global) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        image.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+        image.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
         final String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
         //
         StringRequest stringRequest = new StringRequest(Request.Method.POST, MyApplication.IMAGE_UPLOAD_URL,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
-                        //Disimissing the progress dialog
-                        loading.dismiss();
-                        //Showing toast message of the response
-                        Toast.makeText(mContext, s, Toast.LENGTH_LONG).show();
-                        //TODO Tell user something
-                        AlertDialog.Builder builder=new AlertDialog.Builder(mContext);
-                        builder.setTitle("Request successful").setCancelable(false)
-                                .setMessage("A driver going the direction of your load will get back to you")
-                                .setPositiveButton("Okay",new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        MapsActivity.requestSuccessful();
-                                    }
-                                });
-                        builder.show();
+                        if(null!=s) {
+                            if(s.equals("Image of load successfully Uploaded")){
+                            //Disimissing the progress dialog
+                            loading.dismiss();
+                            //Showing toast message of the response
+                            Toast.makeText(mContext, s, Toast.LENGTH_LONG).show();
+                            //TODO Tell user something
+                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                            builder.setTitle("Request successful").setCancelable(false)
+                                    .setMessage("A driver going the direction of your load will get back to you")
+                                    .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            MapsActivity.requestSuccessful();
+                                        }
+                                    });
+                            builder.show();
+                        }else {
+                                //redo
+                                uploader(image,request_id_global);
+                            }
+                        }else{
+                            //redo
+                            uploader(image,request_id_global);
+                        }
                     }
                 },
                 new Response.ErrorListener() {

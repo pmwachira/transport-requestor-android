@@ -2,7 +2,10 @@ package mushirih.pickup.mapping;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -32,9 +35,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -78,6 +84,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,10 +94,9 @@ import mushirih.pickup.http.HttpConnection;
 import mushirih.pickup.http.Load;
 import mushirih.pickup.internal.MyApplication;
 import mushirih.pickup.internal.MyPreferenceManager;
-import mushirih.pickup.ui.DatePickerFragment;
 import mushirih.pickup.ui.MainActivity;
 import mushirih.pickup.ui.PrefManager;
-import mushirih.pickup.ui.TimePickerFragment;
+
 
 public class MapsActivity extends ActionBarActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener  {
    static Context mContext;
@@ -125,13 +131,16 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     static final int REQUEST_CONTACTS_PERMISSION=12;
     PrefManager prefManager;
     LatLng LOCATION_TO,LOCATION_FROM;
-    String weight;
     ArrayList load_char;
     Bitmap image;
     ProgressDialog progressDialog;
     int showProgress=0;
     int DISTANCE_BETWEEN=0;
-    String namee,idd,numm;
+    String weight="BLANK";
+    String VALUE="BLANK";
+    String namee="BLANK";
+    String idd="BLANK";
+    String numm="BLANK";
     boolean pick_point_set=false;
     boolean load_desc_set=false;
     boolean load_weight_set=false;
@@ -141,7 +150,8 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     String[] options;
     int CAMERA_ZOOM=16;
     ProgressDialog loading,loader;
-    String desc="";
+    String desc="BLANK";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -151,8 +161,6 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
         if(!prefManager.isFirstLaunch()){
             //TODO SHOW APP INTRO
         }
-
-        //pdf=new PDF(context, mBitmap);
 
         buildGoogleApiClient();
         setContentView(R.layout.activity_maps);
@@ -396,24 +404,17 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
             });
     }
     private void setDateTime() {
-        //time pick
-        DialogFragment newFragment = new TimePickerFragment();
-        newFragment.show(getSupportFragmentManager(), "timePicker2");
-
+//SET DATES FIRST
         //datePicker
         DialogFragment newfragment = new DatePickerFragment();
        newfragment.setCancelable(false);
       newfragment.show(getSupportFragmentManager(), "datePicker2");
 
-            //SET DATES FIRST
-        updateProgress(false, 3, "Indicate weight of load", false);
+        updateProgress(false, 4, "Indicate weight of load", false);
 
-            describe_load();
-
-
+        describe_load();
     }
     private  void describe_load() {
-        //TODO test to see if button dissapears
         confirm.setVisibility(View.GONE);
         load_char=new ArrayList();
          options= new String[]{"Urgent", "Fragile ", "Perishable", "In need of packing boxes", "I need help loading"};
@@ -426,7 +427,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                     public void onClick(DialogInterface dialog, int which) {
                         weight=weight_options[which].toString();
                         if(load_weight_set==false) {
-                            updateProgress(false,4, "Provide a description of load", false);
+                            updateProgress(false,5, "Provide a description of load", false);
                             load_weight_set=true;
                         }
 
@@ -444,7 +445,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                         @Override
                         public void onClick(DialogInterface dialog, int which, boolean isChecked) {
                             if(load_desc_set==false) {
-                                updateProgress(false,5, "Provide details of collector", false);
+                                updateProgress(false,6, "Provide details of collector", false);
                             }
                             load_desc_set=true;
                             if (isChecked) {
@@ -749,8 +750,36 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                     }
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(x, CAMERA_ZOOM);
                     mMap.animateCamera(cameraUpdate);
-                    updateProgress(false,2, "Provide load weight", false);
-                    setDateTime();
+                    //VALUE
+                    updateProgress(false,2, "Provide load's estimated value", false);
+                    AlertDialog.Builder builderVal=new AlertDialog.Builder(mContext);
+                    builderVal.setTitle("Please estimate value of your load") ;
+                    View holder=View.inflate(mContext, R.layout.number_picker, null);
+                    builderVal.setView(holder);
+                    final NumberPicker xs = (NumberPicker) holder.findViewById(R.id.numPick);
+                    xs.setMinValue(0);
+                    xs.setMaxValue(100000);
+                    xs.setWrapSelectorWheel(false);
+                    final NumberPicker.Formatter formatter = new NumberPicker.Formatter() {
+                        @Override
+                        public String format(int value) {
+                             VALUE = String.valueOf(value * 50);
+                            return VALUE;
+                        }
+                    };
+                    xs.setFormatter(formatter);
+                    builderVal.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            updateProgress(false,3, "Provide load weight", false);
+                            setDateTime();
+                            Toast.makeText(mContext,VALUE,Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+                    builderVal.show();
+                    //
+
                 }
 
             });
@@ -1102,7 +1131,7 @@ class AddressResultReceiver extends ResultReceiver {
                 image= (Bitmap) extras.get("data");
                 Load.setImage(image);
                 am_done=true;
-                updateProgress(false,6, "Details Completed",true);
+                updateProgress(false,7, "Details Completed",true);
 
   //TODO change requestor button
                 confirm.setVisibility(View.VISIBLE);
@@ -1308,7 +1337,7 @@ class AddressResultReceiver extends ResultReceiver {
                     params.put("distance",String.valueOf(DISTANCE_BETWEEN));
                     params.put("weight",weight);
                     params.put("nature",desc);
-                    params.put("value", String.valueOf(000));
+                    params.put("value", String.valueOf(VALUE));
 
                     Log.e(TAG, "params: " + params.toString());
                     return params;
@@ -1336,6 +1365,55 @@ class AddressResultReceiver extends ResultReceiver {
     private void stopLocationUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,this);
     }
+
+    public static class TimePickerFragment extends DialogFragment implements TimePickerDialog.OnTimeSetListener {
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Calendar c= Calendar.getInstance();
+            int hour=c.get(Calendar.HOUR_OF_DAY);
+            int minute=c.get(Calendar.MINUTE);
+
+            TimePickerDialog tpd=new TimePickerDialog(getActivity(),this,hour,minute, !android.text.format.DateFormat.is24HourFormat(getActivity()));
+            tpd.setTitle("Set preferred time of travel");
+            return tpd;
+        }
+
+        @Override
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            Load.setTime(hourOfDay,minute);
+
+        }
+    }
+
+    public  static class DatePickerFragment extends DialogFragment  implements DatePickerDialog.OnDateSetListener{
+
+            @Override
+            public Dialog onCreateDialog(Bundle savedInstanceState) {
+                final Calendar c= Calendar.getInstance();
+
+
+                int year=c.get(Calendar.YEAR);
+                int month = c.get(Calendar.MONTH);
+                int date=c.get(Calendar.DATE);
+
+                DatePickerDialog dpd=new DatePickerDialog(getActivity(),this,year,month,date);
+                dpd.setTitle("Pick date for transport");
+                return dpd;
+            }
+
+
+            @Override
+            public  void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                Load.setDate(dayOfMonth,monthOfYear+1,year);
+                //time pick
+                DialogFragment newFragment = new TimePickerFragment();
+                newFragment.show(getFragmentManager(), "timePicker2");
+
+
+            }
+
+        }
+    }
 //
 //    //CUSTOM LOCATION METHODS
 //    public void flatMarker(GoogleMap mMap){
@@ -1357,4 +1435,4 @@ class AddressResultReceiver extends ResultReceiver {
 //
 //
 //    }
-}
+
