@@ -78,18 +78,6 @@
             android:label="@string/title_activity_maps">
 
         </activity>
-        <activity
-            android:parentActivityName=".ui.TestScreen"
-        android:name=".ui.TestRegister"
-        android:label="@string/title_activity_maps">
-    </activity>
-        <activity
-            android:name=".ui.TestScreen"
-            android:parentActivityName="mushirih.pickup.ui.MainActivity"
-            android:label="@string/title_activity_maps">
-            <!--LETS TEST SCREENS-->
-            <!--INSERT LAUNCHER HERE FOR DEMO-->
-        </activity>
         <activity android:name=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

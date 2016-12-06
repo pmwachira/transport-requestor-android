@@ -3,7 +3,9 @@ package mushirih.pickup.http;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.util.Base64;
 import android.util.Log;
@@ -119,14 +121,49 @@ public class Load {
 
                     } else {
                         loading.dismiss();
-                        // login error - simply toast the message
-                        Toast.makeText(mContext, "" + object.getJSONObject("error").getString("message"), Toast.LENGTH_LONG).show();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                        builder.setTitle("Error").setCancelable(false)
+                                .setMessage("Please check your internet settings and try again")
+                                .setNeutralButton("Open settings", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
+                                        mContext.startActivity(myIntent);
+                                    }
+                                })
+                                .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        // prevent cost generation again
+                                        send();
+                                    }
+                                });
+                        builder.show();
+                        //Toast.makeText(mContext, "" + object.getJSONObject("error").getString("message"), Toast.LENGTH_LONG).show();
                     }
 
                 } catch (JSONException e) {
                     loading.dismiss();
                     Log.e(TAG, "json parsing error: " + response+"::"+e.getMessage());
-                    Toast.makeText(mContext, "Json parse error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(mContext, "Json parse error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                    builder.setTitle("Error").setCancelable(false)
+                            .setMessage("Please check your internet settings and try again")
+                            .setNeutralButton("Open settings", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
+                                    mContext.startActivity(myIntent);
+                                }
+                            })
+                            .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    // prevent cost generation again
+                                    send();
+                                }
+                            });
+                    builder.show();
                 }
             }
         }, new Response.ErrorListener() {
@@ -136,7 +173,26 @@ public class Load {
                 loading.dismiss();
                 NetworkResponse networkResponse = error.networkResponse;
                 Log.e(TAG, "Volley error: " + error.getMessage() + ", code: " + networkResponse+" and "+error.getMessage());
-                Toast.makeText(mContext, "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+               // Toast.makeText(mContext, "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                builder.setTitle("Error").setCancelable(false)
+                        .setMessage("Please check your internet settings and try again")
+                        .setNeutralButton("Open settings", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
+                                mContext.startActivity(myIntent);
+                            }
+                        })
+                        .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                // prevent cost generation again
+                                send();
+                            }
+                        });
+                builder.show();
+
 
             }
         }) {
@@ -193,6 +249,7 @@ public class Load {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
+                        Log.e(">>>>",s);
                         if(null!=s) {
                             if(!s.equals("Error")){
                             //Disimissing the progress dialog
@@ -227,7 +284,24 @@ public class Load {
                         loading.dismiss();
 
                         //Showing toast
-                        Toast.makeText(mContext, volleyError.getMessage()+" Error", Toast.LENGTH_LONG).show();
+                        //Toast.makeText(mContext, volleyError.getMessage()+" Error", Toast.LENGTH_LONG).show();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                        builder.setTitle("Error").setCancelable(false)
+                                .setMessage("Please check your internet settings and try again")
+                                .setNeutralButton("Open settings", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
+                                        mContext.startActivity(myIntent);
+                                    }
+                                })
+                                .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        uploader(image,request_id_global);
+                                    }
+                                });
+                        builder.show();
                     }
                 }) {
             @Override

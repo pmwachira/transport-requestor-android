@@ -22,6 +22,7 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
@@ -733,7 +734,18 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                         if (AppUtils.isDataEnabled(mContext)) {
                             showRoute();
                         } else {
-                            Toast.makeText(getApplicationContext(), "Please check your internet connection", Toast.LENGTH_SHORT).show();
+                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                            builder.setTitle("Error").setCancelable(false)
+                                    .setMessage("Please check your internet settings and try again")
+                                    .setNeutralButton("Open settings", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
+                                           startActivity(myIntent);
+                                        }
+                                    });
+                            builder.show();
+                           // Toast.makeText(getApplicationContext(), "Please check your internet connection", Toast.LENGTH_SHORT).show();
                         }
                     }
                     LatLng x= new LatLng((LOCATION_FROM.latitude+LOCATION_TO.latitude)/2,(LOCATION_FROM.longitude+LOCATION_TO.longitude)/2);
@@ -1181,7 +1193,18 @@ class AddressResultReceiver extends ResultReceiver {
                         showRoute();
                     }
                     }else{
-                        Toast.makeText(getApplicationContext(),"Please check your internet connection",Toast.LENGTH_SHORT).show();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                        builder.setTitle("Error").setCancelable(false)
+                                .setMessage("Please check your internet settings and try again")
+                                .setNeutralButton("Open settings", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
+                                        mContext.startActivity(myIntent);
+                                    }
+                                });
+                        builder.show();
+                      //  Toast.makeText(getApplicationContext(),"Please check your internet connection",Toast.LENGTH_SHORT).show();
                     }
 
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_TO, CAMERA_ZOOM);
@@ -1303,7 +1326,25 @@ class AddressResultReceiver extends ResultReceiver {
                         } else {
                             // login error - simply toast the message
                             loading.dismiss();
-                            Toast.makeText(getApplicationContext(), "" + obj.getJSONObject("error").getString("message"), Toast.LENGTH_LONG).show();
+                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                            builder.setTitle("Error").setCancelable(false)
+                                    .setMessage("Please check your internet settings and try again")
+                                    .setNeutralButton("Open settings", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
+                                            mContext.startActivity(myIntent);
+                                        }
+                                    })
+                                    .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            //retry
+                                            getCostEstimate();
+                                        }
+                                    });
+                            builder.show();
+                            //Toast.makeText(getApplicationContext(), "" + obj.getJSONObject("error").getString("message"), Toast.LENGTH_LONG).show();
                         }
 
                     } catch (JSONException e) {
@@ -1318,7 +1359,25 @@ class AddressResultReceiver extends ResultReceiver {
                     NetworkResponse networkResponse = error.networkResponse;
                     loading.dismiss();
                     Log.e(TAG, "Volley error: " + error.getMessage() + ", code: " + networkResponse+" and "+error.getMessage());
-                    Toast.makeText(getApplicationContext(), "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                    builder.setTitle("Error").setCancelable(false)
+                            .setMessage("Please check your internet settings and try again")
+                            .setNeutralButton("Open settings", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
+                                    mContext.startActivity(myIntent);
+                                }
+                            })
+                            .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    //retry
+                                    getCostEstimate();
+                                }
+                            });
+                    builder.show();
+                    //Toast.makeText(getApplicationContext(), "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
 
                 }
             }) {

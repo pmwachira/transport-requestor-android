@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
         if (!AppUtils.isDataEnabled(MainActivity.this)){
             AlertDialog.Builder dialog = new AlertDialog.Builder(context);
                 dialog.setMessage("Internet not enabled!");
-                dialog.setPositiveButton("Open Internet settings", new DialogInterface.OnClickListener() {
+                dialog.setPositiveButton("Open settings", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface paramDialogInterface, int paramInt) {
                         Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
@@ -206,7 +206,18 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         // login error - simply toast the message
                         loading.dismiss();
-                        Toast.makeText(getApplicationContext(), "" + obj.getJSONObject("error").getString("message"), Toast.LENGTH_LONG).show();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                        builder.setTitle("Invalid credentials").setCancelable(false)
+                                .setMessage("Please  try again")
+                                .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        startActivity(new Intent(getBaseContext(),MainActivity.class));
+                                        finish();
+                                    }
+                                });
+                        builder.show();
+                        //Toast.makeText(getApplicationContext(), "" + obj.getJSONObject("error").getString("message"), Toast.LENGTH_LONG).show();
                     }
 
                 } catch (JSONException e) {
@@ -221,7 +232,25 @@ public class MainActivity extends AppCompatActivity {
                 NetworkResponse networkResponse = error.networkResponse;
                 loading.dismiss();
                 Log.e(TAG, "Volley error: " + error.getMessage() + ", code: " + networkResponse+" and "+error.getMessage());
-               Toast.makeText(getApplicationContext(), "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("Error").setCancelable(false)
+                        .setMessage("Please check your internet settings and try again")
+                        .setNeutralButton("Open settings", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
+                               startActivity(myIntent);
+                            }
+                        })
+                        .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                //retry
+                             login();
+                            }
+                        });
+                builder.show();
+               //Toast.makeText(getApplicationContext(), "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }) {
 
