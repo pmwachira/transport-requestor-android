@@ -150,7 +150,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     String[] options;
     int CAMERA_ZOOM=16;
     ProgressDialog loading,loader;
-    String desc="BLANK";
+    String desc="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -409,9 +409,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
         DialogFragment newfragment = new DatePickerFragment();
        newfragment.setCancelable(false);
       newfragment.show(getSupportFragmentManager(), "datePicker2");
-
         updateProgress(false, 4, "Indicate weight of load", false);
-
         describe_load();
     }
     private  void describe_load() {
@@ -773,13 +771,9 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                         public void onClick(DialogInterface dialogInterface, int i) {
                             updateProgress(false,3, "Provide load weight", false);
                             setDateTime();
-                            Toast.makeText(mContext,VALUE,Toast.LENGTH_LONG).show();
                         }
                     });
-
                     builderVal.show();
-                    //
-
                 }
 
             });
@@ -1365,7 +1359,31 @@ class AddressResultReceiver extends ResultReceiver {
     private void stopLocationUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,this);
     }
+    public  static class DatePickerFragment extends DialogFragment  implements DatePickerDialog.OnDateSetListener{
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Calendar c= Calendar.getInstance();
+            int year=c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int date=c.get(Calendar.DATE);
 
+            DatePickerDialog dpd=new DatePickerDialog(getActivity(),this,year,month,date);
+            dpd.setTitle("Pick date for transport");
+            return dpd;
+        }
+
+
+        @Override
+        public  void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            Load.setDate(dayOfMonth,monthOfYear+1,year);
+            //time pick
+            DialogFragment newFragment = new TimePickerFragment();
+            newFragment.show(getFragmentManager(), "timePicker2");
+
+
+        }
+
+    }
     public static class TimePickerFragment extends DialogFragment implements TimePickerDialog.OnTimeSetListener {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -1385,34 +1403,6 @@ class AddressResultReceiver extends ResultReceiver {
         }
     }
 
-    public  static class DatePickerFragment extends DialogFragment  implements DatePickerDialog.OnDateSetListener{
-
-            @Override
-            public Dialog onCreateDialog(Bundle savedInstanceState) {
-                final Calendar c= Calendar.getInstance();
-
-
-                int year=c.get(Calendar.YEAR);
-                int month = c.get(Calendar.MONTH);
-                int date=c.get(Calendar.DATE);
-
-                DatePickerDialog dpd=new DatePickerDialog(getActivity(),this,year,month,date);
-                dpd.setTitle("Pick date for transport");
-                return dpd;
-            }
-
-
-            @Override
-            public  void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                Load.setDate(dayOfMonth,monthOfYear+1,year);
-                //time pick
-                DialogFragment newFragment = new TimePickerFragment();
-                newFragment.show(getFragmentManager(), "timePicker2");
-
-
-            }
-
-        }
     }
 //
 //    //CUSTOM LOCATION METHODS

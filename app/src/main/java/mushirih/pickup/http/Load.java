@@ -194,11 +194,11 @@ public class Load {
                     @Override
                     public void onResponse(String s) {
                         if(null!=s) {
-                            if(s.equals("Image of load successfully Uploaded")){
+                            if(!s.equals("Error")){
                             //Disimissing the progress dialog
                             loading.dismiss();
                             //Showing toast message of the response
-                            Toast.makeText(mContext, s, Toast.LENGTH_LONG).show();
+                            Toast.makeText(mContext, s+" Response", Toast.LENGTH_LONG).show();
                             //TODO Tell user something
                             AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                             builder.setTitle("Request successful").setCancelable(false)
@@ -227,7 +227,7 @@ public class Load {
                         loading.dismiss();
 
                         //Showing toast
-                        Toast.makeText(mContext, volleyError.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(mContext, volleyError.getMessage()+" Error", Toast.LENGTH_LONG).show();
                     }
                 }) {
             @Override
