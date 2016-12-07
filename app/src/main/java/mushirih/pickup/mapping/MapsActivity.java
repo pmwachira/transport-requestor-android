@@ -106,7 +106,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     private GoogleApiClient mGoogleApiClient;
     TextView mLocationText,pich_loc,drop_loc;
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    ToggleButton zero,one, two, three;
+
     LinearLayout l0,l1, l2, l3,request_pane,request_time,describe_load,destination_pane,location_pick_graphic,top_dest;
     Button confirm;
     String TAG="MAPSACTIVITY LOG";
@@ -174,40 +174,6 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
         updateProgress(true,0,"Set Collection Point",false);
         mLocationText= (TextView) findViewById(R.id.locationtext);
 
-        zero=(ToggleButton) findViewById(R.id.toggleButton0);
-        one = (ToggleButton) findViewById(R.id.toggleButton1);
-        two = (ToggleButton) findViewById(R.id.toggleButton2);
-        three = (ToggleButton) findViewById(R.id.toggleButton3);
-
-        l0 = (LinearLayout) findViewById(R.id.select_individual);
-        l1 = (LinearLayout) findViewById(R.id.select_bike);
-        l2 = (LinearLayout) findViewById(R.id.select_pick_up);
-        l3 = (LinearLayout) findViewById(R.id.select_lorry);
-
-        l1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                one.setChecked(true);
-                two.setChecked(false);
-                three.setChecked(false);
-            }
-        });
-        l2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                one.setChecked(false);
-                two.setChecked(true);
-                three.setChecked(false);
-            }
-        });
-        l3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                one.setChecked(false);
-                two.setChecked(false);
-                three.setChecked(true);
-            }
-        });
         pich_loc=(TextView) findViewById(R.id.top_bar_location);
 
 

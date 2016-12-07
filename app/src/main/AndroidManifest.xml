@@ -72,12 +72,6 @@
             android:theme="@style/AppTheme.NoActionBar"
             android:label="@string/title_activity_maps">
         </activity>
-        <activity
-            android:parentActivityName=".ui.TestScreen"
-            android:name=".ui.Move"
-            android:label="@string/title_activity_maps">
-
-        </activity>
         <activity android:name=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

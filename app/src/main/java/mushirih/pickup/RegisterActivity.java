@@ -77,6 +77,10 @@ public class RegisterActivity extends AppCompatActivity {
     TextInputLayout tipass;
     @InjectView(R.id.tiemail)
     TextInputLayout tiemail;
+    @InjectView(R.id.ti_userid)
+    TextInputLayout tiuserid;
+    @InjectView(R.id.ti_username)
+    TextInputLayout tiusername;
     String user_name,user_email,user_id,user_password,user_repeat_password,user_gcm;
     Context mContext;
     AsyncTask<Void, Void, Void> mRegisterTask;
@@ -116,11 +120,33 @@ public class RegisterActivity extends AppCompatActivity {
                 user_id=etuser_id.getText().toString().trim();
                 user_password=etpassword1.getText().toString().trim();
                 user_repeat_password=etrepeat_password.getText().toString().trim();
-                if(!user_password.equals(user_repeat_password)){
+                if(user_name.isEmpty()){
+                    etusername.setError("Username can not be empty");
+                    requestFocus(etusername);
+                }else if(user_email.isEmpty()){
+                    etuseremail.setError("User email can not be empty");
+                    requestFocus(etuseremail);
+                }
+                else if(!android.util.Patterns.EMAIL_ADDRESS.matcher(user_email).matches()){
+                    etuseremail.setError("Enter a valid email");
+                    requestFocus(etuseremail);
+                }else if(user_id.isEmpty()){
+                    etuser_id.setError("User ID can not be empty");
+                    requestFocus(etuser_id);
+                }
+                else if(user_password.isEmpty()){
+                    etpassword1.setError("User password can not be empty");
+                    requestFocus(etpassword1);
+                }
+                else if(!user_password.equals(user_repeat_password)){
                         etpassword1.setError("Passwords do not match");
                         requestFocus(etpassword1);
 
-                    } else {
+                } else {
+                    tiusername.setEnabled(false);
+                    tiemail.setEnabled(false);
+                    tiuserid.setEnabled(false);
+                    tipass.setEnabled(false);
                         tipass.setErrorEnabled(false);
                         registerUser(user_name, user_id, user_email, user_password);
                     }

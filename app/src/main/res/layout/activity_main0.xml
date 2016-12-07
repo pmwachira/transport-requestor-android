@@ -4,8 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg"
+
     tools:context="mushirih.pickup.ui.MainActivity">
+    <!--android:background="@drawable/bgx"-->
+    <com.flaviofaria.kenburnsview.KenBurnsView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/bgx"/>
     <ScrollView
 
         android:layout_width="match_parent"
@@ -59,7 +64,7 @@
             android:layout_width="match_parent"
             android:layout_height="50dp">
             <android.support.design.widget.TextInputLayout
-                android:textColorHint="#c5c5c5"
+                android:textColorHint="#2fa881"
                 android:id="@+id/input_layout_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -84,7 +89,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <android.support.design.widget.TextInputLayout
-                    android:textColorHint="#c5c5c5"
+                    android:textColorHint="#2fa881"
                     android:id="@+id/input_layout_password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
