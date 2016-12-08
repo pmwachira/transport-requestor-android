@@ -211,6 +211,8 @@ public class Load {
                 params.put("drop_id",userid);
                 params.put("drop_num","0000");
                 params.put("requestor_id", userid);
+                params.put("collector_name",name);
+                params.put("collector_id", id);
                 params.put("pick_num",num.toString());
                 params.put("pick_lat", String.valueOf(LOCATION_FROM.latitude));
                 params.put("pick_long", String.valueOf(LOCATION_FROM.longitude));
@@ -255,7 +257,7 @@ public class Load {
                             //Disimissing the progress dialog
                             loading.dismiss();
                             //Showing toast message of the response
-                            Toast.makeText(mContext, s+" Response", Toast.LENGTH_LONG).show();
+                            Toast.makeText(mContext, s, Toast.LENGTH_LONG).show();
                             //TODO Tell user something
                             AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                             builder.setTitle("Request successful").setCancelable(false)

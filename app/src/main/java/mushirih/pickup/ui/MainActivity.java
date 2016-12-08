@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         context=MainActivity.this;
         ButterKnife.inject(this);
         inputLayoutEmail= (TextInputLayout) findViewById(R.id.input_layout_email);
-
+        inputLayoutPass= (TextInputLayout) findViewById(R.id.input_layout_password);
         if (!AppUtils.isDataEnabled(MainActivity.this)){
             AlertDialog.Builder dialog = new AlertDialog.Builder(context);
                 dialog.setMessage("Internet not enabled!");
@@ -148,8 +148,14 @@ public class MainActivity extends AppCompatActivity {
                             if (etUseremail.requestFocus()) {
                                 getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
                             }
+                        }else if(password.isEmpty()){
+                            etPassword.setError("Password can not be empty");
+                            if (etPassword.requestFocus()) {
+                                getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                            }
                         }
                         else {
+                            inputLayoutPass.setErrorEnabled(false);
                             inputLayoutEmail.setErrorEnabled(false);
                             login();
                         }

@@ -43,7 +43,6 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
@@ -96,6 +95,7 @@ import mushirih.pickup.http.Load;
 import mushirih.pickup.internal.MyApplication;
 import mushirih.pickup.internal.MyPreferenceManager;
 import mushirih.pickup.ui.MainActivity;
+import mushirih.pickup.ui.Payments;
 import mushirih.pickup.ui.PrefManager;
 
 
@@ -161,6 +161,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
         prefManager=new PrefManager(mContext);
         if(!prefManager.isFirstLaunch()){
             //TODO SHOW APP INTRO
+            //compile 'com.github.chenupt.android:springindicator:1.0.2@aar'
         }
 
         buildGoogleApiClient();
@@ -373,16 +374,15 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     private void setDateTime() {
 //SET DATES FIRST
         //datePicker
-        DialogFragment newfragment = new DatePickerFragment();
-       newfragment.setCancelable(false);
-      newfragment.show(getSupportFragmentManager(), "datePicker2");
-        updateProgress(false, 4, "Indicate weight of load", false);
-        describe_load();
+        datePicker();
+        //we have moved to time picker method
+//        updateProgress(false, 4, "Indicate weight of load", false);
+//        describe_load();
     }
     private  void describe_load() {
         confirm.setVisibility(View.GONE);
         load_char=new ArrayList();
-         options= new String[]{"Urgent", "Fragile ", "Perishable", "In need of packing boxes", "I need help loading"};
+         options= new String[]{ "Fragile ", "Perishable","Urgent","In need of packing boxes", "I need help loading"};
         final String[] weight_options={"Load under 5 Kgs","Load between 5-30 Kgs","Load over 30Kgs"};
         AlertDialog.Builder builder=new AlertDialog.Builder(this);
         builder.setTitle("Please describe your load")
@@ -420,7 +420,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                             }
                         }
                     });
-                    builder.setNegativeButton("Cancel", null);
+                    //builder.setNegativeButton("Cancel", null);
                     //TODO: Contact permission
                     if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED){
                       ActivityCompat.requestPermissions(MapsActivity.this, new String[] {
@@ -489,8 +489,9 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                                                 }
                                                 Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                                 if (takePicture.resolveActivity(getPackageManager()) != null) {
-                                                    startActivityForResult(takePicture, REQUEST_IMAGE_CAPTURE);
                                                     alertDialog.cancel();
+                                                    startActivityForResult(takePicture, REQUEST_IMAGE_CAPTURE);
+
 
 
                                                 }
@@ -506,20 +507,14 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                             //builder.show();
 
                         }
-                    }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                        }
-                    });
+                    });//.setNegativeButton("Cancel", null);
                     //TODO SECOND BUILDER
                      builder.show();
 
 
                 }
             });
-        builder.setNegativeButton("Cancel",null);
+        //builder.setNegativeButton("Cancel",null);
          builder.show();
     }
     private void showRoute() {
@@ -1068,6 +1063,8 @@ class AddressResultReceiver extends ResultReceiver {
             myPreferenceManager.logOutUser();
             startActivity(new Intent(getBaseContext(),MainActivity.class));
             finish();
+        }else if(id==R.id.pay){
+            startActivity(new Intent(getBaseContext(),Payments.class));
         }
 
         return super.onOptionsItemSelected(item);
@@ -1384,49 +1381,64 @@ class AddressResultReceiver extends ResultReceiver {
     private void stopLocationUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,this);
     }
-    public  static class DatePickerFragment extends DialogFragment  implements DatePickerDialog.OnDateSetListener{
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public void datePicker(){
             final Calendar c= Calendar.getInstance();
             int year=c.get(Calendar.YEAR);
             int month = c.get(Calendar.MONTH);
             int date=c.get(Calendar.DATE);
 
-            DatePickerDialog dpd=new DatePickerDialog(getActivity(),this,year,month,date);
-            dpd.setTitle("Pick date for transport");
-            return dpd;
-        }
+        final DatePickerDialog datePickerDialog = new DatePickerDialog(this,
+                new DatePickerDialog.OnDateSetListener() {
+
+                    @Override
+                    public void onDateSet(DatePicker view, int year,
+                                          int monthOfYear, int dayOfMonth) {
+                        Load.setDate(dayOfMonth,monthOfYear+1,year);
+                        //time pick
+                        timePicker();
+                    }
+                }, year, month, date);
+        datePickerDialog.setTitle("Pick date for transport");
+        datePickerDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                datePickerDialog.getButton(Dialog.BUTTON_NEGATIVE).setVisibility(View.GONE);
+            }
+        });
+        datePickerDialog.show();
 
 
-        @Override
-        public  void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-            Load.setDate(dayOfMonth,monthOfYear+1,year);
-            //time pick
-            DialogFragment newFragment = new TimePickerFragment();
-            newFragment.show(getFragmentManager(), "timePicker2");
 
-
-        }
 
     }
-    public static class TimePickerFragment extends DialogFragment implements TimePickerDialog.OnTimeSetListener {
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public void timePicker(){
             final Calendar c= Calendar.getInstance();
             int hour=c.get(Calendar.HOUR_OF_DAY);
             int minute=c.get(Calendar.MINUTE);
 
-            TimePickerDialog tpd=new TimePickerDialog(getActivity(),this,hour,minute, !android.text.format.DateFormat.is24HourFormat(getActivity()));
+            final TimePickerDialog tpd=new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
+                @Override
+                public void onTimeSet(TimePicker timePicker, int hour, int minute) {
+                    String min="00";
+                    if(minute<10){
+                        min="0"+minute;
+                    }else{
+                        min=minute+"";
+                    }
+                    Load.setTime(hour, Integer.parseInt(min));
+                    updateProgress(false, 4, "Indicate weight of load", false);
+                    describe_load();
+                }
+            },hour, minute, !android.text.format.DateFormat.is24HourFormat(this));
             tpd.setTitle("Set preferred time of travel");
-            return tpd;
+        tpd.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                tpd.getButton(Dialog.BUTTON_NEGATIVE).setVisibility(View.GONE);
+            }
+        });
+            tpd.show();
         }
-
-        @Override
-        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            Load.setTime(hourOfDay,minute);
-
-        }
-    }
 
     }
 //
