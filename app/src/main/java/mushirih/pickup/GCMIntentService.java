@@ -16,6 +16,7 @@ import java.util.StringTokenizer;
 
 import mushirih.pickup.cm.ServerUtilities;
 import mushirih.pickup.internal.User;
+import mushirih.pickup.ui.RateTransaction;
 
 import static mushirih.pickup.cm.CommonUtilities.SENDER_ID;
 import static mushirih.pickup.cm.CommonUtilities.displayMessage;
@@ -27,6 +28,8 @@ import static mushirih.pickup.cm.CommonUtilities.displayMessage;
     public class GCMIntentService extends GCMBaseIntentService {
 
         private static final String TAG = "GCMIntentService";
+    private static NotificationManager notificationManager;
+
 
         public GCMIntentService() {
             super(SENDER_ID);
@@ -102,37 +105,62 @@ import static mushirih.pickup.cm.CommonUtilities.displayMessage;
         private static void generateNotification(Context context, String message) {
             int icon = R.mipmap.ic_launcher;
             long when = System.currentTimeMillis();
-            NotificationManager notificationManager = (NotificationManager)
+            notificationManager = (NotificationManager)
                     context.getSystemService(Context.NOTIFICATION_SERVICE);
             Notification notification = new Notification(icon, message, when);
-            String firstMessage="";
-            String secondMessage="";
+            String firstMessage = "";
+            String secondMessage = "";
+
             StringTokenizer splits = new StringTokenizer(message, "::::");
-            if(null!=splits) {
+            if (null != splits) {
                 firstMessage = splits.nextToken();
                 secondMessage = splits.nextToken();
             }
-
+            //TODO notification for successful transaction
+            if (firstMessage.equals("COMPLETE")) {
+                transactionCompete(context, secondMessage);
+            }else{
             String title = context.getString(R.string.app_name);
             Intent notificationIntent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + secondMessage));
             // set intent so it does not start a new activity
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
                     Intent.FLAG_ACTIVITY_SINGLE_TOP);
             PendingIntent intent =
-                    PendingIntent.getActivity(context, 0, notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+                    PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-           NotificationCompat.Builder builder=new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic)
-                   .setContentTitle(title).setContentText(firstMessage+": I will be transporting your load\nClick to call me.");
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic)
+                    .setContentTitle(title).setContentText(firstMessage + ": I will be transporting your load\nClick to call me.");
             builder.setDefaults(Notification.DEFAULT_SOUND);
             builder.setDefaults(Notification.DEFAULT_VIBRATE);
-            builder.setStyle(new NotificationCompat.BigTextStyle().bigText(firstMessage+": I will be transporting your load\nClick to call me."));
+            builder.setStyle(new NotificationCompat.BigTextStyle().bigText(firstMessage + ": I will be transporting your load\nClick to call me."));
             builder.setAutoCancel(true);
             builder.setContentIntent(intent);
 //            notificationManager.notify(0,builder.build());
-            notificationManager.notify((int) System.currentTimeMillis(),builder.build());
-
-
+            notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+        }
         }
 
+    private static void transactionCompete(Context context, String secondMessage) {
+        String title = context.getString(R.string.app_name);
+        //TODO THIS INTENT SHOULD SHOW COMPLETED AND ASK FOR RATING
+        Intent notificationIntent = new Intent(context,RateTransaction.class);
+        notificationIntent.putExtra("ID",secondMessage);
+        // set intent so it does not start a new activity
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent intent =
+                PendingIntent.getActivity(context, 0, notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder builder=new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic)
+                .setContentTitle(title).setContentText("message");
+        builder.setDefaults(Notification.DEFAULT_SOUND);
+        builder.setDefaults(Notification.DEFAULT_VIBRATE);
+        builder.setStyle(new NotificationCompat.BigTextStyle().bigText("message"));
+        builder.setAutoCancel(true);
+        builder.setContentIntent(intent);
+//            notificationManager.notify(0,builder.build());
+        notificationManager.notify((int) System.currentTimeMillis(),builder.build());
     }
+
+}
 ;

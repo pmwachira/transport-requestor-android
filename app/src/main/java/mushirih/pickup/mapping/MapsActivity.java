@@ -547,6 +547,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
 
     public static void requestSuccessful() {
          activity.finish();
+
     }
 
     private class ReadTask extends AsyncTask<String,Void,String> {
@@ -1058,14 +1059,15 @@ class AddressResultReceiver extends ResultReceiver {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if(id==R.id.action_logOut){
-            MyPreferenceManager myPreferenceManager=new MyPreferenceManager(this);
+        if(id==R.id.action_logOut) {
+            MyPreferenceManager myPreferenceManager = new MyPreferenceManager(this);
             myPreferenceManager.logOutUser();
-            startActivity(new Intent(getBaseContext(),MainActivity.class));
+            startActivity(new Intent(getBaseContext(), MainActivity.class));
             finish();
-        }else if(id==R.id.pay){
-            startActivity(new Intent(getBaseContext(),Payments.class));
         }
+//        else if(id==R.id.pay){
+//            startActivity(new Intent(getBaseContext(),Payments.class));
+//        }
 
         return super.onOptionsItemSelected(item);
     }

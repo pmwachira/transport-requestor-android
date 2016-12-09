@@ -83,6 +83,7 @@
 
         </activity>
         <activity android:name=".ui.RateDriver"></activity>
+        <activity android:name=".ui.RateTransaction"></activity>
         <activity android:name=".ui.Payments"
             android:parentActivityName=".mapping.MapsActivity"></activity>
         <receiver

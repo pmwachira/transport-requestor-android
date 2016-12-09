@@ -50,6 +50,7 @@ import mushirih.pickup.cm.WakeLocker;
 import mushirih.pickup.internal.MyApplication;
 import mushirih.pickup.internal.User;
 import mushirih.pickup.mapping.MapsActivity;
+import mushirih.pickup.ui.MainActivity;
 
 import static mushirih.pickup.cm.CommonUtilities.DISPLAY_MESSAGE_ACTION;
 import static mushirih.pickup.cm.CommonUtilities.EXTRA_MESSAGE;
@@ -189,16 +190,16 @@ public class RegisterActivity extends AppCompatActivity {
                         finish();
 
                     } else {
-                        // login error - simply toast the message
+                        //error - simply toast the message
                         loading.dismiss();
-                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                        builder.setTitle("Invalid credentials").setCancelable(false)
-                                .setMessage("Please try again")
-                                .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
+                        builder.setTitle("Error").setCancelable(false)
+                                .setMessage("ID number already exists,please log in")
+                                .setNegativeButton("Log in", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
-                                        //retry
-                                        startActivity(new Intent(getBaseContext(),RegisterActivity.class));
+                                        startActivity(new Intent(getBaseContext(),MainActivity.class));
                                         finish();
                                     }
                                 });

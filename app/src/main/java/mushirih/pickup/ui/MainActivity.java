@@ -201,11 +201,12 @@ public class MainActivity extends AppCompatActivity {
                         String ema=userObj.getString("email");
                         User user = new User(id,nam,ema);
                         // storing user in shared preferences
-                        MyApplication.getInstance().getPrefManager().storeUser(user);
                         if(myPreferenceManager.isFirstLaunch()){
                             reRegisterGCM(nam,ema);
                             myPreferenceManager.setIsFirstLaunch(false);
+
                         }
+                        MyApplication.getInstance().getPrefManager().storeUser(user);
                         startActivity(new Intent(getApplicationContext(), MapsActivity.class));
                         finish();
 
@@ -214,15 +215,16 @@ public class MainActivity extends AppCompatActivity {
                         loading.dismiss();
                         AlertDialog.Builder builder = new AlertDialog.Builder(context);
                         builder.setTitle("Invalid credentials").setCancelable(false)
-                                .setMessage("Please  try again")
+                                .setMessage("Please try again")
                                 .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
-                                        startActivity(new Intent(getBaseContext(),MainActivity.class));
-                                        finish();
+                                        //retry
+                                        dialogInterface.dismiss();
                                     }
                                 });
                         builder.show();
+
                         //Toast.makeText(getApplicationContext(), "" + obj.getJSONObject("error").getString("message"), Toast.LENGTH_LONG).show();
                     }
 

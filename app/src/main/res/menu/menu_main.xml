@@ -3,6 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
     <item android:id="@+id/action_logOut" android:title="Log Out"
         android:orderInCategory="100" app:showAsAction="never" />
-    <item android:id="@+id/pay" android:title="Make payment"
-        android:orderInCategory="200" app:showAsAction="never"/>
+    <!--<item android:id="@+id/pay" android:title="Make payment"-->
+        <!--android:orderInCategory="200" app:showAsAction="never"/>-->
 </menu>
