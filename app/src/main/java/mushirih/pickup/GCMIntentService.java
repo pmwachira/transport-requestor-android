@@ -152,10 +152,10 @@ import static mushirih.pickup.cm.CommonUtilities.displayMessage;
                 PendingIntent.getActivity(context, 0, notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder=new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic)
-                .setContentTitle(title).setContentText("message");
+                .setContentTitle(title).setContentText("Your delivery is complete");
         builder.setDefaults(Notification.DEFAULT_SOUND);
         builder.setDefaults(Notification.DEFAULT_VIBRATE);
-        builder.setStyle(new NotificationCompat.BigTextStyle().bigText("message"));
+        builder.setStyle(new NotificationCompat.BigTextStyle().bigText("Your delivery is complete"));
         builder.setAutoCancel(true);
         builder.setContentIntent(intent);
 //            notificationManager.notify(0,builder.build());

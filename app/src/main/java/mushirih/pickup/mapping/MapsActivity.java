@@ -1427,7 +1427,7 @@ class AddressResultReceiver extends ResultReceiver {
                     }else{
                         min=minute+"";
                     }
-                    Load.setTime(hour, Integer.parseInt(min));
+                    Load.setTime(hour,min);
                     updateProgress(false, 4, "Indicate weight of load", false);
                     describe_load();
                 }

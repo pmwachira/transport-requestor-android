@@ -17,6 +17,7 @@ import mushirih.pickup.R;
 public class Payments  extends ActionBarActivity {
          WebView webView;
         ProgressDialog loading;
+    String cost="033";
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -24,11 +25,14 @@ public class Payments  extends ActionBarActivity {
             loading = ProgressDialog.show(this,null, "Fetching payment methods",true,false);
             setContentView(R.layout.payments);
             webView = (WebView) findViewById(R.id.webview);
+            if (null != getIntent() && null != getIntent().getStringExtra("cost")) {
+                cost = getIntent().getStringExtra("cost");
+            }
             WebSettings webSettings = webView.getSettings();
             webSettings.setJavaScriptEnabled(true);
 
 
-            String postData = "amount=5000&type=MERCHANT&description=lol&reference=101&first_name=peter&" +
+            String postData = "amount="+cost+"&type=MERCHANT&description=lol&reference=101&first_name=peter&" +
                     "last_name=Mush&email=pmwachira@gmail.com";
 
             webView.setWebViewClient(new WebViewClient(){

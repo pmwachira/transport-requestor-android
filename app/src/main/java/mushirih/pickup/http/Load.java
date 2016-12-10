@@ -43,7 +43,7 @@ public class Load {
     public static int MONTH;
     public static int YEAR;
     private static int HOUR;
-    private static int MINUTE;
+    private static String MINUTE;
    private static Context mContext;
     private static String TAG="LOAD ALPHA REQUEST";
     private static String request_id_global;
@@ -69,7 +69,7 @@ public class Load {
         YEAR=year;
         
     }
-    public static void setTime(int hourOfDay, int minute) {
+    public static void setTime(int hourOfDay, String minute) {
         HOUR=hourOfDay;
         MINUTE=minute;
     }

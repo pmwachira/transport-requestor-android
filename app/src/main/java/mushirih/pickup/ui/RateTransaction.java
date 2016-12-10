@@ -40,7 +40,6 @@ import mushirih.pickup.internal.MyApplication;
  * Created by p-tah on 09/12/2016.
  */
 public class RateTransaction extends AppCompatActivity {
-    //TODO ADD MOBILE MONEY
     RatingBar ratingBar;
     ProgressDialog loading;
     Context contextt;
@@ -85,7 +84,7 @@ public class RateTransaction extends AppCompatActivity {
                     // check for error flag
                     if (obj.getString("error").equals("false")) {
                         // user successfully logged in
-                        String cost = obj.getString("cost");
+                        final String cost = obj.getString("cost");
                         final String pick_num = obj.getString("pick_num");
                         loading.dismiss();
                         AlertDialog.Builder builder = new AlertDialog.Builder(contextt);
@@ -94,7 +93,9 @@ public class RateTransaction extends AppCompatActivity {
                                 .setPositiveButton("Pay", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        startActivity(new Intent(RateTransaction.this, Payments.class));
+                                        Intent cst=new Intent(RateTransaction.this, Payments.class);
+                                        cst.putExtra("cost",cost);
+                                        startActivity(cst);
                                         finish();
                                     }
                                 })
