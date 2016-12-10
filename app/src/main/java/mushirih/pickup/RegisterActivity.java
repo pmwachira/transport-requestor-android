@@ -365,8 +365,8 @@ public class RegisterActivity extends AppCompatActivity {
              * For now i am just displaying it on the screen
              * */
 
-            // Showing received message
-            Toast.makeText(getApplicationContext(), "New Message: " + newMessage, Toast.LENGTH_LONG).show();
+            // Toast.makeText(getApplicationContext(), "New Message: " + newMessage, Toast.LENGTH_LONG).show();
+            Log.e("GCM ALERT",newMessage);
 
             // Releasing wake lock
             WakeLocker.release();

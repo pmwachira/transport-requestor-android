@@ -113,6 +113,7 @@ public class RateTransaction extends AppCompatActivity {
                                             return;
                                         }
                                         startActivity(new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + pick_num)));
+                                        finish();
                             }
                         });
 
