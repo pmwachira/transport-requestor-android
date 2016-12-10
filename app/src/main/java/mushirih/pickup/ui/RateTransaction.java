@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,6 +46,7 @@ public class RateTransaction extends AppCompatActivity {
     Context contextt;
     String TAG = "RateTransaction.class";
     String trans_id = "";
+    String comment = "";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,15 +65,17 @@ public class RateTransaction extends AppCompatActivity {
                 preview.setText("" + v);
             }
         });
+        EditText suggest= (EditText) findViewById(R.id.suggest);
+        comment=suggest.getText().toString();
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendReview("trans", ratingBar.getRating());
+                sendReview("trans", ratingBar.getRating(),comment);
             }
         });
     }
 
-    private void sendReview(final String trans, final float rating) {
+    private void sendReview(final String trans, final float rating, final String comment) {
         loading = ProgressDialog.show(contextt, null, "Submitting review...", true, false);
         StringRequest strRating = new StringRequest(Request.Method.POST,
                 MyApplication.RequestorReview, new Response.Listener<String>() {
@@ -151,7 +155,7 @@ public class RateTransaction extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 //retry
-                                sendReview("trans",ratingBar.getRating());
+                                sendReview("trans",ratingBar.getRating(), comment);
                             }
                         });
                 builder.show();
@@ -166,7 +170,7 @@ public class RateTransaction extends AppCompatActivity {
                 Map<String, String> params = new HashMap<>();
                 params.put("eng_id", trans_id);
                 params.put("eng_rating", String.valueOf(rating));
-
+                params.put("comment", comment);
 
                 Log.e(TAG, "params: " + params.toString());
                 return params;
