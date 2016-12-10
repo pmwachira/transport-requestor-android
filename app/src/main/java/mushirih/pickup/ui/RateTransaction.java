@@ -89,7 +89,7 @@ public class RateTransaction extends AppCompatActivity {
                         loading.dismiss();
                         AlertDialog.Builder builder = new AlertDialog.Builder(contextt);
                         builder.setTitle("Delivery Complete").setCancelable(false)
-                                .setMessage("Thank you for using pickUp service.Please pay " + cost + " Ksh")
+                                .setMessage("Thank you for using pickUp service. Please pay " + cost + " Ksh")
                                 .setPositiveButton("Pay", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
