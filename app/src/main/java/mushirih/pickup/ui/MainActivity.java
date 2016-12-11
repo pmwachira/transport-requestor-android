@@ -82,9 +82,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         myPreferenceManager=new MyPreferenceManager(this);
-        if( null!=myPreferenceManager.getUser()){
+
+        if( null!=myPreferenceManager.getUser()) {
+            if( null!=MyApplication.getInstance().getPrefManager().getUser()){
             startActivity(new Intent(getApplicationContext(), MapsActivity.class));
             finish();
+        }
         }
         setContentView(R.layout.activity_main0);
         context=MainActivity.this;

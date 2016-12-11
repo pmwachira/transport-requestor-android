@@ -25,7 +25,6 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
@@ -95,7 +94,6 @@ import mushirih.pickup.http.Load;
 import mushirih.pickup.internal.MyApplication;
 import mushirih.pickup.internal.MyPreferenceManager;
 import mushirih.pickup.ui.MainActivity;
-import mushirih.pickup.ui.Payments;
 import mushirih.pickup.ui.PrefManager;
 
 
@@ -152,6 +150,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     int CAMERA_ZOOM=16;
     ProgressDialog loading,loader;
     String desc="";
+    AlertDialog alertDialogH;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -452,11 +451,11 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                             });
                             builder.setPositiveButton("Take picture of load", null);
 //                            builder.setNegativeButton("Cancel", null);
-                            final AlertDialog alertDialog = builder.create();
-                            alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                             alertDialogH = builder.create();
+                            alertDialogH.setOnShowListener(new DialogInterface.OnShowListener() {
                                 @Override
                                 public void onShow(DialogInterface dialog) {
-                                    Button b = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                                    Button b = alertDialogH.getButton(AlertDialog.BUTTON_POSITIVE);
                                     final EditText name, id, num;
                                     name = (EditText) layoutInflater.findViewById(R.id.name);
                                    id = (EditText) layoutInflater.findViewById(R.id.id);
@@ -489,11 +488,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                                                 }
                                                 Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                                 if (takePicture.resolveActivity(getPackageManager()) != null) {
-                                                    alertDialog.cancel();
                                                     startActivityForResult(takePicture, REQUEST_IMAGE_CAPTURE);
-
-
-
                                                 }
                                             }
                                         }
@@ -502,7 +497,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                                  //  builder.show();
                                 }
                             });
-                            alertDialog.show();
+                            alertDialogH.show();
                             //builder.setView(View.inflate(mContext, R.layout.hello, null));
                             //builder.show();
 
@@ -549,7 +544,6 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
          activity.finish();
 
     }
-
     private class ReadTask extends AsyncTask<String,Void,String> {
 
 
@@ -627,7 +621,6 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                     totalDistance += lastLocation.distanceTo(currLocation);
                 }
                 DISTANCE_BETWEEN= (int) (totalDistance/1000);
-
             }
         }
     }
@@ -748,6 +741,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                         }
                     });
                     builderVal.show();
+
                 }
 
             });
@@ -866,7 +860,6 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                 .addApi(LocationServices.API)
                 .build();
     }
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -877,7 +870,6 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
             e.printStackTrace();
         }
     }
-
     @Override
     protected void onStop() {
         super.onStop();
@@ -890,7 +882,6 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
             mGoogleApiClient.disconnect();
         }
     }
-
     private boolean checkPlayServices() {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
         if (resultCode != ConnectionResult.SUCCESS) {
@@ -904,7 +895,6 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
         }
         return true;
     }
-
     private void changeMap(Location location) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
@@ -950,7 +940,6 @@ if(!am_done) {
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
       }
-
     /**
  * Receiver for data sent from FetchAddressIntentService.
  */
@@ -1101,6 +1090,7 @@ class AddressResultReceiver extends ResultReceiver {
                 Bundle extras=data.getExtras();
                 image= (Bitmap) extras.get("data");
                 Load.setImage(image);
+                alertDialogH.cancel();
                 am_done=true;
                 updateProgress(false,7, "Details Completed",true);
 
