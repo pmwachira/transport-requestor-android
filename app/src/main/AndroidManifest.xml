@@ -86,6 +86,8 @@
         <activity android:name=".ui.RateTransaction"></activity>
         <activity android:name=".ui.Payments"
             android:parentActivityName=".mapping.MapsActivity"></activity>
+        <activity android:name=".ui.TrackLoad"
+            android:process=":TrackLoad"></activity>
         <receiver
             android:name="com.google.android.gcm.GCMBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >

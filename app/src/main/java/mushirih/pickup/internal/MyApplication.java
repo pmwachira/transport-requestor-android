@@ -32,6 +32,7 @@ public class MyApplication extends Application {
     public static final String ONLINE_CALCULATE_COST = "http://noshybakery.co.ke/PICKUP/v1/calculate_cost";
     public static final String IMAGE_UPLOAD_URL = "http://noshybakery.co.ke/PICKUP/include/image_upload.php";
     public static String RequestorReview="http://noshybakery.co.ke/PICKUP/v1/rate_transaction_requestor";
+    public static final String TRACK = "http://noshybakery.co.ke/PICKUP/v1/track";
 
     @Override
     public void onCreate() {

@@ -65,11 +65,12 @@ public class RateTransaction extends AppCompatActivity {
                 preview.setText("" + v);
             }
         });
-        EditText suggest= (EditText) findViewById(R.id.suggest);
-        comment=suggest.getText().toString();
+        final EditText suggest= (EditText) findViewById(R.id.suggest);
+
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                comment=suggest.getText().toString().trim();
                 sendReview("trans", ratingBar.getRating(),comment);
             }
         });

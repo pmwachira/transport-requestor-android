@@ -17,6 +17,7 @@ import java.util.StringTokenizer;
 import mushirih.pickup.cm.ServerUtilities;
 import mushirih.pickup.internal.User;
 import mushirih.pickup.ui.RateTransaction;
+import mushirih.pickup.ui.TrackLoad;
 
 import static mushirih.pickup.cm.CommonUtilities.SENDER_ID;
 import static mushirih.pickup.cm.CommonUtilities.displayMessage;
@@ -121,20 +122,35 @@ import static mushirih.pickup.cm.CommonUtilities.displayMessage;
                 transactionCompete(context, secondMessage);
             }else{
             String title = context.getString(R.string.app_name);
-            Intent notificationIntent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + secondMessage));
+                String number="00";
+                String id="0000";
+                StringTokenizer splits2 = new StringTokenizer(secondMessage, ">>>>");
+                if (null != splits2) {
+                    number = splits2.nextToken();
+                    id = splits2.nextToken();
+                }
+            Intent notificationIntent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + number));
             // set intent so it does not start a new activity
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
                     Intent.FLAG_ACTIVITY_SINGLE_TOP);
             PendingIntent intent =
                     PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
+                Intent notificationIntent2 = new Intent(context,TrackLoad.class);
+                // set intent so it does not start a new activity
+                notificationIntent2.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                        Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                notificationIntent2.putExtra("id",id);
+                PendingIntent intentTrack =
+                        PendingIntent.getActivity(context, 0, notificationIntent2, PendingIntent.FLAG_UPDATE_CURRENT);
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic)
                     .setContentTitle(title).setContentText(firstMessage + ": I will be transporting your load\nClick to call me.");
             builder.setDefaults(Notification.DEFAULT_SOUND);
             builder.setDefaults(Notification.DEFAULT_VIBRATE);
             builder.setStyle(new NotificationCompat.BigTextStyle().bigText(firstMessage + ": I will be transporting your load\nClick to call me."));
             builder.setAutoCancel(true);
-            builder.setContentIntent(intent);
+            //builder.setContentIntent(intent);
+                builder.addAction(R.drawable.call,"Call",intent);
+                builder.addAction(R.drawable.track,"Track",intentTrack);
 //            notificationManager.notify(0,builder.build());
             notificationManager.notify((int) System.currentTimeMillis(), builder.build());
         }
