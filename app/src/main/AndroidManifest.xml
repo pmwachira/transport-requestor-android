@@ -87,6 +87,7 @@
         <activity android:name=".ui.Payments"
             android:parentActivityName=".mapping.MapsActivity"></activity>
         <activity android:name=".ui.TrackLoad"
+            android:theme="@style/AppTheme.NoActionBar"
             android:process=":TrackLoad"></activity>
         <receiver
             android:name="com.google.android.gcm.GCMBroadcastReceiver"

@@ -240,7 +240,7 @@ public class Load {
         //Adding request to request queue
         MyApplication.getInstance().addToRequestQueue(strReq);
         //store transaction id+state to sp
-        MyApplication.getInstance().getPrefManager().storeTRansactionId(request_id_global,"ALPHA");
+        MyApplication.getInstance().getPrefManager().storeTRansactionId(request_id_global );
 
     }
     private static void uploader(final Bitmap image, final String request_id_global) {
@@ -328,7 +328,6 @@ public class Load {
         //Adding request to the queue
         requestQueue.add(stringRequest);
     }
-
     public static void setCost(String cost) {
         COST=cost;
     }

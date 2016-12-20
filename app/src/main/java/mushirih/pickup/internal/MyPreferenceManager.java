@@ -4,13 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import java.util.HashSet;
-
 /**
  * Created by p-tah on 13/08/2016.
  */
 
 public class MyPreferenceManager {
+
+
 
     private String TAG = MyPreferenceManager.class.getSimpleName();
 
@@ -30,6 +30,8 @@ public class MyPreferenceManager {
     private static final String PREF_NAME = "mushirihx";
 
     // All Shared Preferences Keys
+    private static final String KEY_MY_DRIVNUM = "drivers_number";
+    private static final String TRACK_DRIVER_FOR_ME ="track driver for me" ;
     private static final String KEY_USER_ID = "user_id";
     private static final String KEY_USER_NAME = "user_name";
     private static final String KEY_USER_EMAIL = "user_email";
@@ -97,19 +99,29 @@ public class MyPreferenceManager {
         editor.commit();
     }
 
-    public void storeTRansactionId(String request_id_global, String alpha) {
-        HashSet<String> trans=new HashSet<>();
-        trans.add(request_id_global);
-        trans.add(alpha);
-        editor.putStringSet(KEY_MY_TRANSATION,trans);
+    public void storeTRansactionId(String request_id_global) {
+
+        editor.putString(KEY_MY_TRANSATION,request_id_global);
         editor.commit();
     }
-    public String[] getTransaction(){
-        String[] trans = new String[0];
-        if(pref.getStringSet(KEY_MY_TRANSATION,null)!=null){
-             trans=pref.getStringSet(KEY_MY_TRANSATION,null).toArray(new String[pref.getStringSet(KEY_MY_TRANSATION,null).size()]);
+    public String getTransaction(){
+       String trans="0000";
+        if(pref.getString(KEY_MY_TRANSATION,null)!=null){
+             trans=pref.getString(KEY_MY_TRANSATION,null);
         }
         return trans;
+    }
+    public void storenumber(String num) {
+
+        editor.putString(KEY_MY_DRIVNUM,num);
+        editor.commit();
+    }
+    public String getnumber(){
+        String num="0000";
+        if(pref.getString(KEY_MY_DRIVNUM,null)!=null){
+            num=pref.getString(KEY_MY_DRIVNUM,null);
+        }
+        return num;
     }
     public void setIsFirstLaunch(boolean isFirstTime){
         editor.putBoolean(IS_FIRST_LAUNCH,isFirstTime);
@@ -118,5 +130,13 @@ public class MyPreferenceManager {
 
     public boolean isFirstLaunch(){
         return pref.getBoolean(IS_FIRST_LAUNCH,true);
+    }
+
+    public void setTracking(boolean b) {
+        editor.putBoolean(TRACK_DRIVER_FOR_ME,b);
+        editor.commit();
+    }
+    public boolean getTracking(){
+        return pref.getBoolean(TRACK_DRIVER_FOR_ME,false);
     }
 }

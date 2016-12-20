@@ -15,6 +15,7 @@ import com.google.android.gcm.GCMBaseIntentService;
 import java.util.StringTokenizer;
 
 import mushirih.pickup.cm.ServerUtilities;
+import mushirih.pickup.internal.MyPreferenceManager;
 import mushirih.pickup.internal.User;
 import mushirih.pickup.ui.RateTransaction;
 import mushirih.pickup.ui.TrackLoad;
@@ -140,6 +141,9 @@ import static mushirih.pickup.cm.CommonUtilities.displayMessage;
                 notificationIntent2.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
                         Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 notificationIntent2.putExtra("id",id);
+                notificationIntent2.putExtra("num",number);
+                new MyPreferenceManager(context).storeTRansactionId(id);
+                new MyPreferenceManager(context).storenumber(number);
                 PendingIntent intentTrack =
                         PendingIntent.getActivity(context, 0, notificationIntent2, PendingIntent.FLAG_UPDATE_CURRENT);
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic)

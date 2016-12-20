@@ -36,6 +36,7 @@ import java.util.Map;
 
 import mushirih.pickup.R;
 import mushirih.pickup.internal.MyApplication;
+import mushirih.pickup.internal.MyPreferenceManager;
 
 /**
  * Created by p-tah on 09/12/2016.
@@ -54,8 +55,10 @@ public class RateTransaction extends AppCompatActivity {
         if (null != getIntent() && null != getIntent().getStringExtra("ID")) {
             trans_id = getIntent().getStringExtra("ID");
         }
+
         setContentView(R.layout.ratetrans);
         contextt = this;
+        new MyPreferenceManager(contextt).setTracking(false);
         final TextView preview = (TextView) findViewById(R.id.ratingPreview);
         ratingBar = (RatingBar) findViewById(R.id.ratingBar);
         Button submit = (Button) findViewById(R.id.submitReview);

@@ -85,8 +85,13 @@ public class MainActivity extends AppCompatActivity {
 
         if( null!=myPreferenceManager.getUser()) {
             if( null!=MyApplication.getInstance().getPrefManager().getUser()){
-            startActivity(new Intent(getApplicationContext(), MapsActivity.class));
-            finish();
+                if(MyApplication.getInstance().getPrefManager().getTracking()){
+                    startActivity(new Intent(getApplicationContext(), TrackLoad.class));
+                    finish();
+                }else {
+                    startActivity(new Intent(getApplicationContext(), MapsActivity.class));
+                    finish();
+                }
         }
         }
         setContentView(R.layout.activity_main0);
