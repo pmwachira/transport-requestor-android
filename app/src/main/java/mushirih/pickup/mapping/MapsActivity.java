@@ -1271,12 +1271,9 @@ class AddressResultReceiver extends ResultReceiver {
                             accept.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    confirm.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
                                             AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                                             builder.setTitle("Prompt");
-                                            builder.setMessage("By clicking okay,you accept our Terms and conditions");
+                                            builder.setMessage("By clicking okay,you accept the terms and conditions");
                                             builder.setNegativeButton("Cancel", null);
                                             builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
                                                 @Override
@@ -1288,10 +1285,7 @@ class AddressResultReceiver extends ResultReceiver {
                                             builder.show();
                                         }
                                     });
-
-                                }
-                            });
-                             decline.setOnClickListener(new View.OnClickListener() {
+                            decline.setOnClickListener(new View.OnClickListener() {
                                  @Override
                                  public void onClick(View v) {
                                      //TODO ASK COMMENT,ASK PRICE EXPECTED

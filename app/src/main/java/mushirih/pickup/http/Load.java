@@ -12,7 +12,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -171,27 +170,27 @@ public class Load {
             @Override
             public void onErrorResponse(VolleyError error) {
                 loading.dismiss();
-                NetworkResponse networkResponse = error.networkResponse;
-                Log.e(TAG, "Volley error: " + error.getMessage() + ", code: " + networkResponse+" and "+error.getMessage());
-               // Toast.makeText(mContext, "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                builder.setTitle("Error").setCancelable(false)
-                        .setMessage("Please check your internet settings and try again")
-                        .setNeutralButton("Open settings", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
-                                mContext.startActivity(myIntent);
-                            }
-                        })
-                        .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                // prevent cost generation again
-                                send();
-                            }
-                        });
-                builder.show();
+//                NetworkResponse networkResponse = error.networkResponse;
+//                Log.e(TAG, "Volley error: " + error.getMessage() + ", code: " + networkResponse+" and "+error.getMessage());
+//               // Toast.makeText(mContext, "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+//                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+//                builder.setTitle("Error").setCancelable(false)
+//                        .setMessage("Please check your internet settings and try again")
+//                        .setNeutralButton("Open settings", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
+//                                mContext.startActivity(myIntent);
+//                            }
+//                        })
+//                        .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialogInterface, int i) {
+//                                // prevent cost generation again
+//                                send();
+//                            }
+//                        });
+//                builder.show();
 
 
 
