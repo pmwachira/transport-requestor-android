@@ -286,11 +286,11 @@ public class Load {
                         //Dismissing the progress dialog
                         loading.dismiss();
 
-                        //Showing toast
-                        //Toast.makeText(mContext, volleyError.getMessage()+" Error", Toast.LENGTH_LONG).show();
+                       // Showing toast
+                        Toast.makeText(mContext, volleyError.getMessage()+" Error", Toast.LENGTH_LONG).show();
                         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                         builder.setTitle("Error").setCancelable(false)
-                                .setMessage("Please check your internet settings and try again")
+                                .setMessage("Picture upload try again")
                                 .setNeutralButton("Open settings", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {

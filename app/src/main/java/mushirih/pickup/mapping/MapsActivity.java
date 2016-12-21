@@ -94,6 +94,7 @@ import mushirih.pickup.http.Load;
 import mushirih.pickup.internal.MyApplication;
 import mushirih.pickup.internal.MyPreferenceManager;
 import mushirih.pickup.ui.MainActivity;
+import mushirih.pickup.ui.Payments;
 import mushirih.pickup.ui.PrefManager;
 
 
@@ -148,9 +149,12 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     StepperIndicator progressStepper;
     String[] options;
     int CAMERA_ZOOM=16;
-    ProgressDialog loading,loader;
+    ProgressDialog loading,loader,loadingp;
     String desc="";
     AlertDialog alertDialogH;
+    int WEIGHT_INDEX=0;
+    int NATURE_INDEX=0;
+    String desc_costing="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -237,7 +241,11 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View v) {
                 if(mCenterLatLong.latitude>4.9||mCenterLatLong.latitude<-4.8||mCenterLatLong.longitude<34||mCenterLatLong.longitude>41){
-                    Toast.makeText(mContext, "Only PickUp requests from Kenya Allowed", Toast.LENGTH_LONG).show();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                    builder.setTitle("Locations error").setCancelable(false)
+                            .setMessage("Only PickUp requests from Kenya allowed.Select new locations.")
+                            .setPositiveButton("Ok,Got it.",null);
+                    builder.show();
                 }else {
 //                    //SET DATES FIRST
 //                    //time pick
@@ -252,24 +260,6 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
             }
         });
 
-        if(confirm.getText().equals("Request Delivery")) {
-            confirm.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-            builder.setTitle("Prompt");
-            builder.setMessage("By clicking okay,you accept our T&c's");
-            builder.setNegativeButton("Cancel", null);
-            builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    Load.send();
-                }
-            });
-            builder.show();
-                }
-            });
-        }
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -390,6 +380,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         weight=weight_options[which].toString();
+                        WEIGHT_INDEX=which;
                         if(load_weight_set==false) {
                             updateProgress(false,5, "Provide a description of load", false);
                             load_weight_set=true;
@@ -478,6 +469,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
 
                                                 for(int i=0;i<load_char.size();i++){
                                                     desc+=options[(int)load_char.get(i)]+" ";
+
                                                 }
                                                 Load.bulkSet(mContext,LOCATION_FROM,LOCATION_TO,weight,desc,namee,idd,numm,DISTANCE_BETWEEN);
                                                 //TODO CAPTURE PICTURE OF THE LOAD
@@ -679,6 +671,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                     MARKER_TYPE = DROP_FLAG;
                     mAddressOutput = "";
                     startIntentService(mLocation);
+                    loading = ProgressDialog.show(mContext,null, "Finding location.Please wait...",true,false);
                     hide.setVisibility(View.VISIBLE);
                     //TODO change this to pop
                     request_pane.setVisibility(View.VISIBLE);
@@ -696,30 +689,37 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
-                                           startActivity(myIntent);
+                                            startActivity(myIntent);
                                         }
                                     });
                             builder.show();
-                           // Toast.makeText(getApplicationContext(), "Please check your internet connection", Toast.LENGTH_SHORT).show();
+                            // Toast.makeText(getApplicationContext(), "Please check your internet connection", Toast.LENGTH_SHORT).show();
                         }
                     }
-                    LatLng x= new LatLng((LOCATION_FROM.latitude+LOCATION_TO.latitude)/2,(LOCATION_FROM.longitude+LOCATION_TO.longitude)/2);
+                    LatLng x = new LatLng((LOCATION_FROM.latitude + LOCATION_TO.latitude) / 2, (LOCATION_FROM.longitude + LOCATION_TO.longitude) / 2);
                     mMap.resetMinMaxZoomPreference();
-                    if(DISTANCE_BETWEEN<30){
-                        CAMERA_ZOOM=8;
-                    }
-                    else if(DISTANCE_BETWEEN>30&&DISTANCE_BETWEEN<60){
-                        CAMERA_ZOOM=6;
-                    }else{
-                        CAMERA_ZOOM=4;
+                    if (DISTANCE_BETWEEN < 30) {
+                        CAMERA_ZOOM = 8;
+                    } else if (DISTANCE_BETWEEN > 30 && DISTANCE_BETWEEN < 60) {
+                        CAMERA_ZOOM = 6;
+                    } else {
+                        CAMERA_ZOOM = 4;
                     }
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(x, CAMERA_ZOOM);
                     mMap.animateCamera(cameraUpdate);
+                    if(LOCATION_FROM.latitude>4.9||LOCATION_FROM.latitude<-4.8||LOCATION_TO.longitude<34||LOCATION_TO.longitude>41){
+                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                        builder.setTitle("Locations error").setCancelable(false)
+                                .setMessage("Only PickUp requests from Kenya allowed.Select new locations.")
+                                .setPositiveButton("Ok,Got it.",null);
+                        builder.show();
+
+                    }else{
                     //VALUE
-                    updateProgress(false,2, "Provide load's estimated value", false);
-                    AlertDialog.Builder builderVal=new AlertDialog.Builder(mContext);
-                    builderVal.setTitle("Please estimate value of your load") ;
-                    View holder=View.inflate(mContext, R.layout.number_picker, null);
+                    updateProgress(false, 2, "Provide load's estimated value", false);
+                    AlertDialog.Builder builderVal = new AlertDialog.Builder(mContext);
+                    builderVal.setTitle("Please estimate value of your load");
+                    View holder = View.inflate(mContext, R.layout.number_picker, null);
                     builderVal.setView(holder);
                     final NumberPicker xs = (NumberPicker) holder.findViewById(R.id.numPick);
                     xs.setMinValue(0);
@@ -728,7 +728,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                     final NumberPicker.Formatter formatter = new NumberPicker.Formatter() {
                         @Override
                         public String format(int value) {
-                             VALUE = String.valueOf(value * 50);
+                            VALUE = String.valueOf(value * 50);
                             return VALUE;
                         }
                     };
@@ -736,11 +736,12 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                     builderVal.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            updateProgress(false,3, "Provide load weight", false);
+                            updateProgress(false, 3, "Provide load weight", false);
                             setDateTime();
                         }
                     });
                     builderVal.show();
+                }
 
                 }
 
@@ -760,6 +761,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                         MARKER_TYPE = PICK_FLAG;
                         VIEW_TO_CHANGE = pich_loc;
                         mAddressOutput = "";
+                        loading = ProgressDialog.show(mContext,null, "Finding location.Please wait...",true,false);
                         startIntentService(mLocation);
                         if (pich_loc.getText().equals("Select pick up location")) {
                             pich_loc.setTextColor(Color.DKGRAY);
@@ -976,6 +978,7 @@ class AddressResultReceiver extends ResultReceiver {
      * Updates the address in the UI.
      */
     protected void displayAddressOutput() {
+        loading.dismiss();
         //  mLocationAddressTextView.setText(mAddressOutput);
         try {
             if (mAreaOutput != null)
@@ -1054,9 +1057,20 @@ class AddressResultReceiver extends ResultReceiver {
             startActivity(new Intent(getBaseContext(), MainActivity.class));
             finish();
         }
-//        else if(id==R.id.pay){
-//            startActivity(new Intent(getBaseContext(),Payments.class));
-//        }
+        else if(id==R.id.terms){
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            builder.setTitle("Terms and conditions");
+            builder.setMessage("Pick up assumes no liability of goods transported." +
+                    "We however have driver details and proof of deliveries and goods" +
+                    " collection.Please confirm identity of collector of goods by asking " +
+                    "him/her to show you the request he/she received");
+            builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            builder.show();
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -1137,6 +1151,7 @@ class AddressResultReceiver extends ResultReceiver {
                     pick_point_set=true;
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_FROM, 16);
                     mMap.animateCamera(cameraUpdate);
+                    loading = ProgressDialog.show(mContext,null, "Finding location.Please wait...",true,false);
                     startIntentService(x);
                     drop_loc.setText(null);
                     hide.setVisibility(View.VISIBLE);
@@ -1164,6 +1179,7 @@ class AddressResultReceiver extends ResultReceiver {
 
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_TO, CAMERA_ZOOM);
                     mMap.animateCamera(cameraUpdate);
+                    loading = ProgressDialog.show(mContext,null, "Finding location.Please wait...",true,false);
                     startIntentService(x);
                     //TODO WATCHING
                     centerMarkerClick(x);
@@ -1223,7 +1239,7 @@ class AddressResultReceiver extends ResultReceiver {
     private void getCostEstimate() {
         //On acceping price
         //Load.send();
-            loading = ProgressDialog.show(mContext, null, "Calculating price...",true,false);
+            loadingp = ProgressDialog.show(mContext, null, "Calculating price...",true,false);
             StringRequest strCost = new StringRequest(Request.Method.POST,
                     MyApplication.ONLINE_CALCULATE_COST, new Response.Listener<String>() {
 
@@ -1235,7 +1251,7 @@ class AddressResultReceiver extends ResultReceiver {
                         // check for error flag
                         if (obj.getString("error").equals("false")) {
                             // user successfully logged in
-                            loading.dismiss();
+                            loadingp.dismiss();
                             View layoutInflater = View.inflate(mContext, R.layout.cost_est, null);
                             TextView est,tme;
                             Button accept,decline;
@@ -1255,8 +1271,24 @@ class AddressResultReceiver extends ResultReceiver {
                             accept.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    alertDialog.cancel();
-                                    Load.send();
+                                    confirm.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                                            builder.setTitle("Prompt");
+                                            builder.setMessage("By clicking okay,you accept our Terms and conditions");
+                                            builder.setNegativeButton("Cancel", null);
+                                            builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    alertDialog.cancel();
+                                                    Load.send();
+                                                }
+                                            });
+                                            builder.show();
+                                        }
+                                    });
+
                                 }
                             });
                              decline.setOnClickListener(new View.OnClickListener() {
@@ -1280,7 +1312,7 @@ class AddressResultReceiver extends ResultReceiver {
 
                         } else {
                             // login error - simply toast the message
-                            loading.dismiss();
+                            loadingp.dismiss();
                             AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                             builder.setTitle("Error").setCancelable(false)
                                     .setMessage("Please check your internet settings and try again")
@@ -1312,7 +1344,7 @@ class AddressResultReceiver extends ResultReceiver {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     NetworkResponse networkResponse = error.networkResponse;
-                    loading.dismiss();
+                    loadingp.dismiss();
                     Log.e(TAG, "Volley error: " + error.getMessage() + ", code: " + networkResponse+" and "+error.getMessage());
                     AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                     builder.setTitle("Error").setCancelable(false)
@@ -1343,8 +1375,8 @@ class AddressResultReceiver extends ResultReceiver {
                     Map<String, String> params = new HashMap<>();
                     params.put("eng_id", String.valueOf(000));
                     params.put("distance",String.valueOf(DISTANCE_BETWEEN));
-                    params.put("weight",weight);
-                    params.put("nature",desc);
+                    params.put("weight", String.valueOf(WEIGHT_INDEX));
+                    params.put("nature",load_char.toString());
                     params.put("value", String.valueOf(VALUE));
 
                     Log.e(TAG, "params: " + params.toString());

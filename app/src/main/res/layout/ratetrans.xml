@@ -73,6 +73,7 @@
             android:layout_height="wrap_content">
             <EditText
                 android:layout_margin="4dp"
+                android:gravity="center_horizontal"
                 android:id="@+id/suggest"
                 android:inputType="text"
                 android:layout_width="match_parent"
