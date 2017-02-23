@@ -12,6 +12,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -55,6 +56,7 @@ public class Load {
    private static String NAMEE, IDD, NUMM;
    private static int DISTANCE_BETWEEN;
     private static String COST;
+    private static String CAR_TYPE;
 
 
 
@@ -72,7 +74,7 @@ public class Load {
         HOUR=hourOfDay;
         MINUTE=minute;
     }
-    public static void bulkSet(Context mContext, LatLng location_from, LatLng location_to, String weight, String load_char, String namee, String idd, String numm, int distance_between) {
+    public static void bulkSet(Context mContext, LatLng location_from, LatLng location_to, String weight, String load_char, String namee, String idd, String numm, int distance_between, String car_type) {
         CONTEXT=mContext;
         LOCATION_FROM=location_from;
         LOCATION_TO=location_to;
@@ -82,13 +84,13 @@ public class Load {
         IDD=idd;
         NUMM=numm;
         DISTANCE_BETWEEN=distance_between;
-
+        CAR_TYPE=car_type;
 
     }
     public static void send(){
-        requestService(CONTEXT,LOCATION_FROM,LOCATION_TO,WEIGHT,LOAD_CHAR,NAMEE,IDD,NUMM,IMAGE,DISTANCE_BETWEEN);
+        requestService(CONTEXT,LOCATION_FROM,LOCATION_TO,WEIGHT,LOAD_CHAR,NAMEE,IDD,NUMM,IMAGE,DISTANCE_BETWEEN,CAR_TYPE);
     }
-    public static void requestService(final Context current, final LatLng LOCATION_FROM, final LatLng LOCATION_TO, final String weight, final String load_char, final String name, final String id, final String num, final Bitmap image, final int DISTANCE_BETWEEN) {
+    public static void requestService(final Context current, final LatLng LOCATION_FROM, final LatLng LOCATION_TO, final String weight, final String load_char, final String name, final String id, final String num, final Bitmap image, final int DISTANCE_BETWEEN, String carType) {
         mContext=current;
 
         loading = ProgressDialog.show(mContext,null, "Submitting request.Please wait.",true,false);
@@ -170,27 +172,27 @@ public class Load {
             @Override
             public void onErrorResponse(VolleyError error) {
                 loading.dismiss();
-//                NetworkResponse networkResponse = error.networkResponse;
-//                Log.e(TAG, "Volley error: " + error.getMessage() + ", code: " + networkResponse+" and "+error.getMessage());
-//               // Toast.makeText(mContext, "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-//                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-//                builder.setTitle("Error").setCancelable(false)
-//                        .setMessage("Please check your internet settings and try again")
-//                        .setNeutralButton("Open settings", new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
-//                                mContext.startActivity(myIntent);
-//                            }
-//                        })
-//                        .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialogInterface, int i) {
-//                                // prevent cost generation again
-//                                send();
-//                            }
-//                        });
-//                builder.show();
+                NetworkResponse networkResponse = error.networkResponse;
+                Log.e(TAG, "Volley error: " + error.getMessage() + ", code: " + networkResponse+" and "+error.getMessage());
+               // Toast.makeText(mContext, "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                builder.setTitle("Error").setCancelable(false)
+                        .setMessage("Please check your internet settings and try again")
+                        .setNeutralButton("Open settings", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
+                                mContext.startActivity(myIntent);
+                            }
+                        })
+                        .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                // prevent cost generation again
+                                send();
+                            }
+                        });
+                builder.show();
 
 
 
@@ -224,6 +226,7 @@ public class Load {
                 params.put("pick_date",DAY+"/"+MONTH+"/"+YEAR);
                 params.put("drop_lat", String.valueOf(LOCATION_TO.latitude));
                 params.put("drop_long", String.valueOf(LOCATION_TO.longitude));
+                params.put("car_type",CAR_TYPE);
 
 
                 Log.e(TAG, "params: " + params.toString());

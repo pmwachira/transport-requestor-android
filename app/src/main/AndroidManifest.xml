@@ -79,6 +79,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ui.CarSelect">
+        </activity>
         <activity android:name=".RegisterActivity">
 
         </activity>

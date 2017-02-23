@@ -37,8 +37,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -89,17 +91,18 @@ import java.util.List;
 import java.util.Map;
 
 import mushirih.pickup.R;
+import mushirih.pickup.http.House;
 import mushirih.pickup.http.HttpConnection;
 import mushirih.pickup.http.Load;
 import mushirih.pickup.internal.MyApplication;
 import mushirih.pickup.internal.MyPreferenceManager;
+import mushirih.pickup.ui.CarSelect;
 import mushirih.pickup.ui.MainActivity;
-import mushirih.pickup.ui.Payments;
 import mushirih.pickup.ui.PrefManager;
 
-
+//TODO ADD CAR SELECT AND HINT AS A POP UP
 public class MapsActivity extends ActionBarActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener  {
-   static Context mContext;
+    static Context mContext;
     LinearLayout searchloc;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
@@ -119,9 +122,9 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     protected String mCityOutput;
     protected String mStateOutput;
     static Activity activity;
-   Location mLastLocation;
+    Location mLastLocation;
     CardView hide;
-  TextView VIEW_TO_CHANGE;
+    TextView VIEW_TO_CHANGE;
     EditText EDIT_TEXT_TO_EDIT;
     int CONTACT_PICKER_RESULT=999;
     int PICK_FLAG=44;
@@ -155,6 +158,9 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     int WEIGHT_INDEX=0;
     int NATURE_INDEX=0;
     String desc_costing="";
+    String car_type="DEFAULT";
+    String my_house="DEFAULT";
+    int choice=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,13 +173,53 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
             //compile 'com.github.chenupt.android:springindicator:1.0.2@aar'
         }
 
-        buildGoogleApiClient();
         setContentView(R.layout.activity_maps);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        progressStepper= (StepperIndicator) findViewById(R.id.progressStepper);
+        //choice
+        final AlertDialog alert;
+        View layoutInflater = View.inflate(mContext, R.layout.choice, null);
+            final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+          //  builder.setCancelable(false).setTitle("Provide details of person to pick goods.");
+            builder.setView(layoutInflater);
+        builder.create();
+        alert=builder.show();
+            layoutInflater.findViewById(R.id.goods).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                   choice=0;
+                    alert.cancel();
+                    loader = new ProgressDialog(mContext);
+                    loader.setIndeterminate(true);
+                    loader.setMessage("Finding your location");
+                    loader.setCancelable(false);
+                    loader.show();
+                    buildGoogleApiClient();
+
+                }
+            });
+        layoutInflater.findViewById(R.id.move).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO CHANGE
+              progressStepper.setStepCount(5);
+                choice=1;
+                alert.cancel();
+                loader = new ProgressDialog(mContext);
+                loader.setIndeterminate(true);
+                loader.setMessage("Finding your location");
+                loader.setCancelable(false);
+                loader.show();
+                buildGoogleApiClient();
+            }
+        });
+
+
+
         progressTitle= (TextView) findViewById(R.id.progressTitle);
         next_action= (TextView) findViewById(R.id.next_action);
-        progressStepper= (StepperIndicator) findViewById(R.id.progressStepper);
+
 
         updateProgress(true,0,"Set Collection Point",false);
         mLocationText= (TextView) findViewById(R.id.locationtext);
@@ -181,7 +227,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
         pich_loc=(TextView) findViewById(R.id.top_bar_location);
 
 
-       drop_loc= (TextView) findViewById(R.id.top_bar_location_rep);
+        drop_loc= (TextView) findViewById(R.id.top_bar_location_rep);
         searchloc= (LinearLayout) findViewById(R.id.search_loc);
         searchloc.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -255,7 +301,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
 //                    DialogFragment newfragment = new DatePickerFragment();
 //                    newfragment.show(getSupportFragmentManager(), "datePicker");
                     //then proceed with load
-                      //  describe_load();
+                    //  describe_load();
                 }
             }
         });
@@ -265,11 +311,6 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         showProgress = 1;
-        loader = new ProgressDialog(mContext);
-        loader.setIndeterminate(true);
-        loader.setMessage("Finding your location");
-        loader.setCancelable(false);
-        loader.show();
 
         mResultReceiver = new AddressResultReceiver(new Handler());
 
@@ -321,44 +362,44 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
         }
     }
     private void showLocationPermissionDialog() {
-            GoogleApiClient googleApiClient = new GoogleApiClient.Builder(mContext)
-                    .addApi(LocationServices.API).build();
-            googleApiClient.connect();
+        GoogleApiClient googleApiClient = new GoogleApiClient.Builder(mContext)
+                .addApi(LocationServices.API).build();
+        googleApiClient.connect();
 
-            LocationRequest locationRequest = LocationRequest.create();
-            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-            locationRequest.setInterval(10000);
-            locationRequest.setFastestInterval(10000 / 2);
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(10000 / 2);
 
-            LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
-            builder.setAlwaysShow(true);
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
+        builder.setAlwaysShow(true);
 
-            PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
+        PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
         result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-                @Override
-                public void onResult(LocationSettingsResult result) {
-                    final Status status = result.getStatus();
-                    switch (status.getStatusCode()) {
-                        case LocationSettingsStatusCodes.SUCCESS:
-                            Log.i(TAG, "All location settings are satisfied.");
-                            break;
-                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                            Log.i(TAG, "Location settings are not satisfied. Show the user a dialog to upgrade location settings ");
+            @Override
+            public void onResult(LocationSettingsResult result) {
+                final Status status = result.getStatus();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        Log.i(TAG, "All location settings are satisfied.");
+                        break;
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        Log.i(TAG, "Location settings are not satisfied. Show the user a dialog to upgrade location settings ");
 
-                            try {
-                                // Show the dialog by calling startResolutionForResult(), and check the result
-                                // in onActivityResult().
-                                status.startResolutionForResult(MapsActivity.this, REQUEST_CHECK_SETTINGS);
-                            } catch (IntentSender.SendIntentException e) {
-                                Log.i(TAG, "PendingIntent unable to execute request.");
-                            }
-                            break;
-                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                            Log.i(TAG, "Location settings are inadequate, and cannot be fixed here. Dialog not created.");
-                            break;
-                    }
+                        try {
+                            // Show the dialog by calling startResolutionForResult(), and check the result
+                            // in onActivityResult().
+                            status.startResolutionForResult(MapsActivity.this, REQUEST_CHECK_SETTINGS);
+                        } catch (IntentSender.SendIntentException e) {
+                            Log.i(TAG, "PendingIntent unable to execute request.");
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        Log.i(TAG, "Location settings are inadequate, and cannot be fixed here. Dialog not created.");
+                        break;
                 }
-            });
+            }
+        });
     }
     private void setDateTime() {
 //SET DATES FIRST
@@ -371,7 +412,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     private  void describe_load() {
         confirm.setVisibility(View.GONE);
         load_char=new ArrayList();
-         options= new String[]{ "Fragile ", "Perishable","Urgent","In need of packing boxes", "I need help loading"};
+        options= new String[]{ "Fragile ", "Perishable","Urgent","In need of packing boxes", "I need help loading"};
         final String[] weight_options={"Load under 5 Kgs","Load between 5-30 Kgs","Load over 30Kgs"};
         AlertDialog.Builder builder=new AlertDialog.Builder(this);
         builder.setTitle("Please describe your load")
@@ -389,120 +430,120 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                     }
 
                 })
-            .setPositiveButton("Okay",new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                    builder
-                            .setCancelable(false)
-                            .setTitle("Please describe your load");
-                    builder.setMultiChoiceItems(options, null, new DialogInterface.OnMultiChoiceClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                            if(load_desc_set==false) {
-                                updateProgress(false,6, "Provide details of collector", false);
-                            }
-                            load_desc_set=true;
-                            if (isChecked) {
-                                load_char.add(which);
-                            } else if (load_char.contains(which)) {
-                                load_char.remove(Integer.valueOf(which));
-                            }
-                        }
-                    });
-                    //builder.setNegativeButton("Cancel", null);
-                    //TODO: Contact permission
-                    if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED){
-                      ActivityCompat.requestPermissions(MapsActivity.this, new String[] {
-                                        Manifest.permission.READ_CONTACTS},
-                                REQUEST_CONTACTS_PERMISSION);
-                    }
-                    if (ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(MapsActivity.this, new String[]{
-                                       Manifest.permission.CALL_PHONE},
-                                8709);
-                    }
-                    builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-                        View layoutInflater = View.inflate(mContext, R.layout.contact_details, null);
-
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                            builder.setCancelable(false).setTitle("Provide details of person to pick goods.");
-                            builder.setView(layoutInflater);
-                            final View nambayake = layoutInflater.findViewById(R.id.numbertoget);
-                            layoutInflater.findViewById(R.id.bContact).setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    EDIT_TEXT_TO_EDIT = (EditText) nambayake;
-                                    Intent pickContactIntent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
-                                    pickContactIntent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
-                                    startActivityForResult(pickContactIntent, CONTACT_PICKER_RESULT);
+                .setPositiveButton("Okay",new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                        builder
+                                .setCancelable(false)
+                                .setTitle("Please describe your load");
+                        builder.setMultiChoiceItems(options, null, new DialogInterface.OnMultiChoiceClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                                if(load_desc_set==false) {
+                                    updateProgress(false,6, "Provide details of collector", false);
                                 }
-                            });
-                            builder.setPositiveButton("Take picture of load", null);
+                                load_desc_set=true;
+                                if (isChecked) {
+                                    load_char.add(which);
+                                } else if (load_char.contains(which)) {
+                                    load_char.remove(Integer.valueOf(which));
+                                }
+                            }
+                        });
+                        //builder.setNegativeButton("Cancel", null);
+                        //TODO: Contact permission
+                        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED){
+                            ActivityCompat.requestPermissions(MapsActivity.this, new String[] {
+                                            Manifest.permission.READ_CONTACTS},
+                                    REQUEST_CONTACTS_PERMISSION);
+                        }
+                        if (ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                            ActivityCompat.requestPermissions(MapsActivity.this, new String[]{
+                                            Manifest.permission.CALL_PHONE},
+                                    8709);
+                        }
+                        builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                            View layoutInflater = View.inflate(mContext, R.layout.contact_details, null);
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                                builder.setCancelable(false).setTitle("Provide details of person to pick goods.");
+                                builder.setView(layoutInflater);
+                                final View nambayake = layoutInflater.findViewById(R.id.numbertoget);
+                                layoutInflater.findViewById(R.id.bContact).setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        EDIT_TEXT_TO_EDIT = (EditText) nambayake;
+                                        Intent pickContactIntent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+                                        pickContactIntent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
+                                        startActivityForResult(pickContactIntent, CONTACT_PICKER_RESULT);
+                                    }
+                                });
+                                builder.setPositiveButton("Take picture of load", null);
 //                            builder.setNegativeButton("Cancel", null);
-                             alertDialogH = builder.create();
-                            alertDialogH.setOnShowListener(new DialogInterface.OnShowListener() {
-                                @Override
-                                public void onShow(DialogInterface dialog) {
-                                    Button b = alertDialogH.getButton(AlertDialog.BUTTON_POSITIVE);
-                                    final EditText name, id, num;
-                                    name = (EditText) layoutInflater.findViewById(R.id.name);
-                                   id = (EditText) layoutInflater.findViewById(R.id.id);
-                                    num = (EditText) layoutInflater.findViewById(R.id.numbertoget);
-                                    b.setOnClickListener(new View.OnClickListener() {
+                                alertDialogH = builder.create();
+                                alertDialogH.setOnShowListener(new DialogInterface.OnShowListener() {
+                                    @Override
+                                    public void onShow(DialogInterface dialog) {
+                                        Button b = alertDialogH.getButton(AlertDialog.BUTTON_POSITIVE);
+                                        final EditText name, id, num;
+                                        name = (EditText) layoutInflater.findViewById(R.id.name);
+                                        id = (EditText) layoutInflater.findViewById(R.id.id);
+                                        num = (EditText) layoutInflater.findViewById(R.id.numbertoget);
+                                        b.setOnClickListener(new View.OnClickListener() {
 
-                                        @Override
-                                        public void onClick(View view) {
-                                            namee=name.getText().toString();
-                                            numm=num.getText().toString();
-                                            idd=id.getText().toString();
-                                            if (name.getText().length() == 0) {
-                                                name.setError("Please fill in all details");
-                                            }else  if (id.getText().length() == 0) {
-                                                id.setError("Please fill in all details");
-                                            }else  if (num.getText().length() == 0) {
-                                                num.setError("Please fill in all details");
+                                            @Override
+                                            public void onClick(View view) {
+                                                namee=name.getText().toString();
+                                                numm=num.getText().toString();
+                                                idd=id.getText().toString();
+                                                if (name.getText().length() == 0) {
+                                                    name.setError("Please fill in all details");
+                                                }else  if (id.getText().length() == 0) {
+                                                    id.setError("Please fill in all details");
+                                                }else  if (num.getText().length() == 0) {
+                                                    num.setError("Please fill in all details");
+                                                }
+                                                else {
+
+                                                    for(int i=0;i<load_char.size();i++){
+                                                        desc+=options[(int)load_char.get(i)]+" ";
+
+                                                    }
+                                                    Load.bulkSet(mContext,LOCATION_FROM,LOCATION_TO,weight,desc,namee,idd,numm,DISTANCE_BETWEEN,car_type);
+                                                    //TODO CAPTURE PICTURE OF THE LOAD
+                                                    if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                                                        ActivityCompat.requestPermissions(MapsActivity.this, new String[]{
+                                                                        Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                                                879);
+                                                    }
+                                                    Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                                    if (takePicture.resolveActivity(getPackageManager()) != null) {
+                                                        startActivityForResult(takePicture, REQUEST_IMAGE_CAPTURE);
+                                                    }
+                                                }
                                             }
-                                            else {
+                                        });
 
-                                                for(int i=0;i<load_char.size();i++){
-                                                    desc+=options[(int)load_char.get(i)]+" ";
+                                        //  builder.show();
+                                    }
+                                });
+                                alertDialogH.show();
+                                //builder.setView(View.inflate(mContext, R.layout.hello, null));
+                                //builder.show();
 
-                                                }
-                                                Load.bulkSet(mContext,LOCATION_FROM,LOCATION_TO,weight,desc,namee,idd,numm,DISTANCE_BETWEEN);
-                                                //TODO CAPTURE PICTURE OF THE LOAD
-                                                if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                                                    ActivityCompat.requestPermissions(MapsActivity.this, new String[]{
-                                                                    Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                                                            879);
-                                                }
-                                                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                                if (takePicture.resolveActivity(getPackageManager()) != null) {
-                                                    startActivityForResult(takePicture, REQUEST_IMAGE_CAPTURE);
-                                                }
-                                            }
-                                        }
-                                    });
-
-                                 //  builder.show();
-                                }
-                            });
-                            alertDialogH.show();
-                            //builder.setView(View.inflate(mContext, R.layout.hello, null));
-                            //builder.show();
-
-                        }
-                    });//.setNegativeButton("Cancel", null);
-                    //TODO SECOND BUILDER
-                     builder.show();
+                            }
+                        });//.setNegativeButton("Cancel", null);
+                        //TODO SECOND BUILDER
+                        builder.show();
 
 
-                }
-            });
+                    }
+                });
         //builder.setNegativeButton("Cancel",null);
-         builder.show();
+        builder.show();
     }
     private void showRoute() {
         mMap.clear();
@@ -533,7 +574,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
     }
 
     public static void requestSuccessful() {
-         activity.finish();
+        activity.finish();
 
     }
     private class ReadTask extends AsyncTask<String,Void,String> {
@@ -578,28 +619,28 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
         protected void onPostExecute(List<List<HashMap<String, String>>> lists) {
             ArrayList<LatLng> points = null;
             PolylineOptions polyLineOptions = null;
-        if(routes.size()>0){
-            // traversing through routes
-            for (int i = 0; i < routes.size(); i++) {
-                points = new ArrayList<LatLng>();
-                polyLineOptions = new PolylineOptions();
-                List<HashMap<String, String>> path = routes.get(i);
+            if(routes.size()>0){
+                // traversing through routes
+                for (int i = 0; i < routes.size(); i++) {
+                    points = new ArrayList<LatLng>();
+                    polyLineOptions = new PolylineOptions();
+                    List<HashMap<String, String>> path = routes.get(i);
 
-                for (int j = 0; j < path.size(); j++) {
+                    for (int j = 0; j < path.size(); j++) {
 
-                    HashMap<String, String> point = path.get(j);
+                        HashMap<String, String> point = path.get(j);
 
-                    double lat = Double.parseDouble(point.get("lat"));
-                    double lng = Double.parseDouble(point.get("lng"));
-                    LatLng position = new LatLng(lat, lng);
-                    points.add(position);
+                        double lat = Double.parseDouble(point.get("lat"));
+                        double lng = Double.parseDouble(point.get("lng"));
+                        LatLng position = new LatLng(lat, lng);
+                        points.add(position);
+                    }
+
+                    polyLineOptions.addAll(points);
+                    polyLineOptions.width(10);
+                    polyLineOptions.color(Color.BLUE);
                 }
-
-                polyLineOptions.addAll(points);
-                polyLineOptions.width(10);
-                polyLineOptions.color(Color.BLUE);
             }
-        }
             if(null!=polyLineOptions) {
                 mMap.addPolyline(polyLineOptions);
                 float totalDistance = 0;
@@ -656,8 +697,8 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
         }
-            //ADDS LOCATION Finder option on map
-            // flatMarker(mMap);
+        //ADDS LOCATION Finder option on map
+        // flatMarker(mMap);
     }
     private void centerMarkerClick(final Location mLocation) {
         //Check for drop of marker move
@@ -715,33 +756,28 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                         builder.show();
 
                     }else{
-                    //VALUE
-                    updateProgress(false, 2, "Provide load's estimated value", false);
-                    AlertDialog.Builder builderVal = new AlertDialog.Builder(mContext);
-                    builderVal.setTitle("Please estimate value of your load");
-                    View holder = View.inflate(mContext, R.layout.number_picker, null);
-                    builderVal.setView(holder);
-                    final NumberPicker xs = (NumberPicker) holder.findViewById(R.id.numPick);
-                    xs.setMinValue(0);
-                    xs.setMaxValue(100000);
-                    xs.setWrapSelectorWheel(false);
-                    final NumberPicker.Formatter formatter = new NumberPicker.Formatter() {
-                        @Override
-                        public String format(int value) {
-                            VALUE = String.valueOf(value * 50);
-                            return VALUE;
+                        //INSERT SERVICE TYPE DIALOG
+                        if(choice!=1) {
+                            updateProgress(false, 2, "Choose preferred car", false);
+                            chooseVehicleDialog();
+                        }else{
+
+                            final String[] house_options={"Less than 1 bedroom","1 bedroom","2 bedroom and above"};
+                            AlertDialog.Builder builder2=new AlertDialog.Builder(mContext);
+                            final AlertDialog dialogd=builder2.show();
+                            builder2.setTitle("Please describe your house")
+                                    .setSingleChoiceItems(house_options,-1 , new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            my_house = house_options[which].toString();
+                                            setDateTime();
+                                            //dialogd.cancel();
+
+                                        }
+                                    });
+
                         }
-                    };
-                    xs.setFormatter(formatter);
-                    builderVal.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            updateProgress(false, 3, "Provide load weight", false);
-                            setDateTime();
-                        }
-                    });
-                    builderVal.show();
-                }
+                    }
 
                 }
 
@@ -782,6 +818,133 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
             }
         }
     }
+
+    private void chooseVehicleDialog() {
+        View layoutInflater = View.inflate(mContext, R.layout.car_select_dialog, null);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setCancelable(false);
+        //.setTitle("Request Details.");
+        builder.setView(layoutInflater);
+        final RadioGroup rg = (RadioGroup) layoutInflater.findViewById(R.id.rg);
+        ImageView one= (ImageView) layoutInflater.findViewById(R.id.one);
+        one.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rg.check(R.id.radioButton1);
+            }
+        });
+        ImageView two= (ImageView) layoutInflater.findViewById(R.id.two);
+        two.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rg.check(R.id.radioButton2);
+            }
+        });
+        ImageView three= (ImageView) layoutInflater.findViewById(R.id.three);
+        three.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rg.check(R.id.radioButton3);
+            }
+        });
+        ImageView four= (ImageView) layoutInflater.findViewById(R.id.four);
+        four.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rg.check(R.id.radioButton4);
+            }
+        });
+        ImageView five= (ImageView) layoutInflater.findViewById(R.id.five);
+        five.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rg.check(R.id.radioButton5);
+            }
+        });
+        TextView onee= (TextView) layoutInflater.findViewById(R.id.onee);
+        onee.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rg.check(R.id.radioButton1);
+            }
+        });
+        TextView twoo= (TextView) layoutInflater.findViewById(R.id.twoo);
+        twoo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rg.check(R.id.radioButton2);
+            }
+        });
+        TextView threee= (TextView) layoutInflater.findViewById(R.id.threee);
+        threee.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rg.check(R.id.radioButton3);
+            }
+        });
+        TextView fourr= (TextView) layoutInflater.findViewById(R.id.fourr);
+        fourr.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rg.check(R.id.radioButton4);
+            }
+        });
+        TextView fivee= (TextView) layoutInflater.findViewById(R.id.fivee);
+        fivee.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rg.check(R.id.radioButton5);
+            }
+        });
+        builder.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                int radioSelectId = rg.getCheckedRadioButtonId();
+                View radio = rg.findViewById(radioSelectId);
+                int index = rg.indexOfChild(radio);
+                if (index == 0) {
+                    car_type = "A";
+                } else if (index == 1) {
+                    car_type = "B";
+                } else if (index == 2) {
+                    car_type = "C";
+                } else if (index == 3) {
+                    car_type = "D";
+                } else {
+                    car_type = "E";
+                }
+
+                //VALUE
+//                updateProgress(false, 3, "Provide load's estimated value", false);
+//                AlertDialog.Builder builderVal = new AlertDialog.Builder(mContext);
+//                builderVal.setTitle("Please estimate value of your load");
+//                View holder = View.inflate(mContext, R.layout.number_picker, null);
+//                builderVal.setView(holder);
+//                final NumberPicker xs = (NumberPicker) holder.findViewById(R.id.numPick);
+//                xs.setMinValue(0);
+//                xs.setMaxValue(100000);
+//                xs.setWrapSelectorWheel(false);
+//                final NumberPicker.Formatter formatter = new NumberPicker.Formatter() {
+//                    @Override
+//                    public String format(int value) {
+//                        VALUE = String.valueOf(value * 50);
+//                        return VALUE;
+//                    }
+//                };
+//                xs.setFormatter(formatter);
+//                builderVal.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int i) {
+                        updateProgress(false, 3, "Set date and time for transportation", false);
+                        setDateTime();
+//                    }
+//                });
+//                builderVal.show();
+            }
+        });
+        builder.show();
+    }
+
     @Override
     public void onConnected(Bundle bundle) {
         //TODO TEST IF MAPS RELOADS
@@ -801,9 +964,9 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
             loader.dismiss();
         }
         if (mLastLocation != null) {
-          changeMap(mLastLocation);
+            changeMap(mLastLocation);
             centerMarkerClick(mLastLocation);
-           // VIEW_TO_CHANGE = drop_loc;
+            // VIEW_TO_CHANGE = drop_loc;
             //startIntentService(mLastLocation);
             Log.d(TAG, "ON connected");
 
@@ -837,22 +1000,22 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
 
     @Override
     public void onLocationChanged(Location location) {
-            if (showProgress == 1) {
-               //progressDialog.dismiss();
-                loader.dismiss();
+        if (showProgress == 1) {
+            //progressDialog.dismiss();
+            loader.dismiss();
 //                centerMarkerClick(location);
-            }
-            try {
-                if (location != null)
-                    changeMap(location);
-                centerMarkerClick(location);
+        }
+        try {
+            if (location != null)
+                changeMap(location);
+            centerMarkerClick(location);
 
-                LocationServices.FusedLocationApi.removeLocationUpdates(
-                        mGoogleApiClient, this);
+            LocationServices.FusedLocationApi.removeLocationUpdates(
+                    mGoogleApiClient, this);
 
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -898,82 +1061,82 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
         return true;
     }
     private void changeMap(Location location) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
-if(!am_done) {
-    // check if map is created successfully or not
-    if (mMap != null) {
-        mMap.getUiSettings().setZoomControlsEnabled(false);
-        LatLng latLong;
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        if(!am_done) {
+            // check if map is created successfully or not
+            if (mMap != null) {
+                mMap.getUiSettings().setZoomControlsEnabled(false);
+                LatLng latLong;
 
 
-        latLong = new LatLng(location.getLatitude(), location.getLongitude());
-        //TODO: CAMERA TILT TOPOGRAPHY
+                latLong = new LatLng(location.getLatitude(), location.getLongitude());
+                //TODO: CAMERA TILT TOPOGRAPHY
 //            CameraPosition cameraPosition = new CameraPosition.Builder().target(latLong).zoom(19f).tilt(70).build();
-        CameraPosition cameraPosition = new CameraPosition.Builder().target(latLong).zoom(19f).build();
+                CameraPosition cameraPosition = new CameraPosition.Builder().target(latLong).zoom(19f).build();
 
-        mMap.setMyLocationEnabled(true);
-        mMap.getUiSettings().setMyLocationButtonEnabled(true);
-        //TODO: CAMERA TILT TOPOGRAPHY
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-        //mLocationMarkerText.setText("Lat : " + location.getLatitude() + "," + "Long : " + location.getLongitude());
+                mMap.setMyLocationEnabled(true);
+                mMap.getUiSettings().setMyLocationButtonEnabled(true);
+                //TODO: CAMERA TILT TOPOGRAPHY
+                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                //mLocationMarkerText.setText("Lat : " + location.getLatitude() + "," + "Long : " + location.getLongitude());
 //TODO Location getter
 //            startIntentService(location);
 
 
-    } else {
-        Toast.makeText(getApplicationContext(),
-                "Sorry! unable to create maps"+am_done, Toast.LENGTH_LONG)
-                .show();
-    }
-}
+            } else {
+                Toast.makeText(getApplicationContext(),
+                        "Sorry! unable to create maps"+am_done, Toast.LENGTH_LONG)
+                        .show();
+            }
+        }
 
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
-      }
-    /**
- * Receiver for data sent from FetchAddressIntentService.
- */
-class AddressResultReceiver extends ResultReceiver {
-
-    public AddressResultReceiver(Handler handler) {
-
-        super(handler);
     }
-
     /**
-     * Receives data sent from FetchAddressIntentService and updates the UI in MainActivity.
+     * Receiver for data sent from FetchAddressIntentService.
      */
-    @Override
-    protected void onReceiveResult(int resultCode, Bundle resultData) {
+    class AddressResultReceiver extends ResultReceiver {
 
-        // Display the address string or an error message sent from the intent service.
-        mAddressOutput = resultData.getString(AppUtils.LocationConstants.RESULT_DATA_KEY);
+        public AddressResultReceiver(Handler handler) {
 
-        mAreaOutput = resultData.getString(AppUtils.LocationConstants.LOCATION_DATA_AREA);
+            super(handler);
+        }
 
-        mCityOutput = resultData.getString(AppUtils.LocationConstants.LOCATION_DATA_CITY);
-        mStateOutput = resultData.getString(AppUtils.LocationConstants.LOCATION_DATA_STREET);
+        /**
+         * Receives data sent from FetchAddressIntentService and updates the UI in MainActivity.
+         */
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
 
-        displayAddressOutput();
+            // Display the address string or an error message sent from the intent service.
+            mAddressOutput = resultData.getString(AppUtils.LocationConstants.RESULT_DATA_KEY);
 
-        // Show a toast message if an address was found.
-        if (resultCode == AppUtils.LocationConstants.SUCCESS_RESULT) {
-            //  showToast(getString(R.string.address_found));
+            mAreaOutput = resultData.getString(AppUtils.LocationConstants.LOCATION_DATA_AREA);
+
+            mCityOutput = resultData.getString(AppUtils.LocationConstants.LOCATION_DATA_CITY);
+            mStateOutput = resultData.getString(AppUtils.LocationConstants.LOCATION_DATA_STREET);
+
+            displayAddressOutput();
+
+            // Show a toast message if an address was found.
+            if (resultCode == AppUtils.LocationConstants.SUCCESS_RESULT) {
+                //  showToast(getString(R.string.address_found));
+            }
         }
     }
-}
     /**
      * Updates the address in the UI.
      */
@@ -987,7 +1150,7 @@ class AddressResultReceiver extends ResultReceiver {
 //                mLocationAddress.setText(mAddressOutput);
             //mLocationText.setText(mAreaOutput);
             //SEND THIS LOCATION TO DRIVER REQUEST
-           //Toast.makeText(getApplicationContext(),"This location is "+mAddressOutput,Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(),"This location is "+mAddressOutput,Toast.LENGTH_SHORT).show();
             VIEW_TO_CHANGE.setText(mAddressOutput);
             mAddressOutput="";
         } catch (Exception e) {
@@ -1056,6 +1219,8 @@ class AddressResultReceiver extends ResultReceiver {
             myPreferenceManager.logOutUser();
             startActivity(new Intent(getBaseContext(), MainActivity.class));
             finish();
+        }else if(id==R.id.charge){
+            startActivity(new Intent(this, CarSelect.class));
         }
         else if(id==R.id.terms){
             AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
@@ -1093,7 +1258,7 @@ class AddressResultReceiver extends ResultReceiver {
 //                    progressDialog.show();
                     break;
                 case Activity.RESULT_CANCELED:
-                 //TODO HANDLE USER NOT TURNED LOCATION
+                    //TODO HANDLE USER NOT TURNED LOCATION
                     break;
             }
 
@@ -1108,38 +1273,50 @@ class AddressResultReceiver extends ResultReceiver {
                 am_done=true;
                 updateProgress(false,7, "Details Completed",true);
 
-  //TODO change requestor button
+                //TODO change requestor button
                 confirm.setVisibility(View.VISIBLE);
                 confirm.setText("Request Delivery");
                 confirm.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        //TODO ESTIMATE PRICE FIRST
-                        getCostEstimate();
-                        //Load.send();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                        builder.setTitle("Prompt");
+                        builder.setMessage("By clicking okay,you accept the terms and conditions");
+                        builder.setNegativeButton("Cancel", null);
+                        builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String cost="0000";
+                                Load.setCost(cost);
+                                Load.send();
+                            }
+                        });
+                        builder.show();
+                        //ESTIMATE PRICE FIRST
+//                        getCostEstimate();
                     }
                 });
             }
         }
         //CONTACTPICKER
         if(requestCode==CONTACT_PICKER_RESULT){
-        if (resultCode == RESULT_OK) {
-            String phoneNo = null;
-            Uri uri = data.getData();
-            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-            cursor.moveToFirst();
+            if (resultCode == RESULT_OK) {
+                String phoneNo = null;
+                Uri uri = data.getData();
+                Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+                cursor.moveToFirst();
 
-            int phoneIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-            phoneNo = cursor.getString(phoneIndex);
+                int phoneIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                phoneNo = cursor.getString(phoneIndex);
 
-            phoneNo = phoneNo.replace("+254", "0");
-            phoneNo = phoneNo.replace(" ", "");
-            phoneNo = phoneNo.replace("-", "");
-            //TODO GET CALLING NUMBER
-           EDIT_TEXT_TO_EDIT.setText(phoneNo);
-            cursor.close();
+                phoneNo = phoneNo.replace("+254", "0");
+                phoneNo = phoneNo.replace(" ", "");
+                phoneNo = phoneNo.replace("-", "");
+                //TODO GET CALLING NUMBER
+                EDIT_TEXT_TO_EDIT.setText(phoneNo);
+                cursor.close();
+            }
         }
-    }
         if(requestCode==PLACE_PICKER_DEST_REQUEST){
             if(resultCode==RESULT_OK){
                 Place place=PlacePicker.getPlace(this,data);
@@ -1160,8 +1337,8 @@ class AddressResultReceiver extends ResultReceiver {
                     LOCATION_TO=new LatLng(x.getLatitude(),x.getLongitude());
                     if(!LOCATION_FROM.equals(null)&&!LOCATION_TO.equals(null)){
                         if(AppUtils.isDataEnabled(mContext)) {
-                        showRoute();
-                    }
+                            showRoute();
+                        }
                     }else{
                         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                         builder.setTitle("Error").setCancelable(false)
@@ -1174,7 +1351,7 @@ class AddressResultReceiver extends ResultReceiver {
                                     }
                                 });
                         builder.show();
-                      //  Toast.makeText(getApplicationContext(),"Please check your internet connection",Toast.LENGTH_SHORT).show();
+                        //  Toast.makeText(getApplicationContext(),"Please check your internet connection",Toast.LENGTH_SHORT).show();
                     }
 
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(LOCATION_TO, CAMERA_ZOOM);
@@ -1183,7 +1360,7 @@ class AddressResultReceiver extends ResultReceiver {
                     startIntentService(x);
                     //TODO WATCHING
                     centerMarkerClick(x);
-                  //  setDateTime();
+                    //  setDateTime();
                     //updateProgress(false,2,"Choose Date and time of transport",false);
 
 
@@ -1208,7 +1385,7 @@ class AddressResultReceiver extends ResultReceiver {
                 //mLocationText.setText(place.getName() + "");
 
                 //TODO: CAMERA TILT TOPOGRAPHY
-               //CameraPosition cameraPosition = new CameraPosition.Builder().target(latLong).zoom(19f).tilt(70).build();
+                //CameraPosition cameraPosition = new CameraPosition.Builder().target(latLong).zoom(19f).tilt(70).build();
 
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     // TODO: Consider calling
@@ -1222,7 +1399,7 @@ class AddressResultReceiver extends ResultReceiver {
                 }
                 mMap.setMyLocationEnabled(true);
                 //TODO: CAMERA TILT TOPOGRAPHY
-               // mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                // mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
 
             }
@@ -1237,154 +1414,152 @@ class AddressResultReceiver extends ResultReceiver {
     }
 
     private void getCostEstimate() {
-        //On acceping price
-        //Load.send();
-            loadingp = ProgressDialog.show(mContext, null, "Calculating price...",true,false);
-            StringRequest strCost = new StringRequest(Request.Method.POST,
-                    MyApplication.ONLINE_CALCULATE_COST, new Response.Listener<String>() {
+        loadingp = ProgressDialog.show(mContext, null, "Calculating price...",true,false);
+        StringRequest strCost = new StringRequest(Request.Method.POST,
+                MyApplication.ONLINE_CALCULATE_COST, new Response.Listener<String>() {
 
-                @Override
-                public void onResponse(String response) {
-                    Log.e(TAG, "response: " + response);
-                    try {
-                        JSONObject obj = new JSONObject(response);
-                        // check for error flag
-                        if (obj.getString("error").equals("false")) {
-                            // user successfully logged in
-                            loadingp.dismiss();
-                            View layoutInflater = View.inflate(mContext, R.layout.cost_est, null);
-                            TextView est,tme;
-                            Button accept,decline;
-                                final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                                builder.setCancelable(false);
-                                //.setTitle("Request Details.");
-                                builder.setView(layoutInflater);
-                           est= (TextView) layoutInflater.findViewById(R.id.tvestimatedcost);
-                            String cost=obj.getString("cost");
-                            est.setText(cost);
-                            Load.setCost(cost);
-                           tme= (TextView) layoutInflater.findViewById(R.id.tvtimeanddate);
-                            tme.setText(Load.DAY+"/"+Load.MONTH+"/"+Load.YEAR);
-                             accept= (Button) layoutInflater.findViewById(R.id.accept);
-                            decline= (Button) layoutInflater.findViewById(R.id.decline);
-                            final AlertDialog alertDialog = builder.create();
-                            accept.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                                            builder.setTitle("Prompt");
-                                            builder.setMessage("By clicking okay,you accept the terms and conditions");
-                                            builder.setNegativeButton("Cancel", null);
-                                            builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    alertDialog.cancel();
-                                                    Load.send();
-                                                }
-                                            });
-                                            builder.show();
-                                        }
-                                    });
-                            decline.setOnClickListener(new View.OnClickListener() {
-                                 @Override
-                                 public void onClick(View v) {
-                                     //TODO ASK COMMENT,ASK PRICE EXPECTED
-                                     finish();
-                                 }
-                             });
-                            //builder.setPositiveButton("OKKKK", null);
+            @Override
+            public void onResponse(String response) {
+                Log.e(TAG, "response: " + response);
+                try {
+                    JSONObject obj = new JSONObject(response);
+                    // check for error flag
+                    if (obj.getString("error").equals("false")) {
+                        // user successfully logged in
+                        loadingp.dismiss();
+                        View layoutInflater = View.inflate(mContext, R.layout.cost_est, null);
+                        TextView est,tme;
+                        Button accept,decline;
+                        final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                        builder.setCancelable(false);
+                        //.setTitle("Request Details.");
+                        builder.setView(layoutInflater);
+                        est= (TextView) layoutInflater.findViewById(R.id.tvestimatedcost);
+                        String cost=obj.getString("cost");
+                        est.setText(cost);
+                        Load.setCost(cost);
+                        tme= (TextView) layoutInflater.findViewById(R.id.tvtimeanddate);
+                        tme.setText(Load.DAY+"/"+Load.MONTH+"/"+Load.YEAR);
+                        accept= (Button) layoutInflater.findViewById(R.id.accept);
+                        decline= (Button) layoutInflater.findViewById(R.id.decline);
+                        final AlertDialog alertDialog = builder.create();
+                        accept.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                                builder.setTitle("Prompt");
+                                builder.setMessage("By clicking okay,you accept the terms and conditions");
+                                builder.setNegativeButton("Cancel", null);
+                                builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        alertDialog.cancel();
+                                        Load.send();
+                                    }
+                                });
+                                builder.show();
+                            }
+                        });
+                        decline.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                //TODO ASK COMMENT,ASK PRICE EXPECTED
+                                finish();
+                            }
+                        });
+                        //builder.setPositiveButton("OKKKK", null);
 //                            builder.setNegativeButton("Cancel", null);
 
-                            alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                            @Override
+                            public void onShow(DialogInterface dialog) {
+                                Button b = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                            }
+                        });
+                        alertDialog.show();
+
+
+                    } else {
+                        // login error - simply toast the message
+                        loadingp.dismiss();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                        builder.setTitle("Error").setCancelable(false)
+                                .setMessage("Please check your internet settings and try again")
+                                .setNeutralButton("Open settings", new DialogInterface.OnClickListener() {
                                     @Override
-                                    public void onShow(DialogInterface dialog) {
-                                        Button b = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
+                                        mContext.startActivity(myIntent);
                                     }
-                                    });
-                            alertDialog.show();
-
-
-                        } else {
-                            // login error - simply toast the message
-                            loadingp.dismiss();
-                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                            builder.setTitle("Error").setCancelable(false)
-                                    .setMessage("Please check your internet settings and try again")
-                                    .setNeutralButton("Open settings", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
-                                            mContext.startActivity(myIntent);
-                                        }
-                                    })
-                                    .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            //retry
-                                            getCostEstimate();
-                                        }
-                                    });
-                            builder.show();
-                            //Toast.makeText(getApplicationContext(), "" + obj.getJSONObject("error").getString("message"), Toast.LENGTH_LONG).show();
-                        }
-
-                    } catch (JSONException e) {
-                        Log.e(TAG, "json parsing error: " + e.getMessage());
-                        Toast.makeText(getApplicationContext(), "Json parse error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                })
+                                .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        //retry
+                                        getCostEstimate();
+                                    }
+                                });
+                        builder.show();
+                        //Toast.makeText(getApplicationContext(), "" + obj.getJSONObject("error").getString("message"), Toast.LENGTH_LONG).show();
                     }
+
+                } catch (JSONException e) {
+                    Log.e(TAG, "json parsing error: " + e.getMessage());
+                    Toast.makeText(getApplicationContext(), "Json parse error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
-            }, new Response.ErrorListener() {
+            }
+        }, new Response.ErrorListener() {
 
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    NetworkResponse networkResponse = error.networkResponse;
-                    loadingp.dismiss();
-                    Log.e(TAG, "Volley error: " + error.getMessage() + ", code: " + networkResponse+" and "+error.getMessage());
-                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                    builder.setTitle("Error").setCancelable(false)
-                            .setMessage("Please check your internet settings and try again")
-                            .setNeutralButton("Open settings", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
-                                    mContext.startActivity(myIntent);
-                                }
-                            })
-                            .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    //retry
-                                    getCostEstimate();
-                                }
-                            });
-                    builder.show();
-                    //Toast.makeText(getApplicationContext(), "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                NetworkResponse networkResponse = error.networkResponse;
+                loadingp.dismiss();
+                Log.e(TAG, "Volley error: " + error.getMessage() + ", code: " + networkResponse+" and "+error.getMessage());
+                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                builder.setTitle("Error").setCancelable(false)
+                        .setMessage("Please check your internet settings and try again")
+                        .setNeutralButton("Open settings", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
+                                mContext.startActivity(myIntent);
+                            }
+                        })
+                        .setNegativeButton("Retry", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                //retry
+                                getCostEstimate();
+                            }
+                        });
+                builder.show();
+                //Toast.makeText(getApplicationContext(), "Volley error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
 
-                }
-            }) {
+            }
+        }) {
 
-                @Override
+            @Override
 
-                public Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> params = new HashMap<>();
-                    params.put("eng_id", String.valueOf(000));
-                    params.put("distance",String.valueOf(DISTANCE_BETWEEN));
-                    params.put("weight", String.valueOf(WEIGHT_INDEX));
-                    params.put("nature",load_char.toString());
-                    params.put("value", String.valueOf(VALUE));
+            public Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("eng_id", String.valueOf(000));
+                params.put("distance",String.valueOf(DISTANCE_BETWEEN));
+                params.put("weight", String.valueOf(WEIGHT_INDEX));
+                params.put("nature",load_char.toString());
+                params.put("value", String.valueOf(VALUE));
 
-                    Log.e(TAG, "params: " + params.toString());
-                    return params;
-                }
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String,String> params = new HashMap<String, String>();
-                    params.put("Content-Type","application/x-www-form-urlencoded");
-                    return params;
-                }
-            };
-            //Adding request to request queue
-            MyApplication.getInstance().addToRequestQueue(strCost);
+                Log.e(TAG, "params: " + params.toString());
+                return params;
+            }
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String,String> params = new HashMap<String, String>();
+                params.put("Content-Type","application/x-www-form-urlencoded");
+                return params;
+            }
+        };
+        //Adding request to request queue
+        MyApplication.getInstance().addToRequestQueue(strCost);
 
     }
     //stop tracking when app is in background
@@ -1400,10 +1575,10 @@ class AddressResultReceiver extends ResultReceiver {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,this);
     }
     public void datePicker(){
-            final Calendar c= Calendar.getInstance();
-            int year=c.get(Calendar.YEAR);
-            int month = c.get(Calendar.MONTH);
-            int date=c.get(Calendar.DATE);
+        final Calendar c= Calendar.getInstance();
+        int year=c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int date=c.get(Calendar.DATE);
 
         final DatePickerDialog datePickerDialog = new DatePickerDialog(this,
                 new DatePickerDialog.OnDateSetListener() {
@@ -1411,7 +1586,11 @@ class AddressResultReceiver extends ResultReceiver {
                     @Override
                     public void onDateSet(DatePicker view, int year,
                                           int monthOfYear, int dayOfMonth) {
-                        Load.setDate(dayOfMonth,monthOfYear+1,year);
+                        if (choice!=1) {
+                            Load.setDate(dayOfMonth, monthOfYear + 1, year);
+                        }else{
+                            House.setDate(dayOfMonth,monthOfYear+1,year);
+                        }
                         //time pick
                         timePicker();
                     }
@@ -1430,35 +1609,52 @@ class AddressResultReceiver extends ResultReceiver {
 
     }
     public void timePicker(){
-            final Calendar c= Calendar.getInstance();
-            int hour=c.get(Calendar.HOUR_OF_DAY);
-            int minute=c.get(Calendar.MINUTE);
+        final Calendar c= Calendar.getInstance();
+        int hour=c.get(Calendar.HOUR_OF_DAY);
+        int minute=c.get(Calendar.MINUTE);
 
-            final TimePickerDialog tpd=new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
-                @Override
-                public void onTimeSet(TimePicker timePicker, int hour, int minute) {
-                    String min="00";
-                    if(minute<10){
-                        min="0"+minute;
-                    }else{
-                        min=minute+"";
-                    }
+        final TimePickerDialog tpd=new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker timePicker, final int hour, int minute) {
+                String min="00";
+                if(minute<10){
+                    min="0"+minute;
+                }else{
+                    min=minute+"";
+                }
+
+                if (choice!=1) {
                     Load.setTime(hour,min);
                     updateProgress(false, 4, "Indicate weight of load", false);
                     describe_load();
+                }else{
+                    confirm.setVisibility(View.VISIBLE);
+                    confirm.setText("Request Delivery");
+                    final String finalMin = min;
+                    confirm.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            House.setTime(hour, finalMin);
+                            House.bulkSet(mContext, LOCATION_FROM, LOCATION_TO, my_house, DISTANCE_BETWEEN, "M");
+                            House.send();
+                        }
+                    });
+
                 }
-            },hour, minute, !android.text.format.DateFormat.is24HourFormat(this));
-            tpd.setTitle("Set preferred time of travel");
+
+            }
+        },hour, minute, !android.text.format.DateFormat.is24HourFormat(this));
+        tpd.setTitle("Set preferred time of travel");
         tpd.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
                 tpd.getButton(Dialog.BUTTON_NEGATIVE).setVisibility(View.GONE);
             }
         });
-            tpd.show();
-        }
-
+        tpd.show();
     }
+
+}
 //
 //    //CUSTOM LOCATION METHODS
 //    public void flatMarker(GoogleMap mMap){
@@ -1480,4 +1676,3 @@ class AddressResultReceiver extends ResultReceiver {
 //
 //
 //    }
-
