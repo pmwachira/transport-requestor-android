@@ -1,0 +1,116 @@
+{
+  "project_info": {
+    "project_number": "495371649755",
+    "firebase_url": "https://gcmm-140211.firebaseio.com",
+    "project_id": "gcmm-140211",
+    "storage_bucket": "gcmm-140211.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:495371649755:android:0cc7592df2424991",
+        "android_client_info": {
+          "package_name": "mushirih.gcm"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "495371649755-l9m9ajuicmp2hr767oo8pnoccsmf6c0h.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "495371649755-8a3aaokfj21h4h4sfkselifvvrc1t068.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1zyXWp4A0PjCPOBzWTVD1xR0RYXTeMng"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:495371649755:android:b1d9be37e0e05b8c",
+        "android_client_info": {
+          "package_name": "mushirih.dropoff"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "495371649755-l9m9ajuicmp2hr767oo8pnoccsmf6c0h.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "495371649755-8a3aaokfj21h4h4sfkselifvvrc1t068.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1zyXWp4A0PjCPOBzWTVD1xR0RYXTeMng"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:495371649755:android:689c73cac5a69ca5",
+        "android_client_info": {
+          "package_name": "mushirih.pickup"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "495371649755-l9m9ajuicmp2hr767oo8pnoccsmf6c0h.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "495371649755-8a3aaokfj21h4h4sfkselifvvrc1t068.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1zyXWp4A0PjCPOBzWTVD1xR0RYXTeMng"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

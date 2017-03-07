@@ -6,8 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.AsyncTask;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -32,6 +31,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.google.android.gcm.GCMRegistrar;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,13 +46,13 @@ import mushirih.pickup.R;
 import mushirih.pickup.RegisterActivity;
 import mushirih.pickup.cm.ServerUtilities;
 import mushirih.pickup.cm.WakeLocker;
+import mushirih.pickup.firebase.Config;
 import mushirih.pickup.internal.MyApplication;
 import mushirih.pickup.internal.MyPreferenceManager;
 import mushirih.pickup.internal.User;
 import mushirih.pickup.mapping.AppUtils;
 import mushirih.pickup.mapping.MapsActivity;
 
-import static mushirih.pickup.cm.CommonUtilities.DISPLAY_MESSAGE_ACTION;
 import static mushirih.pickup.cm.CommonUtilities.EXTRA_MESSAGE;
 import static mushirih.pickup.cm.CommonUtilities.SENDER_ID;
 
@@ -76,7 +76,8 @@ public class MainActivity extends AppCompatActivity {
     Context context;
     ProgressDialog loading;
     MyPreferenceManager myPreferenceManager;
-    AsyncTask<Void, Void, Void> mRegisterTask;
+    //AsyncTask<Void, Void, Void> mRegisterTask;
+    BroadcastReceiver broadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,9 +119,29 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 dialog.show();
+            //TODO NEW
+            broadcastReceiver=new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if(intent.getAction().equals(Config.REGISTRATION_COMPLETE)){
+                        FirebaseMessaging.getInstance().subscribeToTopic(Config.TOPIC_GLOBAL);
+                        displayFirebaseRegId();
+                    }else if(intent.getAction().equals(Config.PUSH_NOTIFICATION)){
+                        String message=intent.getStringExtra("message");
+                        Toast.makeText(getApplicationContext(), "Push notification: " + message, Toast.LENGTH_LONG).show();
+
+
+                    }
+                }
+            };
             }
     }
+    private void displayFirebaseRegId() {
+        SharedPreferences pref = getApplicationContext().getSharedPreferences(Config.SHARED_PREF, 0);
+        String regId = pref.getString("regId", null);
 
+        Log.e(TAG, "Firebase reg id: " + regId);
+    }
     @OnClick({R.id.bt_go, R.id.register})
     public void onClick(View view) {
         switch (view.getId()) {
@@ -293,18 +314,22 @@ public class MainActivity extends AppCompatActivity {
 
     private void reRegisterGCM(final String nam, final String ema) {
             context=this;
-            // Make sure the device has the proper dependencies.
-            GCMRegistrar.checkDevice(this);
+            /*
+        // Make sure the device has the proper dependencies.
+        GCMRegistrar.checkDevice(this);
 
-            // Make sure the manifest was properly set - comment out this line
-            // while developing the app, then uncomment it when it's ready.
-            GCMRegistrar.checkManifest(this);
+        // Make sure the manifest was properly set - comment out this line
+        // while developing the app, then uncomment it when it's ready.
+        GCMRegistrar.checkManifest(this);
 
-            registerReceiver(mHandleMessageReceiver, new IntentFilter(
-                    DISPLAY_MESSAGE_ACTION));
+        registerReceiver(mHandleMessageReceiver, new IntentFilter(
+                DISPLAY_MESSAGE_ACTION));
 
-            // Get GCM registration id
-            final String regId = GCMRegistrar.getRegistrationId(context);
+        // Get GCM registration id
+        final String regId = GCMRegistrar.getRegistrationId(context);
+        */
+        SharedPreferences pref = getApplicationContext().getSharedPreferences(Config.SHARED_PREF, 0);
+        final String regId = pref.getString("regId", null);
             // Check if regid already presents
             if (regId.equals("")) {
                 // Registration is not present, register now with GCM
@@ -322,6 +347,7 @@ public class MainActivity extends AppCompatActivity {
                     // Try to register again, but not in the UI thread.
                     // It's also necessary to cancel the thread onDestroy(),
                     // hence the use of AsyncTask instead of a raw thread.
+                    /*
                     mRegisterTask = new AsyncTask<Void, Void, Void>() {
 
                         @Override
@@ -339,6 +365,7 @@ public class MainActivity extends AppCompatActivity {
 
                     };
                     mRegisterTask.execute(null, null, null);
+                    */
                 }
             }
 
@@ -384,6 +411,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        /*
         if (mRegisterTask != null) {
             mRegisterTask.cancel(true);
         }
@@ -393,6 +421,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e("UnRegister Receiver Error", "> " + e.getMessage());
         }
+        */
         super.onDestroy();
     }
 }
