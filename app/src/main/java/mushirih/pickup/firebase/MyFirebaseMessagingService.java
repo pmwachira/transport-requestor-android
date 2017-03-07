@@ -12,6 +12,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -24,14 +25,16 @@ import org.json.JSONObject;
 
 import java.util.StringTokenizer;
 
-import mushirih.dropoff.R;
-import mushirih.dropoff.internal.MyApplication;
-import mushirih.dropoff.trans.RecievedRequest;
+import mushirih.pickup.R;
+import mushirih.pickup.internal.MyPreferenceManager;
+import mushirih.pickup.ui.RateTransaction;
+import mushirih.pickup.ui.TrackLoad;
 
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 private static final String TAG=MyFirebaseMessagingService.class.getSimpleName();
     private NotificationUtils notificationsUtils;
+    private static NotificationManager notificationManager;
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -108,43 +111,67 @@ private static final String TAG=MyFirebaseMessagingService.class.getSimpleName()
             e.printStackTrace();
         }
         */
-        String message= null;
-        Context context=getApplicationContext();
+        String message = null;
+        Context context = getApplicationContext();
         try {
             message = jsonObject.getString("message");
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        NotificationManager notificationManager = (NotificationManager)
-                context.getSystemService(Context.NOTIFICATION_SERVICE);
-        StringTokenizer stringTokenizer=new StringTokenizer(message, "::::");
-        String code="";
-        String name="";
-        StringTokenizer splits = new StringTokenizer(message, "::::");
-        if(null!=splits) {
-            code = stringTokenizer.nextToken();
-            name = stringTokenizer.nextToken();
-        }
-        String title = context.getString(R.string.app_name);
-        Intent notificationIntent = new Intent(context, RecievedRequest.class);
-        //TODO GET TIME OF NOW AND PASS TO INTENT
-        notificationIntent.putExtra(MyApplication.TRANSACTION_ID,code);
-        notificationIntent.putExtra(MyApplication.FLAG_FRESH_TRANSACTION,"1");
-        //  set intent so it does not start a new activity
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent intent =
-                PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Builder builder=new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic)
+        int icon = R.mipmap.ic_launcher;
+        long when = System.currentTimeMillis();
 
-                .setContentTitle(title).setContentText(name+" requested for transport along your next route\nClick to view\n");
-        builder.setStyle(new NotificationCompat.BigTextStyle().bigText(name+" requested for transport along your next route\nClick to view\n"/*+message*/));
-        builder.setDefaults(Notification.DEFAULT_SOUND);
-        builder.setDefaults(Notification.DEFAULT_VIBRATE);
-        builder.setAutoCancel(true);
-        builder.setContentIntent(intent);
-        //notificationManager.notify(0,builder.build());
-        notificationManager.notify((int) System.currentTimeMillis(),builder.build());
+        notificationManager = (NotificationManager)
+                context.getSystemService(Context.NOTIFICATION_SERVICE);
+        Notification notification = new Notification(icon, message, when);
+        String firstMessage = "";
+        String secondMessage = "";
+
+        StringTokenizer splits = new StringTokenizer(message, "::::");
+        if (null != splits) {
+            firstMessage = splits.nextToken();
+            secondMessage = splits.nextToken();
+        }
+        //TODO notification for successful transaction
+        if (firstMessage.equals("COMPLETE")) {
+            transactionCompete(context, secondMessage);
+        } else {
+            String title = context.getString(R.string.app_name);
+            String number = "00";
+            String id = "0000";
+            StringTokenizer splits2 = new StringTokenizer(secondMessage, ">>>>");
+            if (null != splits2) {
+                number = splits2.nextToken();
+                id = splits2.nextToken();
+            }
+            Intent notificationIntent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + number));
+            // set intent so it does not start a new activity
+            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            PendingIntent intent =
+                    PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            Intent notificationIntent2 = new Intent(context, TrackLoad.class);
+            // set intent so it does not start a new activity
+            notificationIntent2.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            notificationIntent2.putExtra("id", id);
+            notificationIntent2.putExtra("num", number);
+            new MyPreferenceManager(context).storeTRansactionId(id);
+            new MyPreferenceManager(context).storenumber(number);
+            PendingIntent intentTrack =
+                    PendingIntent.getActivity(context, 0, notificationIntent2, PendingIntent.FLAG_UPDATE_CURRENT);
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic)
+                    .setContentTitle(title).setContentText(firstMessage + ": I will be transporting your load\nClick to call me.");
+            builder.setDefaults(Notification.DEFAULT_SOUND);
+            builder.setDefaults(Notification.DEFAULT_VIBRATE);
+            builder.setStyle(new NotificationCompat.BigTextStyle().bigText(firstMessage + ": I will be transporting your load\nClick to call me."));
+            builder.setAutoCancel(true);
+            //builder.setContentIntent(intent);
+            builder.addAction(R.drawable.call, "Call", intent);
+            builder.addAction(R.drawable.track, "Track", intentTrack);
+//            notificationManager.notify(0,builder.build());
+            notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+        }
     }
 
     private void showNotificationMessageWithBigImage(Context applicationContext, String title, String message, String timestamp, Intent resultIntent, String imageUrl) {
@@ -158,6 +185,26 @@ private static final String TAG=MyFirebaseMessagingService.class.getSimpleName()
         resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         notificationsUtils.showNotificationMessage(title, message, timestamp, resultIntent,null);
     }
+    private static void transactionCompete(Context context, String secondMessage) {
+        String title = context.getString(R.string.app_name);
+        //TODO THIS INTENT SHOULD SHOW COMPLETED AND ASK FOR RATING
+        Intent notificationIntent = new Intent(context,RateTransaction.class);
+        notificationIntent.putExtra("ID",secondMessage);
+        // set intent so it does not start a new activity
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent intent =
+                PendingIntent.getActivity(context, 0, notificationIntent,PendingIntent.FLAG_UPDATE_CURRENT);
 
+        NotificationCompat.Builder builder=new NotificationCompat.Builder(context).setSmallIcon(R.drawable.ic)
+                .setContentTitle(title).setContentText("Your delivery is complete");
+        builder.setDefaults(Notification.DEFAULT_SOUND);
+        builder.setDefaults(Notification.DEFAULT_VIBRATE);
+        builder.setStyle(new NotificationCompat.BigTextStyle().bigText("Your delivery is complete"));
+        builder.setAutoCancel(true);
+        builder.setContentIntent(intent);
+//            notificationManager.notify(0,builder.build());
+        notificationManager.notify((int) System.currentTimeMillis(),builder.build());
+    }
 
 }
