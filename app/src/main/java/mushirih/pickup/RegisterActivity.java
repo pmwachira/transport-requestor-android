@@ -8,12 +8,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -36,6 +38,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.google.android.gcm.GCMRegistrar;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,12 +51,12 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import mushirih.pickup.cm.ServerUtilities;
 import mushirih.pickup.cm.WakeLocker;
+import mushirih.pickup.firebase.Config;
 import mushirih.pickup.internal.MyApplication;
 import mushirih.pickup.internal.User;
 import mushirih.pickup.mapping.MapsActivity;
 import mushirih.pickup.ui.MainActivity;
 
-import static mushirih.pickup.cm.CommonUtilities.DISPLAY_MESSAGE_ACTION;
 import static mushirih.pickup.cm.CommonUtilities.EXTRA_MESSAGE;
 import static mushirih.pickup.cm.CommonUtilities.SENDER_ID;
 
@@ -87,13 +91,29 @@ public class RegisterActivity extends AppCompatActivity {
     AsyncTask<Void, Void, Void> mRegisterTask;
     ProgressDialog loading;
     String TAG="REGISTER_ACTIVITY";
-
+BroadcastReceiver broadcastReceiver;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
         ButterKnife.inject(this);
         mContext=this;
+        //TODO NEW
+        broadcastReceiver=new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if(intent.getAction().equals(Config.REGISTRATION_COMPLETE)){
+                    FirebaseMessaging.getInstance().subscribeToTopic(Config.TOPIC_GLOBAL);
+                    displayFirebaseRegId();
+                }else if(intent.getAction().equals(Config.PUSH_NOTIFICATION)){
+                    String message=intent.getStringExtra("message");
+                    Toast.makeText(getApplicationContext(), "Push notification: " + message, Toast.LENGTH_LONG).show();
+
+
+                }
+            }
+        };
+        /*
         // Make sure the device has the proper dependencies.
         GCMRegistrar.checkDevice(this);
 
@@ -103,7 +123,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         registerReceiver(mHandleMessageReceiver, new IntentFilter(
                 DISPLAY_MESSAGE_ACTION));
-
+*/
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ShowEnterAnimation();
         }
@@ -154,7 +174,12 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
     }
+    private void displayFirebaseRegId() {
+        SharedPreferences pref = getApplicationContext().getSharedPreferences(Config.SHARED_PREF, 0);
+        String regId = pref.getString("regId", null);
 
+        Log.e(TAG, "Firebase reg id: " + regId);
+    }
     private void registerUser(final String username, final String userid, final String useremail, final String password1) {
 
         loading = ProgressDialog.show(mContext, null, "Registering.Please wait...",true,false);
@@ -310,20 +335,22 @@ public class RegisterActivity extends AppCompatActivity {
     private void registerCM(final String user_name, final String DRIVER_EMAIL) {
 
         // Get GCM registration id
-        final String regId = GCMRegistrar.getRegistrationId(mContext);
+        //final String regId = GCMRegistrar.getRegistrationId(mContext);
+        final String regId= FirebaseInstanceId.getInstance().getToken();
         // Check if regid already presents
         if (regId.equals("")) {
             // Registration is not present, register now with GCM
             GCMRegistrar.register(mContext,SENDER_ID);
             loading.dismiss();
         } else {
+            /*
             // Device is already registered on GCM
             if (GCMRegistrar.isRegisteredOnServer(mContext)) {
                 ServerUtilities.register(mContext, user_name, DRIVER_EMAIL, regId);
                 loading.dismiss();
                 Toast.makeText(getApplicationContext(), "Already registered with GCM", Toast.LENGTH_LONG).show();
             } else {
-
+*/
                 // Try to register again, but not in the UI thread.
                 // It's also necessary to cancel the thread onDestroy(),
                 // hence the use of AsyncTask instead of a raw thread.
@@ -347,7 +374,7 @@ public class RegisterActivity extends AppCompatActivity {
                 };
                 mRegisterTask.execute(null, null, null);
             }
-        }
+        //}
     }
     /**
      * Receiving push messages
@@ -457,6 +484,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
     @Override
     protected void onDestroy() {
+        /*
         if (mRegisterTask != null) {
             mRegisterTask.cancel(true);
         }
@@ -466,6 +494,22 @@ public class RegisterActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e("UnRegister Receiver Error", "> " + e.getMessage());
         }
+        */
         super.onDestroy();
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //TODO NEW
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,new IntentFilter(Config.REGISTRATION_COMPLETE));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,new IntentFilter(Config.PUSH_NOTIFICATION));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //TODONEW
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
     }
 }

@@ -6,11 +6,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -31,6 +34,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.google.android.gcm.GCMRegistrar;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONException;
@@ -76,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
     Context context;
     ProgressDialog loading;
     MyPreferenceManager myPreferenceManager;
-    //AsyncTask<Void, Void, Void> mRegisterTask;
+    AsyncTask<Void, Void, Void> mRegisterTask;
     BroadcastReceiver broadcastReceiver;
 
     @Override
@@ -329,13 +333,17 @@ public class MainActivity extends AppCompatActivity {
         final String regId = GCMRegistrar.getRegistrationId(context);
         */
         SharedPreferences pref = getApplicationContext().getSharedPreferences(Config.SHARED_PREF, 0);
-        final String regId = pref.getString("regId", null);
+        //final String regId = pref.getString("regId", null);
+        final String regId= FirebaseInstanceId.getInstance().getToken();
+        Log.e("Firebase token",regId+"ll");
             // Check if regid already presents
             if (regId.equals("")) {
                 // Registration is not present, register now with GCM
                 GCMRegistrar.register(context,SENDER_ID);
 
             } else {
+                /*
+            }
                 // Device is already registered on GCM
                 if (GCMRegistrar.isRegisteredOnServer(context)) {
                     // Skips registration.
@@ -343,11 +351,11 @@ public class MainActivity extends AppCompatActivity {
 
                     Toast.makeText(getApplicationContext(), "Already registered with GCM", Toast.LENGTH_LONG).show();
                 } else {
-
+*/
                     // Try to register again, but not in the UI thread.
                     // It's also necessary to cancel the thread onDestroy(),
                     // hence the use of AsyncTask instead of a raw thread.
-                    /*
+
                     mRegisterTask = new AsyncTask<Void, Void, Void>() {
 
                         @Override
@@ -365,9 +373,9 @@ public class MainActivity extends AppCompatActivity {
 
                     };
                     mRegisterTask.execute(null, null, null);
-                    */
+
                 }
-            }
+           // }
 
     }
 
@@ -408,7 +416,6 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
     @Override
     protected void onDestroy() {
         /*
@@ -423,5 +430,20 @@ public class MainActivity extends AppCompatActivity {
         }
         */
         super.onDestroy();
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //TODO NEW
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,new IntentFilter(Config.REGISTRATION_COMPLETE));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,new IntentFilter(Config.PUSH_NOTIFICATION));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //TODONEW
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
     }
 }
