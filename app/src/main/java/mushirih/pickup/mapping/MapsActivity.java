@@ -1359,7 +1359,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                     loading = ProgressDialog.show(mContext,null, "Finding location.Please wait...",true,false);
                     startIntentService(x);
                     //TODO WATCHING
-                    centerMarkerClick(x);
+                   // centerMarkerClick(x);
                     //  setDateTime();
                     //updateProgress(false,2,"Choose Date and time of transport",false);
 
