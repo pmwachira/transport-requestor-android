@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: com.toe.chowder:chowder-0.7.6">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/chowder-0.7.6.aar/83fada616b1a3c716f89529802ba7e34/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/chowder-0.7.6.aar/83fada616b1a3c716f89529802ba7e34/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.toe.chowder/chowder/0.7.6/da6e9810a70360f57711e46e009a0831cc686dc9/chowder-0.7.6-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
