@@ -1,3 +1,8 @@
-"# transport-requestor-android" 
+Realtime Transport Requesting platform for Android
 
-![alt text](https://github.com/pmwachira/D3Visualization/blob/master/static/img/d3%20%20visualization.PNG)|![alt text](https://github.com/pmwachira/transport-requestor-android/blob/master/Screenshot%201.png)|![alt text](https://github.com/pmwachira/transport-requestor-android/blob/master/Screenshot%202.png)
+Used Technologies:
+Android
+Google Cloud Messaging
+Google Maps
+
+![alt text](https://github.com/pmwachira/transport-requestor-android/blob/master/Screenshot%203.png)|![alt text](https://github.com/pmwachira/transport-requestor-android/blob/master/Screenshot%201.png)|![alt text](https://github.com/pmwachira/transport-requestor-android/blob/master/Screenshot%202.png)
